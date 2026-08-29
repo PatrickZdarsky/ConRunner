@@ -6,5 +6,6 @@ public record OidcProviderProps(
     String issuerUri,
     String jwkSetUri,
     Set<String> allowedIssuers,
+    String audience,
     String usernameClaim
 ) {}

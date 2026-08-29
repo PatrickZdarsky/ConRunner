@@ -5,7 +5,6 @@ import at.control.shiftcontrol.identity.UserAccountMapper;
 import at.control.shiftcontrol.identity.UserSearchRequest;
 import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.identity.entity.UserAccountEntity;
-import at.control.shiftcontrol.identity.repo.ExternalIdentityRepository;
 import at.control.shiftcontrol.identity.repo.UserAccountRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +23,17 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserAccountRepository userAccountRepository;
-    private final ExternalIdentityRepository externalIdentityRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public User getUser(@NonNull String userId) {
-        UserAccountEntity account = resolveUsers(Set.of(userId)).get(userId);
+    public User getUser(@NonNull UUID userId) {
+        UserAccountEntity account = userAccountRepository.findById(userId).orElse(null);
         if (account == null) {
             throw new NoSuchElementException("User not found: " + userId);
         }
@@ -43,8 +42,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<User> getUsers(@NonNull Collection<String> userIds) {
-        Set<String> requestedIds = userIds.stream()
+    public Collection<User> getUsers(@NonNull Collection<UUID> userIds) {
+        Set<UUID> requestedIds = userIds.stream()
             .filter(Objects::nonNull)
             .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
 
@@ -52,7 +51,9 @@ public class UserServiceImpl implements UserService {
             return List.of();
         }
 
-        Map<String, UserAccountEntity> accountsByUserId = resolveUsers(requestedIds);
+        Map<UUID, UserAccountEntity> accountsByUserId = new LinkedHashMap<>();
+        userAccountRepository.findAllById(requestedIds)
+            .forEach(account -> accountsByUserId.put(account.getId(), account));
         return requestedIds.stream()
             .map(accountsByUserId::get)
             .filter(Objects::nonNull)
@@ -64,12 +65,12 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Page<User> searchUsers(int page, int size, @NonNull UserSearchRequest searchDto) {
         PageRequest pageable = PageRequest.of(page, size);
-        Page<Long> accountIdPage = userAccountRepository.searchUserIds(toSearchPattern(searchDto.getName()), pageable);
+        Page<UUID> accountIdPage = userAccountRepository.searchUserIds(toSearchPattern(searchDto.getName()), pageable);
         if (accountIdPage.isEmpty()) {
             return new PageImpl<>(List.of(), pageable, accountIdPage.getTotalElements());
         }
 
-        Map<Long, UserAccountEntity> accountsById = userAccountRepository
+        Map<UUID, UserAccountEntity> accountsById = userAccountRepository
             .findAllWithExternalIdentitiesByIdIn(accountIdPage.getContent())
             .stream()
             .collect(java.util.stream.Collectors.toMap(
@@ -82,13 +83,6 @@ public class UserServiceImpl implements UserService {
             .map(UserAccountMapper::toDto)
             .toList();
         return new PageImpl<>(users, pageable, accountIdPage.getTotalElements());
-    }
-
-    private Map<String, UserAccountEntity> resolveUsers(Collection<String> userIds) {
-        Map<String, UserAccountEntity> accountsByUserId = new LinkedHashMap<>();
-        externalIdentityRepository.findAllBySubjectIn(userIds).forEach(identity ->
-            accountsByUserId.putIfAbsent(identity.getSubject(), identity.getUserAccount()));
-        return accountsByUserId;
     }
 
     private static String toSearchPattern(String name) {

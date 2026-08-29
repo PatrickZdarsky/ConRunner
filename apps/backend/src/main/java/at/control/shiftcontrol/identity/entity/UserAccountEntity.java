@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import at.control.shiftcontrol.identity.ApplicationRole;
 import jakarta.persistence.CascadeType;
@@ -33,11 +34,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "user_account")
+@Table(name = "identity_user_account")
 public class UserAccountEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -65,7 +66,7 @@ public class UserAccountEntity {
     private String email;
 
     @Size(max = 2048)
-    @Column(name = "avatarUrl", length = 2048)
+    @Column(name = "avatar_url", length = 2048)
     private String avatarUrl;
 
     @Column(name = "email_verified", nullable = false)
@@ -73,7 +74,7 @@ public class UserAccountEntity {
 
     @Builder.Default
     @ElementCollection
-    @CollectionTable(name = "user_account_application_role", joinColumns = @JoinColumn(name = "user_account_id"))
+    @CollectionTable(name = "identity_user_account_application_role", joinColumns = @JoinColumn(name = "user_account_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "application_role", nullable = false, length = 64)
     private List<ApplicationRole> applicationRoles = new ArrayList<>();

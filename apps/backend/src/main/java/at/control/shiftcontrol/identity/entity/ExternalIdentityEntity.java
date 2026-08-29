@@ -24,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "external_identity")
+@Table(name = "identity_external_identity")
 public class ExternalIdentityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

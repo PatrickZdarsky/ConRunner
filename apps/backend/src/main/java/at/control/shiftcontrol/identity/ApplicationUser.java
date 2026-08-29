@@ -5,19 +5,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.UUID;
 
 /**
- * This is an abstract representation of an application user for authentication and authorization purposes.
- * It is represented by a JWT token, which contains the necessary information about the user.
+ * The authenticated application actor. Its identifier is owned by ShiftControl; OIDC claims are used only
+ * while resolving the actor during authentication.
  */
 
 @Getter
 public abstract class ApplicationUser implements UserDetails {
+    private final UUID userId;
     private final Collection<? extends GrantedAuthority> authorities;
     private final String username;
     private final boolean enabled;
 
-    protected ApplicationUser(Collection<? extends GrantedAuthority> authorities, String username, boolean enabled) {
+    protected ApplicationUser(UUID userId,
+                              Collection<? extends GrantedAuthority> authorities,
+                              String username,
+                              boolean enabled) {
+        this.userId = userId;
         this.authorities = authorities;
         this.username = username;
         this.enabled = enabled;

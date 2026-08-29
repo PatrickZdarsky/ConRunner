@@ -1,0 +1,139 @@
+databaseChangeLog:
+  - changeSet:
+      id: identity-001-create-user-accounts
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: identity_user_account
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: preferred_username
+                  type: VARCHAR(255)
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+              - column:
+                  name: display_name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(320)
+              - column:
+                  name: avatar_url
+                  type: VARCHAR(2048)
+              - column:
+                  name: email_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_login_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: identity_user_account
+            indexName: idx_identity_user_account_status
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            tableName: identity_user_account
+            indexName: idx_identity_user_account_email
+            columns:
+              - column:
+                  name: email
+        - createTable:
+            tableName: identity_external_identity
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: issuer
+                  type: VARCHAR(512)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: identity_external_identity
+            baseColumnNames: user_account_id
+            constraintName: fk_identity_external_identity_user_account
+            referencedTableName: identity_user_account
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addUniqueConstraint:
+            tableName: identity_external_identity
+            columnNames: issuer, subject
+            constraintName: uk_identity_external_identity_issuer_subject
+        - createIndex:
+            tableName: identity_external_identity
+            indexName: idx_identity_external_identity_user_account
+            columns:
+              - column:
+                  name: user_account_id
+        - createTable:
+            tableName: identity_user_account_application_role
+            columns:
+              - column:
+                  name: user_account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: application_role
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: identity_user_account_application_role
+            columnNames: user_account_id, application_role
+            constraintName: pk_identity_user_account_application_role
+        - addForeignKeyConstraint:
+            baseTableName: identity_user_account_application_role
+            baseColumnNames: user_account_id
+            constraintName: fk_identity_user_account_application_role_account
+            referencedTableName: identity_user_account
+            referencedColumnNames: id
+            onDelete: CASCADE

@@ -49,6 +49,22 @@ Liquibase changes will be grouped under `src/main/resources/db/changelog/<module
 its change sets and includes them from a single application-level master changelog once persistence
 work begins.
 
+## OIDC configuration
+
+The backend is an OAuth 2.0 resource server. Production configuration must provide the trusted issuer,
+its JWK set URI, and the access-token audience expected by this API:
+
+```yaml
+oidc:
+  provider:
+    issuer-uri: https://identity.example/realms/shiftcontrol
+    jwk-set-uri: https://identity.example/realms/shiftcontrol/protocol/openid-connect/certs
+    audience: shiftcontrol-backend
+```
+
+`allowed-issuers` defaults to `issuer-uri`. OIDC subjects and issuers remain internal to the identity
+module; APIs and other modules use ShiftControl's UUID user ID.
+
 ## Initializr baseline
 
 The generated dependencies and application/test bootstrap are intentionally unchanged. `HELP.md`

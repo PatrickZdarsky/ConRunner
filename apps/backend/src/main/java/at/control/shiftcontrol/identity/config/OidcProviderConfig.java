@@ -35,8 +35,15 @@ public class OidcProviderConfig {
             binder.bind("oidc.provider.username-claim", String.class).orElse(null),
             "preferred_username"
         );
+        String audience = binder.bind("oidc.provider.audience", String.class).orElse(null);
 
-        return new OidcProviderProps(issuerUri, jwkSetUri, allowedIssuers, usernameClaim);
+        return new OidcProviderProps(
+            requireConfigured(issuerUri, "oidc.provider.issuer-uri"),
+            requireConfigured(jwkSetUri, "oidc.provider.jwk-set-uri"),
+            requireConfigured(allowedIssuers, "oidc.provider.allowed-issuers"),
+            requireConfigured(audience, "oidc.provider.audience"),
+            usernameClaim
+        );
     }
 
     private String buildLegacyIssuerUri(String authServerUrl, String authRealm) {
@@ -68,5 +75,19 @@ public class OidcProviderConfig {
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private String requireConfigured(String value, String property) {
+        if (isBlank(value)) {
+            throw new IllegalStateException("Missing required OIDC configuration: " + property);
+        }
+        return value.trim();
+    }
+
+    private Set<String> requireConfigured(Set<String> values, String property) {
+        if (values == null || values.isEmpty()) {
+            throw new IllegalStateException("Missing required OIDC configuration: " + property);
+        }
+        return values;
     }
 }

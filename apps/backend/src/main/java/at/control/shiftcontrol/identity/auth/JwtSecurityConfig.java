@@ -13,10 +13,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -36,6 +39,9 @@ public class JwtSecurityConfig {
         return jwt -> {
             var decodedToken = JwtTokenDecoder.decode(jwt);
             var applicationUser = applicationUserSyncService.constructUserForLogin(decodedToken);
+            if (!applicationUser.isEnabled()) {
+                throw new DisabledException("User account is suspended");
+            }
             var token = new UserAuthenticationToken(applicationUser, jwt.getTokenValue(), applicationUser.getAuthorities());
             token.setDetails(jwt);
             return token;
@@ -45,7 +51,12 @@ public class JwtSecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder(OidcProviderProps oidcProviderProps) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(oidcProviderProps.jwkSetUri()).build();
-        decoder.setJwtValidator(token -> {
+        decoder.setJwtValidator(jwtValidator(oidcProviderProps));
+        return decoder;
+    }
+
+    OAuth2TokenValidator<Jwt> jwtValidator(OidcProviderProps oidcProviderProps) {
+        OAuth2TokenValidator<Jwt> issuerValidator = token -> {
             String issuer = token.getIssuer() == null ? null : token.getIssuer().toString();
             if (issuer == null || !oidcProviderProps.allowedIssuers().contains(issuer)) {
                 return OAuth2TokenValidatorResult.failure(new OAuth2Error(
@@ -54,8 +65,15 @@ public class JwtSecurityConfig {
                     null));
             }
             return OAuth2TokenValidatorResult.success();
-        });
-        return decoder;
+        };
+        OAuth2TokenValidator<Jwt> audienceValidator = token -> token.getAudience().contains(oidcProviderProps.audience())
+            ? OAuth2TokenValidatorResult.success()
+            : OAuth2TokenValidatorResult.failure(new OAuth2Error(
+                "invalid_token",
+                "The aud claim does not contain the expected audience",
+                null));
+
+        return JwtValidators.createDefaultWithValidators(issuerValidator, audienceValidator);
     }
 
     @Bean

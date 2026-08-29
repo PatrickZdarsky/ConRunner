@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,6 +32,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationUserSyncServiceImplTest {
+    private static final UUID USER_ID = UUID.fromString("12ec9b96-3a88-4ce9-8c80-64899b3b0bcf");
+
     @Mock
     private UserAccountRepository userAccountRepository;
 
@@ -51,7 +54,11 @@ class ApplicationUserSyncServiceImplTest {
         when(externalIdentityRepository.findByIssuerAndSubject(token.issuer(), token.subject()))
             .thenReturn(Optional.empty());
         when(userAccountRepository.save(any(UserAccountEntity.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> {
+                UserAccountEntity account = invocation.getArgument(0);
+                account.setId(USER_ID);
+                return account;
+            });
 
         var applicationUser = service.constructUserForLogin(token);
 
@@ -74,6 +81,7 @@ class ApplicationUserSyncServiceImplTest {
         assertEquals(token.subject(), identity.getSubject());
 
         assertEquals("pat", applicationUser.getUsername());
+        assertEquals(USER_ID, applicationUser.getUserId());
         assertTrue(applicationUser.isEnabled());
         assertTrue(applicationUser.getAuthorities().isEmpty());
     }
@@ -82,6 +90,7 @@ class ApplicationUserSyncServiceImplTest {
     void updatesChangedClaimsAndUsesPersistedApplicationRoles() {
         Instant previousUpdate = Instant.parse("2026-01-01T00:00:00Z");
         UserAccountEntity account = UserAccountEntity.builder()
+            .id(USER_ID)
             .status(UserAccountStatus.ACTIVE)
             .preferredUsername("old-name")
             .displayName("Custom display name")
@@ -112,6 +121,7 @@ class ApplicationUserSyncServiceImplTest {
         assertTrue(account.getUpdatedAt().isAfter(previousUpdate));
 
         assertEquals("new-name", applicationUser.getUsername());
+        assertEquals(USER_ID, applicationUser.getUserId());
         assertTrue(applicationUser.isEnabled());
         assertEquals(
             List.of(Authorities.PLATFORM_ADMIN_ROLE),
@@ -121,6 +131,7 @@ class ApplicationUserSyncServiceImplTest {
     @Test
     void keepsSuspendedAccountsDisabled() {
         UserAccountEntity account = UserAccountEntity.builder()
+            .id(USER_ID)
             .status(UserAccountStatus.SUSPENDED)
             .preferredUsername("pat")
             .build();
@@ -137,5 +148,6 @@ class ApplicationUserSyncServiceImplTest {
         var applicationUser = service.constructUserForLogin(token);
 
         assertFalse(applicationUser.isEnabled());
+        assertEquals(USER_ID, applicationUser.getUserId());
     }
 }

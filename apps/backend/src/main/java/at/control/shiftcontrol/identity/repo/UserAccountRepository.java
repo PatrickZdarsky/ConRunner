@@ -11,8 +11,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Long> {
+public interface UserAccountRepository extends JpaRepository<UserAccountEntity, UUID> {
     Optional<UserAccountEntity> findFirstByEmailIgnoreCase(String email);
 
     @Query(value = """
@@ -50,7 +51,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
                     and lower(coalesce(externalIdentity.subject, '')) like :pattern
             )
         """)
-    Page<Long> searchUserIds(@Param("pattern") String pattern, Pageable pageable);
+    Page<UUID> searchUserIds(@Param("pattern") String pattern, Pageable pageable);
 
 //    @Query("""
 //        select distinct userAccount
@@ -83,7 +84,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         left join fetch userAccount.externalIdentities externalIdentity
         where userAccount.id in :userAccountIds
         """)
-    List<UserAccountEntity> findAllWithExternalIdentitiesByIdIn(@Param("userAccountIds") Collection<Long> userAccountIds);
+    List<UserAccountEntity> findAllWithExternalIdentitiesByIdIn(@Param("userAccountIds") Collection<UUID> userAccountIds);
 
     @Query("""
         select distinct userAccount

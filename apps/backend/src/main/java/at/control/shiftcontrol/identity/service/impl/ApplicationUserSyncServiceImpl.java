@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Read/Write Manager which manages the complete lifecycle of the application users.
@@ -97,6 +98,7 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
                 .toList();
 
         return new SyncedApplicationUser(
+            requireUserId(userAccount),
             authorities,
             firstNonBlank(userAccount.getPreferredUsername(), subject),
             userAccount.getStatus() == UserAccountStatus.ACTIVE);
@@ -134,9 +136,19 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
         }
     }
 
+    private static UUID requireUserId(UserAccountEntity userAccount) {
+        if (userAccount.getId() == null) {
+            throw new IllegalStateException("Persisted user account has no ID");
+        }
+        return userAccount.getId();
+    }
+
     private static final class SyncedApplicationUser extends ApplicationUser {
-        private SyncedApplicationUser(List<GrantedAuthority> authorities, String username, boolean enabled) {
-            super(authorities, username, enabled);
+        private SyncedApplicationUser(UUID userId,
+                                      List<GrantedAuthority> authorities,
+                                      String username,
+                                      boolean enabled) {
+            super(userId, authorities, username, enabled);
         }
     }
 }
