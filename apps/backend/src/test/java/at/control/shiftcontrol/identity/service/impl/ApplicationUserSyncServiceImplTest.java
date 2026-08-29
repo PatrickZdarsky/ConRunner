@@ -3,6 +3,7 @@ package at.control.shiftcontrol.identity.service.impl;
 import at.control.shiftcontrol.identity.ApplicationRole;
 import at.control.shiftcontrol.identity.Authorities;
 import at.control.shiftcontrol.identity.auth.JwtTokenDecoder;
+import at.control.shiftcontrol.identity.config.props.PlatformAdminBootstrap;
 import at.control.shiftcontrol.identity.entity.ExternalIdentityEntity;
 import at.control.shiftcontrol.identity.entity.UserAccountEntity;
 import at.control.shiftcontrol.identity.entity.UserAccountStatus;
@@ -44,7 +45,8 @@ class ApplicationUserSyncServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new ApplicationUserSyncServiceImpl(userAccountRepository, externalIdentityRepository);
+        service = new ApplicationUserSyncServiceImpl(
+            userAccountRepository, externalIdentityRepository, PlatformAdminBootstrap.none());
     }
 
     @Test
@@ -67,8 +69,7 @@ class ApplicationUserSyncServiceImplTest {
         UserAccountEntity account = accountCaptor.getValue();
 
         assertEquals(UserAccountStatus.ACTIVE, account.getStatus());
-        assertEquals("pat", account.getPreferredUsername());
-        assertEquals("pat", account.getDisplayName());
+        assertEquals("pat", account.getUsername());
         assertEquals("pat@example.com", account.getEmail());
         assertEquals("https://example.com/pat.png", account.getAvatarUrl());
         assertNotNull(account.getCreatedAt());
@@ -92,8 +93,7 @@ class ApplicationUserSyncServiceImplTest {
         UserAccountEntity account = UserAccountEntity.builder()
             .id(USER_ID)
             .status(UserAccountStatus.ACTIVE)
-            .preferredUsername("old-name")
-            .displayName("Custom display name")
+            .username("old-name")
             .email("old@example.com")
             .avatarUrl("https://example.com/old.png")
             .applicationRoles(List.of(ApplicationRole.PLATFORM_ADMIN))
@@ -114,8 +114,7 @@ class ApplicationUserSyncServiceImplTest {
         var applicationUser = service.constructUserForLogin(token);
 
         verify(userAccountRepository).save(account);
-        assertEquals("new-name", account.getPreferredUsername());
-        assertEquals("Custom display name", account.getDisplayName());
+        assertEquals("new-name", account.getUsername());
         assertEquals("old@example.com", account.getEmail());
         assertEquals("https://example.com/new.png", account.getAvatarUrl());
         assertTrue(account.getUpdatedAt().isAfter(previousUpdate));
@@ -133,7 +132,7 @@ class ApplicationUserSyncServiceImplTest {
         UserAccountEntity account = UserAccountEntity.builder()
             .id(USER_ID)
             .status(UserAccountStatus.SUSPENDED)
-            .preferredUsername("pat")
+            .username("pat")
             .build();
         ExternalIdentityEntity identity = ExternalIdentityEntity.builder()
             .issuer("https://identity.example")
@@ -149,5 +148,33 @@ class ApplicationUserSyncServiceImplTest {
 
         assertFalse(applicationUser.isEnabled());
         assertEquals(USER_ID, applicationUser.getUserId());
+    }
+
+    @Test
+    void grantsPlatformAdminOnlyToTheConfiguredExternalIdentity() {
+        JwtTokenDecoder.DecodedJwtToken token = new JwtTokenDecoder.DecodedJwtToken(
+            "https://identity.example", "subject-1", "pat", null, null);
+        service = new ApplicationUserSyncServiceImpl(
+            userAccountRepository,
+            externalIdentityRepository,
+            new PlatformAdminBootstrap(List.of(new PlatformAdminBootstrap.ExternalIdentity(
+                token.issuer(), token.subject())))
+        );
+        when(externalIdentityRepository.findByIssuerAndSubject(token.issuer(), token.subject()))
+            .thenReturn(Optional.empty());
+        when(userAccountRepository.save(any(UserAccountEntity.class)))
+            .thenAnswer(invocation -> {
+                UserAccountEntity account = invocation.getArgument(0);
+                account.setId(USER_ID);
+                return account;
+            });
+
+        var applicationUser = service.constructUserForLogin(token);
+
+        ArgumentCaptor<UserAccountEntity> accountCaptor = ArgumentCaptor.forClass(UserAccountEntity.class);
+        verify(userAccountRepository).save(accountCaptor.capture());
+        assertEquals(List.of(ApplicationRole.PLATFORM_ADMIN), accountCaptor.getValue().getApplicationRoles());
+        assertEquals(List.of(Authorities.PLATFORM_ADMIN_ROLE),
+            applicationUser.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
     }
 }

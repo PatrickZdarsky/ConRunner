@@ -20,10 +20,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         select userAccount.id
         from UserAccountEntity userAccount
         where :pattern is null
-            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
-            or lower(coalesce(userAccount.firstName, '')) like :pattern
-            or lower(coalesce(userAccount.lastName, '')) like :pattern
-            or lower(coalesce(userAccount.displayName, '')) like :pattern
+            or lower(coalesce(userAccount.username, '')) like :pattern
             or lower(coalesce(userAccount.email, '')) like :pattern
             or exists (
                 select 1
@@ -31,18 +28,13 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
                 where externalIdentity.userAccount = userAccount
                     and lower(coalesce(externalIdentity.subject, '')) like :pattern
             )
-        order by lower(coalesce(userAccount.lastName, '')),
-            lower(coalesce(userAccount.firstName, '')),
-            lower(coalesce(userAccount.preferredUsername, '')),
+        order by lower(coalesce(userAccount.username, '')),
             userAccount.id
         """, countQuery = """
         select count(userAccount.id)
         from UserAccountEntity userAccount
         where :pattern is null
-            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
-            or lower(coalesce(userAccount.firstName, '')) like :pattern
-            or lower(coalesce(userAccount.lastName, '')) like :pattern
-            or lower(coalesce(userAccount.displayName, '')) like :pattern
+            or lower(coalesce(userAccount.username, '')) like :pattern
             or lower(coalesce(userAccount.email, '')) like :pattern
             or exists (
                 select 1

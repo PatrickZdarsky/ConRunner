@@ -14,7 +14,7 @@ public final class UserAccountMapper {
     public static User toDto(UserAccountEntity entity) {
         return User.builder()
                 .id(entity.getId())
-                .username(entity.getPreferredUsername())
+                .username(entity.getUsername())
                 .email(entity.getEmail())
                 .avatarUrl(entity.getAvatarUrl())
                 .applicationRoles(entity.getApplicationRoles() == null

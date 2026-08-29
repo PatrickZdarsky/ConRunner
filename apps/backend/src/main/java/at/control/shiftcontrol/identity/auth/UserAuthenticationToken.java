@@ -1,6 +1,5 @@
 package at.control.shiftcontrol.identity.auth;
 
-import at.control.shiftcontrol.identity.ApplicationUser;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
@@ -12,10 +11,10 @@ import java.util.Collection;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 public class UserAuthenticationToken extends AbstractAuthenticationToken {
-    private final ApplicationUser principal;
+    private final Object principal;
     private final String credentials;
 
-    public UserAuthenticationToken(@NonNull ApplicationUser principal,
+    public UserAuthenticationToken(@NonNull Object principal,
                                    String credentials,
                                    Collection<? extends GrantedAuthority> authorities) {
         super(authorities);

@@ -11,8 +11,6 @@ import java.util.UUID;
 public record UserInfo(
     UUID id,
     String username,
-    String firstName,
-    String lastName,
     String email,
     String avatarUrl,
     List<ApplicationRole> applicationRoles
@@ -20,12 +18,10 @@ public record UserInfo(
     public static UserInfo from(UserAccountEntity account) {
         return new UserInfo(
             account.getId(),
-            firstNonBlank(account.getPreferredUsername(), account.getId().toString()),
-            blankToEmpty(account.getFirstName()),
-            blankToEmpty(account.getLastName()),
+            firstNonBlank(account.getUsername(), account.getId().toString()),
             blankToEmpty(account.getEmail()),
             account.getAvatarUrl(),
-            account.getApplicationRoles()
+            account.getApplicationRoles() == null ? List.of() : List.copyOf(account.getApplicationRoles())
         );
     }
 

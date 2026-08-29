@@ -6,14 +6,14 @@ import java.net.URL;
 import java.util.Optional;
 
 public class JwtTokenDecoder {
-    public static DecodedJwtToken decode(Jwt token) {
+    public static DecodedJwtToken decode(Jwt token, String usernameClaim) {
         String issuer = Optional.ofNullable(token.getIssuer()).map(URL::toString).orElse("");
         String subject = token.getSubject();
-        String preferredUsername = token.getClaimAsString("preferred_username");
+        String username = token.getClaimAsString(usernameClaim);
         String email = token.getClaimAsString("email");
         String avatarUrl = firstNonBlank(token.getClaimAsString("avatar_url"), token.getClaimAsString("picture"), token.getClaimAsString("profile"));
 
-        return new DecodedJwtToken(issuer, subject, preferredUsername, email, avatarUrl);
+        return new DecodedJwtToken(issuer, subject, username, email, avatarUrl);
     }
 
     private static String firstNonBlank(String... values) {
@@ -28,7 +28,7 @@ public class JwtTokenDecoder {
 
     public record DecodedJwtToken(String issuer,
                                   String subject,
-                                  String preferredUsername,
+                                  String username,
                                   String email,
                                   String avatarUrl) {
     }

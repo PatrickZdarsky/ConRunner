@@ -18,16 +18,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: preferred_username
-                  type: VARCHAR(255)
-              - column:
-                  name: first_name
-                  type: VARCHAR(255)
-              - column:
-                  name: last_name
-                  type: VARCHAR(255)
-              - column:
-                  name: display_name
+                  name: username
                   type: VARCHAR(255)
               - column:
                   name: email
@@ -35,15 +26,6 @@ databaseChangeLog:
               - column:
                   name: avatar_url
                   type: VARCHAR(2048)
-              - column:
-                  name: email_verified
-                  type: BOOLEAN
-                  defaultValueBoolean: false
-                  constraints:
-                    nullable: false
-              - column:
-                  name: last_login_at
-                  type: TIMESTAMP WITH TIME ZONE
               - column:
                   name: created_at
                   type: TIMESTAMP WITH TIME ZONE

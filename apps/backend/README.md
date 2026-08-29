@@ -60,10 +60,32 @@ oidc:
     issuer-uri: https://identity.example/realms/shiftcontrol
     jwk-set-uri: https://identity.example/realms/shiftcontrol/protocol/openid-connect/certs
     audience: shiftcontrol-backend
+    username-claim: preferred_username
 ```
 
 `allowed-issuers` defaults to `issuer-uri`. OIDC subjects and issuers remain internal to the identity
-module; APIs and other modules use ShiftControl's UUID user ID.
+module; APIs and other modules use ShiftControl's UUID user ID. `username-claim` is the one token
+claim copied to the local username; it defaults to `preferred_username` and can instead be a claim
+such as `nickname`. First and last names are intentionally not stored.
+
+For an initial platform administrator or a still-external transition client, configure only the
+specific external identity or client capability that is needed:
+
+```yaml
+identity:
+  bootstrap-platform-admins:
+    - issuer: https://identity.example/realms/shiftcontrol
+      subject: 8c4d9d54-6b2a-4b42-a285-1bf1d5494881
+  machine-clients:
+    - client-id: notification-worker
+      authorities:
+        - notifications.recipients.read
+```
+
+A bootstrap entry grants the local `PLATFORM_ADMIN` role when that exact issuer/subject signs in;
+the role is then persisted locally. A machine client receives only its configured authorities, and
+only when all of those authorities are also present in its token's `scope` or `scp` claim. These
+temporary machine-client entries should disappear as callers move into this application.
 
 ## Initializr baseline
 

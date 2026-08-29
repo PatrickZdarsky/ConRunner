@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
@@ -30,22 +30,37 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class JwtSecurityConfig {
     private final ApplicationUserSyncService applicationUserSyncService;
+    private final MachineClientAuthorizer machineClientAuthorizer;
 
     /**
      * Main authentication entry point for the application.
      * @return {@link Converter} which converts the JWT to a {@link UserAuthenticationToken}
      */
-    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(OidcProviderProps oidcProviderProps) {
         return jwt -> {
-            var decodedToken = JwtTokenDecoder.decode(jwt);
+            var machineAuthentication = machineClientAuthorizer.authenticate(jwt);
+            if (machineAuthentication.isPresent()) {
+                var machine = machineAuthentication.get();
+                return authenticatedToken(machine.principal(), jwt, machine.authorities());
+            }
+
+            var decodedToken = JwtTokenDecoder.decode(jwt, oidcProviderProps.usernameClaim());
             var applicationUser = applicationUserSyncService.constructUserForLogin(decodedToken);
             if (!applicationUser.isEnabled()) {
                 throw new DisabledException("User account is suspended");
             }
-            var token = new UserAuthenticationToken(applicationUser, jwt.getTokenValue(), applicationUser.getAuthorities());
-            token.setDetails(jwt);
-            return token;
+            return authenticatedToken(applicationUser, jwt, applicationUser.getAuthorities());
         };
+    }
+
+    private UserAuthenticationToken authenticatedToken(
+        Object principal,
+        Jwt jwt,
+        java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities
+    ) {
+        var token = new UserAuthenticationToken(principal, jwt.getTokenValue(), authorities);
+        token.setDetails(jwt);
+        return token;
     }
 
     @Bean
@@ -77,7 +92,7 @@ public class JwtSecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filterChain(HttpSecurity http, OidcProviderProps oidcProviderProps) throws Exception {
         http.csrf(csrf -> csrf.disable());
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/swagger-ui/**")
@@ -95,7 +110,8 @@ public class JwtSecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                 .permitAll() // Permit all OPTIONS requests (preflight))
                 .anyRequest().authenticated())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt ->
+                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter(oidcProviderProps))));
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }

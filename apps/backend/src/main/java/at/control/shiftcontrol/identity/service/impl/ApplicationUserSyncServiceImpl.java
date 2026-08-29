@@ -4,6 +4,7 @@ import at.control.shiftcontrol.identity.ApplicationUser;
 import at.control.shiftcontrol.identity.ApplicationRole;
 import at.control.shiftcontrol.identity.Authorities;
 import at.control.shiftcontrol.identity.auth.JwtTokenDecoder;
+import at.control.shiftcontrol.identity.config.props.PlatformAdminBootstrap;
 import at.control.shiftcontrol.identity.entity.ExternalIdentityEntity;
 import at.control.shiftcontrol.identity.entity.UserAccountEntity;
 import at.control.shiftcontrol.identity.entity.UserAccountStatus;
@@ -30,6 +31,7 @@ import java.util.UUID;
 public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncService {
     private final UserAccountRepository userAccountRepository;
     private final ExternalIdentityRepository externalIdentityRepository;
+    private final PlatformAdminBootstrap platformAdminBootstrap;
 
     /**
      * Constructs a {@link ApplicationUser} from the given JWT token.
@@ -48,7 +50,8 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
             .map(ExternalIdentityEntity::getUserAccount)
             .orElseGet(() -> createUserAccount(jwtToken));
 
-        if (updateProfileClaims(userAccount, jwtToken)) {
+        if (updateProfileClaims(userAccount, jwtToken)
+            || grantBootstrapPlatformAdmin(userAccount, jwtToken)) {
             userAccount.setUpdatedAt(Instant.now());
             userAccount = userAccountRepository.save(userAccount);
         }
@@ -59,17 +62,18 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
     //Todo: Add support for matching the same user from multiple externalidentities
     private UserAccountEntity createUserAccount(JwtTokenDecoder.DecodedJwtToken jwtToken) {
         Instant now = Instant.now();
-        String username = firstNonBlank(jwtToken.preferredUsername(), jwtToken.subject());
+        String username = firstNonBlank(jwtToken.username(), jwtToken.subject());
 
         UserAccountEntity userAccount = UserAccountEntity.builder()
             .status(UserAccountStatus.ACTIVE)
-            .preferredUsername(username)
-            .displayName(username)
+            .username(username)
             .email(blankToNull(jwtToken.email()))
             .avatarUrl(blankToNull(jwtToken.avatarUrl()))
             .createdAt(now)
             .updatedAt(now)
             .build();
+
+        grantBootstrapPlatformAdmin(userAccount, jwtToken);
 
         userAccount.addExternalIdentity(ExternalIdentityEntity.builder()
             .issuer(jwtToken.issuer())
@@ -84,10 +88,18 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
                                         JwtTokenDecoder.DecodedJwtToken jwtToken) {
         boolean changed = false;
         changed |= setIfPresentAndChanged(
-            jwtToken.preferredUsername(), userAccount.getPreferredUsername(), userAccount::setPreferredUsername);
+            jwtToken.username(), userAccount.getUsername(), userAccount::setUsername);
         changed |= setIfPresentAndChanged(jwtToken.email(), userAccount.getEmail(), userAccount::setEmail);
         changed |= setIfPresentAndChanged(jwtToken.avatarUrl(), userAccount.getAvatarUrl(), userAccount::setAvatarUrl);
         return changed;
+    }
+
+    private boolean grantBootstrapPlatformAdmin(UserAccountEntity userAccount,
+                                                JwtTokenDecoder.DecodedJwtToken jwtToken) {
+        if (!platformAdminBootstrap.matches(jwtToken.issuer(), jwtToken.subject())) {
+            return false;
+        }
+        return userAccount.grantRole(ApplicationRole.PLATFORM_ADMIN);
     }
 
     private ApplicationUser toApplicationUser(UserAccountEntity userAccount, String subject) {
@@ -100,7 +112,7 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
         return new SyncedApplicationUser(
             requireUserId(userAccount),
             authorities,
-            firstNonBlank(userAccount.getPreferredUsername(), subject),
+            firstNonBlank(userAccount.getUsername(), subject),
             userAccount.getStatus() == UserAccountStatus.ACTIVE);
     }
 

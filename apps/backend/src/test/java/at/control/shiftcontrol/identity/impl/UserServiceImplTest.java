@@ -81,7 +81,7 @@ class UserServiceImplTest {
         return UserAccountEntity.builder()
             .id(id)
             .status(UserAccountStatus.ACTIVE)
-            .preferredUsername(username)
+            .username(username)
             .email(email)
             .avatarUrl("https://example.com/" + username + ".png")
             .applicationRoles(List.of(ApplicationRole.PLATFORM_ADMIN))

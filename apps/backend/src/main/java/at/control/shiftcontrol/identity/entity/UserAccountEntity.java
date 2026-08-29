@@ -46,20 +46,8 @@ public class UserAccountEntity {
     private UserAccountStatus status;
 
     @Size(max = 255)
-    @Column(name = "preferred_username", length = 255)
-    private String preferredUsername;
-
-    @Size(max = 255)
-    @Column(name = "first_name", length = 255)
-    private String firstName;
-
-    @Size(max = 255)
-    @Column(name = "last_name", length = 255)
-    private String lastName;
-
-    @Size(max = 255)
-    @Column(name = "display_name", length = 255)
-    private String displayName;
+    @Column(name = "username", length = 255)
+    private String username;
 
     @Size(max = 320)
     @Column(name = "email", length = 320)
@@ -69,18 +57,12 @@ public class UserAccountEntity {
     @Column(name = "avatar_url", length = 2048)
     private String avatarUrl;
 
-    @Column(name = "email_verified", nullable = false)
-    private boolean emailVerified;
-
     @Builder.Default
     @ElementCollection
     @CollectionTable(name = "identity_user_account_application_role", joinColumns = @JoinColumn(name = "user_account_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "application_role", nullable = false, length = 64)
     private List<ApplicationRole> applicationRoles = new ArrayList<>();
-
-    @Column(name = "last_login_at")
-    private Instant lastLoginAt;
 
     @NotNull
     @Column(name = "created_at", nullable = false)
@@ -99,5 +81,21 @@ public class UserAccountEntity {
     public void addExternalIdentity(ExternalIdentityEntity externalIdentity) {
         externalIdentity.setUserAccount(this);
         externalIdentities.add(externalIdentity);
+    }
+
+    public boolean grantRole(ApplicationRole role) {
+        if (applicationRoles == null) {
+            applicationRoles = new ArrayList<>();
+        }
+        if (applicationRoles.contains(role)) {
+            return false;
+        }
+        try {
+            applicationRoles.add(role);
+        } catch (UnsupportedOperationException ignored) {
+            applicationRoles = new ArrayList<>(applicationRoles);
+            applicationRoles.add(role);
+        }
+        return true;
     }
 }
