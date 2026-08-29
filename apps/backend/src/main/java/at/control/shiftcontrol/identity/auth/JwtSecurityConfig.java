@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Objects;
+
 @Conditional(NonDevTestCondition.class)
 @EnableWebSecurity
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
@@ -81,7 +83,8 @@ public class JwtSecurityConfig {
             }
             return OAuth2TokenValidatorResult.success();
         };
-        OAuth2TokenValidator<Jwt> audienceValidator = token -> token.getAudience().contains(oidcProviderProps.audience())
+        OAuth2TokenValidator<Jwt> audienceValidator = token ->
+            Objects.requireNonNull(token.getAudience()).contains(oidcProviderProps.audience())
             ? OAuth2TokenValidatorResult.success()
             : OAuth2TokenValidatorResult.failure(new OAuth2Error(
                 "invalid_token",
