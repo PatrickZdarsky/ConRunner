@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,8 +19,9 @@ public class User {
     @NotNull
     private String email;
 
-    private String profile;
-
     @NotNull
-    private boolean isPlatformAdmin;
+    private String avatarUrl;
+
+    @Builder.Default
+    private List<ApplicationRole> applicationRoles = List.of();
 }

@@ -3,15 +3,20 @@ package at.control.shiftcontrol.identity.entity;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import at.control.shiftcontrol.identity.ApplicationRole;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -60,24 +65,21 @@ public class UserAccountEntity {
     private String email;
 
     @Size(max = 2048)
-    @Column(name = "profile", length = 2048)
-    private String profile;
+    @Column(name = "avatarUrl", length = 2048)
+    private String avatarUrl;
 
     @Column(name = "email_verified", nullable = false)
     private boolean emailVerified;
 
-    @Column(name = "platform_admin", nullable = false)
-    private boolean platformAdmin;
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(name = "user_account_application_role", joinColumns = @JoinColumn(name = "user_account_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_role", nullable = false, length = 64)
+    private List<ApplicationRole> applicationRoles = new ArrayList<>();
 
     @Column(name = "last_login_at")
     private Instant lastLoginAt;
-
-    @Column(name = "last_profile_sync_at")
-    private Instant lastProfileSyncAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "last_profile_sync_source", length = 32)
-    private UserProfileSource lastProfileSyncSource;
 
     @NotNull
     @Column(name = "created_at", nullable = false)

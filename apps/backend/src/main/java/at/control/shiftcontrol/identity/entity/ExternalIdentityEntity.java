@@ -49,7 +49,4 @@ public class ExternalIdentityEntity {
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
-
-    @Column(name = "last_seen_at")
-    private Instant lastSeenAt;
 }

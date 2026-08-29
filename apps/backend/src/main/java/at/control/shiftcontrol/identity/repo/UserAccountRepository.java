@@ -1,6 +1,9 @@
 package at.control.shiftcontrol.identity.repo;
 
+import at.control.shiftcontrol.identity.ApplicationRole;
 import at.control.shiftcontrol.identity.entity.UserAccountEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,78 +15,48 @@ import java.util.Optional;
 public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Long> {
     Optional<UserAccountEntity> findFirstByEmailIgnoreCase(String email);
 
-//    @Query(value = """
-//        select userAccount.id
-//        from UserAccountEntity userAccount
-//        where (
-//            userAccount.platformAdmin = true
-//            or exists (
-//                select 1
-//                from ExternalIdentityEntity externalIdentity
-//                where externalIdentity.userAccount = userAccount
-//                    and exists (
-//                        select 1
-//                        from Volunteer volunteer
-//                        where volunteer.id = externalIdentity.subject
-//                    )
-//            )
-//        )
-//        and (
-//            :pattern is null
-//            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
-//            or lower(coalesce(userAccount.firstName, '')) like :pattern
-//            or lower(coalesce(userAccount.lastName, '')) like :pattern
-//            or lower(coalesce(userAccount.displayName, '')) like :pattern
-//            or lower(coalesce(userAccount.email, '')) like :pattern
-//            or exists (
-//                select 1
-//                from ExternalIdentityEntity externalIdentity
-//                where externalIdentity.userAccount = userAccount
-//                    and lower(coalesce(externalIdentity.subject, '')) like :pattern
-//            )
-//        )
-//        order by lower(coalesce(userAccount.lastName, '')),
-//            lower(coalesce(userAccount.firstName, '')),
-//            lower(coalesce(userAccount.preferredUsername, '')),
-//            userAccount.id
-//        """, countQuery = """
-//        select count(userAccount.id)
-//        from UserAccountEntity userAccount
-//        where (
-//            userAccount.platformAdmin = true
-//            or exists (
-//                select 1
-//                from ExternalIdentity externalIdentity
-//                where externalIdentity.userAccount = userAccount
-//                    and exists (
-//                        select 1
-//                        from Volunteer volunteer
-//                        where volunteer.id = externalIdentity.subject
-//                    )
-//            )
-//        )
-//        and (
-//            :pattern is null
-//            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
-//            or lower(coalesce(userAccount.firstName, '')) like :pattern
-//            or lower(coalesce(userAccount.lastName, '')) like :pattern
-//            or lower(coalesce(userAccount.displayName, '')) like :pattern
-//            or lower(coalesce(userAccount.email, '')) like :pattern
-//            or exists (
-//                select 1
-//                from ExternalIdentity externalIdentity
-//                where externalIdentity.userAccount = userAccount
-//                    and lower(coalesce(externalIdentity.subject, '')) like :pattern
-//            )
-//        )
-//        """)
-//    Page<Long> searchRelevantUserIds(@Param("pattern") String pattern, Pageable pageable);
+    @Query(value = """
+        select userAccount.id
+        from UserAccountEntity userAccount
+        where :pattern is null
+            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
+            or lower(coalesce(userAccount.firstName, '')) like :pattern
+            or lower(coalesce(userAccount.lastName, '')) like :pattern
+            or lower(coalesce(userAccount.displayName, '')) like :pattern
+            or lower(coalesce(userAccount.email, '')) like :pattern
+            or exists (
+                select 1
+                from ExternalIdentityEntity externalIdentity
+                where externalIdentity.userAccount = userAccount
+                    and lower(coalesce(externalIdentity.subject, '')) like :pattern
+            )
+        order by lower(coalesce(userAccount.lastName, '')),
+            lower(coalesce(userAccount.firstName, '')),
+            lower(coalesce(userAccount.preferredUsername, '')),
+            userAccount.id
+        """, countQuery = """
+        select count(userAccount.id)
+        from UserAccountEntity userAccount
+        where :pattern is null
+            or lower(coalesce(userAccount.preferredUsername, '')) like :pattern
+            or lower(coalesce(userAccount.firstName, '')) like :pattern
+            or lower(coalesce(userAccount.lastName, '')) like :pattern
+            or lower(coalesce(userAccount.displayName, '')) like :pattern
+            or lower(coalesce(userAccount.email, '')) like :pattern
+            or exists (
+                select 1
+                from ExternalIdentityEntity externalIdentity
+                where externalIdentity.userAccount = userAccount
+                    and lower(coalesce(externalIdentity.subject, '')) like :pattern
+            )
+        """)
+    Page<Long> searchUserIds(@Param("pattern") String pattern, Pageable pageable);
 
 //    @Query("""
 //        select distinct userAccount
 //        from UserAccount userAccount
 //        left join fetch userAccount.externalIdentities externalIdentity
-//        where userAccount.platformAdmin = true
+//        where :platformAdminRole member of userAccount.applicationRoles
 //            or exists (
 //                select 1
 //                from ExternalIdentity relevantIdentity
@@ -116,7 +89,11 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         select distinct userAccount
         from UserAccountEntity userAccount
         left join fetch userAccount.externalIdentities externalIdentity
-        where userAccount.platformAdmin = true
+        where :role member of userAccount.applicationRoles
         """)
-    List<UserAccountEntity> findAllPlatformAdminsWithExternalIdentities();
+    List<UserAccountEntity> findAllWithApplicationRoleAndExternalIdentities(@Param("role") ApplicationRole role);
+
+    default List<UserAccountEntity> findAllPlatformAdminsWithExternalIdentities() {
+        return findAllWithApplicationRoleAndExternalIdentities(ApplicationRole.PLATFORM_ADMIN);
+    }
 }
