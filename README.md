@@ -40,7 +40,8 @@ Maven modules.
 ## Architectural direction
 
 - One backend process contains independently owned Spring Modulith application modules.
-- A module exposes deliberate types from its root package; subpackages are internal.
+- A module exposes only deliberate named `api` or `events` interfaces; its root package is module
+  metadata, not a dumping ground.
 - A module owns its entities, repositories, migrations, and lifecycle.
 - Cross-module calls use application APIs, stable identifiers, and immutable values—not another
   module's JPA entities or repositories.
@@ -52,4 +53,5 @@ Maven modules.
   schedule models.
 
 See [the backend structure](apps/backend/README.md) and
-[the architecture guide](docs/architecture/README.md) before adding code.
+[the architecture guide](docs/architecture/README.md) before adding code. The detailed migration
+convention is [Backend code structure and module interaction](docs/architecture/code-structure.md).

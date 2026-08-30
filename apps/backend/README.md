@@ -30,24 +30,21 @@ operational responder state and must not access shift persistence directly.
 
 ## Package convention
 
-Most business modules use this starting convention; omit a layer when the module does not need it:
+Use module-first, feature-local packages—not an `application` / `domain` / `infrastructure` split.
+For example, migrated shift code belongs under features such as `shift.plan`, `shift.volunteer`,
+`shift.positionslot`, and `shift.assignment`, where endpoints, services, DAOs, repositories, query
+Specifications, and boundary mappers remain close to their feature.
 
-```text
-<module>/
-├── package-info.java        # module contract and public API package
-├── application/             # commands, queries, use cases, transactions
-├── domain/                  # aggregates, values, policies, domain events
-└── infrastructure/          # persistence, HTTP, messaging, jobs, framework adapters
-```
+The existing empty layer directories are transitional scaffolding; do not add new migrated code to
+them.
 
-Public types needed by another module belong in the module root package. Everything in a subpackage
-is internal by default. This follows Spring Modulith's default package model and avoids a broad
-shared library. `platform` deliberately has no `domain` package so it cannot become a home for shared
-business concepts.
+The root package normally contains only module metadata. A subpackage becomes cross-module-visible
+only when it is deliberately annotated as a Spring Modulith named `api` or `events` interface. The
+full rules and examples are in [the backend code-structure guide](../../docs/architecture/code-structure.md).
 
-Tests should be placed alongside the owning module under the matching test package. Cross-module
-boundary verification belongs in `at.control.shiftcontrol.architecture`; full-stack journeys belong
-in the repository-level `e2e` directory.
+Tests mirror their production feature package. Cross-module boundary verification belongs in
+`at.control.shiftcontrol.architecture`; full-stack journeys belong in the repository-level `e2e`
+directory.
 
 Liquibase changes will be grouped under `src/main/resources/db/changelog/<module>`. Each module owns
 its change sets and includes them from a single application-level master changelog once persistence

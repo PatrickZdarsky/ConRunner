@@ -1,36 +1,22 @@
 # Architecture guide
 
 ShiftControl is a modular monolith optimized for one maintainer. Deployment simplicity does not
-remove domain ownership: the package modules are intended to be strong boundaries and possible
-future extraction seams.
+remove domain ownership: package modules are strong boundaries and possible future extraction seams.
 
-## Dependency rules
+The authoritative guide for laying out migrated backend code and integrating modules is
+[Backend code structure and module interaction](code-structure.md). It defines the feature-first
+package convention, DAO/repository responsibilities, internal Specifications, named module APIs,
+and event publication rules.
 
-1. A module owns its persistence model, repositories, migrations, and state transitions.
-2. Another module may depend only on deliberate API types in the owning module's root package.
-3. JPA entities and repositories never cross module boundaries.
-4. Domain modules do not depend on HTTP, JSON, or generated types from an external integration.
-5. `platform` contains technical mechanisms only; it must not become a shared business model.
-6. Cross-module cycles are not allowed.
-7. Domain events, audit records, and durable outbox work are different concepts and will be modeled
-   separately.
+At a high level:
 
-These rules should become automated Spring Modulith/architecture tests before migrated domain code
-is accepted.
+- A module owns its persistence model, repositories, migrations, state transitions, and endpoints.
+- JPA entities, repositories, DAOs, HTTP types, and Specifications never cross module boundaries.
+- Cross-module interaction uses stable IDs, a small named `api` contract when an immediate answer is
+  needed, or a named `events` contract for asynchronous facts.
+- `identity` provides the stable authenticated user ID; `shift` owns volunteers, plan membership,
+  plans, shifts, and staffing behavior.
+- `platform` contains technical mechanisms only; it must not become a shared business model.
 
-## Domain relationships
-
-- `eventcatalog` provides stable event/session/room identities.
-- `schedule` owns draft placement and immutable published versions.
-- `identity` provides the stable user ID and external-login mapping. It does not own volunteers,
-  plan access, or live operational status.
-- `shift` may reference published schedule item identifiers and owns volunteer profiles, plan
-  membership/access, shift plans, shifts, and staffing assignments.
-- `dispatch` reads stable schedule and shift identifiers through module APIs. It may reference a
-  user ID for a responder, but owns that responder's live operational state and its timeline.
-- `integrations.pretalx` translates remote data into integration-neutral commands and values.
-- `communications`, `audit`, and `risk` react through explicit APIs/events; they do not query another
-  module's tables.
-
-Record material choices in an ADR before implementation. Start with module boundaries, event/outbox
-semantics, authorization, Pretalx field ownership, schedule versioning, and dispatch terminology.
+Record material choices in an ADR before implementation. The current migration focus is identity and
+shift; dispatch package design is intentionally deferred.
