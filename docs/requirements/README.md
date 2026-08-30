@@ -15,7 +15,7 @@ They are deliberately lean:
 - Design details such as private method names, JPA annotations, and REST routing do not belong here.
 
 The initial event-catalogue slice used [the template](0000-module-template.md). The documents now
-also establish the approved target baseline for modules that are not yet implemented, so migration
+also establish a draft target baseline for modules that are not yet implemented, so migration
 work has a requirement to implement rather than merely a legacy service to copy.
 
 ## Sources and precedence
@@ -39,6 +39,7 @@ IDs are never reused. A requirement is one of:
 - **Implemented**: behavior and at least one test exist in this repository.
 - **Planned**: agreed direction without an implementation yet.
 - **Open**: an intentional unresolved decision that blocks behavior or data migration.
+- **WIP / out of scope**: documented future direction that must not expand the current migration.
 - **Retired**: a legacy behavior intentionally excluded from the target system.
 
 Current specifications:
@@ -49,10 +50,10 @@ Current specifications:
 | Identity | [Identity requirements](identity.md) | Foundation implemented |
 | Event catalogue | [Event catalogue requirements](eventcatalog.md) | First non-HTTP slice implemented |
 | Shift staffing | [Shift requirements](shift.md) | Planned migration target |
-| Programme scheduling | [Schedule requirements](schedule.md) | Planned |
-| Pretalx integration | [Pretalx integration requirements](integrations-pretalx.md) | Planned |
+| Programme scheduling | [Schedule requirements](schedule.md) | Stage 1 migration support; Stage 2 WIP/out of scope |
+| Pretalx integration | [Pretalx integration requirements](integrations-pretalx.md) | WIP/out of scope |
 | Communications | [Communications requirements](communications.md) | Planned migration target |
 | Audit | [Audit requirements](audit.md) | Planned migration target |
-| Risk | [Risk requirements](risk.md) | Planned migration target |
-| Dispatch | [Dispatch requirements](dispatch.md) | Discovery and constraints only |
+| Risk | [Risk requirements](risk.md) | WIP/out of scope |
+| Dispatch | [Dispatch requirements](dispatch.md) | WIP/out of scope |
 | Platform | [Platform requirements](platform.md) | Cross-cutting planned target |

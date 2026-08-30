@@ -1,48 +1,49 @@
 # Programme scheduling requirements
 
-Status: Planned
+Status: Stage 1 planned; Stage 2 WIP and out of scope
 Owner: `at.control.shiftcontrol.schedule`
 Last reviewed: 2026-08-30
 
 ## Purpose and scope
 
-Schedule manages the editable programme for an event: drafts, placement of catalogue sessions in
-rooms and time, constraints, validation, publication, and impact analysis. It references stable
-event-catalogue IDs and produces immutable published versions. It does not own programme metadata,
-Pretalx HTTP calls, volunteer assignments, or dispatch cases.
+Schedule is deliberately staged. The current migration needs only enough programme context for
+staffing shifts to refer to event sessions. It does not need a schedule editor, schedule versions,
+or Pretalx synchronization.
 
-The current event-catalogue session time and room fields are short-term migration compatibility.
-They do not establish permanent catalogue ownership of editable placement.
+Stage 1 therefore reuses the event catalogue's current event, room, and session data. The current
+catalogue session time and room are the schedule context available to the rest of the application.
+This is a migration bridge, not a commitment to make `eventcatalog` the long-term editor of a live
+programme.
 
-## Functional requirements
+## Stage 1 — staffing schedule context
 
-| ID | Status | Requirement | Responsibility/architecture source |
-| --- | --- | --- | --- |
-| `SCH-CORE-001` | Planned | Each event has a schedule workspace with a named event timezone. Schedule instants are stored unambiguously and presented in that timezone. | Architecture schedule design |
-| `SCH-CORE-002` | Planned | A schedule item references one catalogue session or submission by stable UUID and records placement for one schedule draft or version. It does not duplicate the catalogue entity as a mutable JPA relationship. | `SP3`, architecture ownership |
-| `SCH-DRAFT-001` | Planned | Authorized schedule editors create and edit drafts derived from a known base version. Every edit records its actor, time, and base/version context. | Architecture schedule versioning |
-| `SCH-DRAFT-002` | Planned | A draft can place, move, resize, order, or remove schedule items and associate them with event-catalogue rooms. The module rejects references outside the event. | `SP2`, `SP3`, legacy activity/location behavior |
-| `SCH-VALIDATE-001` | Planned | Schedule validation distinguishes hard conflicts from warnings. Hard conflicts prevent publication; warnings are visible with a documented approval/override path. | `SP14`, `SP15`, architecture schedule design |
-| `SCH-VALIDATE-002` | Planned | Validation covers at least invalid time ranges, rooms outside the event, overlapping room use, and invalid or missing catalogue references. Additional organizer constraints are typed and versioned rather than arbitrary executable expressions. | `SP14`, architecture schedule design |
-| `SCH-PUBLISH-001` | Planned | Publishing creates an immutable version. Published versions are readable as the event's released programme; future edits create a new draft rather than modifying the published version. | Architecture schedule versioning |
-| `SCH-PUBLISH-002` | Planned | Publication produces an impact report for linked staffing shifts, assignments, planned communications, and dispatch references. No import or publication silently rewrites operational data. Approved impacts are applied through explicit commands. | Architecture schedule impact handling |
-| `SCH-PUBLISH-003` | Planned | A public or broad volunteer schedule view uses only a published version and only where the relevant plan/event policy permits it. Draft visibility is limited to authorized editors. | `V2XL`, `V3`, architecture schedule design |
-| `SCH-VIEW-001` | Planned | Schedule reads support calendar and table views, filtering by date, room, session metadata, role-related staffing context where authorized, and stable room columns across a requested range. Rendering concerns do not change scheduling ownership. | `V3`, `V6`, legacy schedule endpoints |
-| `SCH-STAFF-001` | Planned | Staffing shifts may reference a published schedule item. Schedule does not create, delete, or directly modify shift assignments; it asks `shift` for impact data through a named application query. | `SP3`, ownership baseline |
+Stage 1 is the only schedule scope that may be implemented during the current staffing migration.
 
-## Interaction rules
-
-- `eventcatalog` owns the identity and descriptive metadata of events, rooms, and sessions.
-- `integrations.pretalx` fetches and normalizes remote data. Schedule decides whether a proposed
-  placement becomes part of a local draft and how publication is reconciled.
-- `shift` references a published schedule item for staffing context. It may continue to support
-  stand-alone staffing shifts only according to `SH-OPEN-005`.
-- A schedule version may be referenced by dispatch, but dispatch never updates it.
-
-## Open questions
-
-| ID | Question | Decision needed by |
+| ID | Status | Requirement |
 | --- | --- | --- |
-| `SCH-OPEN-001` | Is ShiftControl or Pretalx canonical for room/time placement in the first release? The answer determines whether local edits are authoritative drafts or proposals. | Before schedule implementation. |
-| `SCH-OPEN-002` | Which hard and soft constraints matter to actual organizers—speaker availability, setup buffers, track ordering, accessibility, equipment, or others? | Before validation rules are implemented. |
-| `SCH-OPEN-003` | Which schedule version and impact-approval workflow is required for publication to Pretalx and for changes during a live event? | Before external publishing. |
+| `SCH1-REF-001` | Planned | A staffing shift may optionally reference a session from the same event. A staffing shift is valid without a session reference. |
+| `SCH1-REF-002` | Planned | The optional session reference supplies programme context only. `shift` does not mutate the session, its room, or its time range. |
+| `SCH1-READ-001` | Planned | Shift-facing reads can obtain the current session name, time range, and room for the referenced session through a small named catalogue read API or an equivalent immutable value. No catalogue entity or repository crosses the module boundary. |
+| `SCH1-READ-002` | Planned | Volunteer and planner views show only schedule context the requester is already authorized to see through their event/plan access. |
+| `SCH1-CHANGE-001` | Planned | Until Stage 2 begins, event-catalogue administration is the only local way to change current session/room/time data. There is no parallel schedule draft, local publication, or impact workflow. |
+
+## Stage 2 — live schedule management and Pretalx integration
+
+Status: WIP and out of scope. Do not begin this stage while migrating the shift module.
+
+Stage 2 will add the ability to manage programme schedule data while an event is in progress. It is
+intentionally deferred because the design is coupled to Pretalx source-of-truth rules and the
+impact of a schedule change on staffing work.
+
+| ID | Status | Future requirement |
+| --- | --- | --- |
+| `SCH2-DRAFT-001` | WIP | Authorized editors can manage schedule placement as drafts, with explicit event timezone, room, time, ordering, validation, and author/version information. |
+| `SCH2-PUBLISH-001` | WIP | Publishing creates an immutable released version; later edits create another draft rather than mutating the released version. |
+| `SCH2-IMPACT-001` | WIP | A live schedule change identifies affected staffing shifts and gives planners a deliberate notification/approval path. It never silently rewrites assignments. |
+| `SCH2-PRETALX-001` | WIP | Schedule publication and reconciliation with Pretalx use the later Pretalx integration contract, stable external mappings, durable work, and a field-level source-of-truth decision. |
+
+## Later decision
+
+Before Stage 2, record an ADR that defines the source of truth for room/time placement, the live
+change approval flow, hard/soft validation rules, and the Pretalx reconciliation behavior. Those
+choices are not needed to migrate the first staffing slice.
