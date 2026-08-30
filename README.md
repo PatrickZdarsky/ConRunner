@@ -15,7 +15,8 @@ incrementally from the existing system.
 ├── contracts/               # contracts for genuinely external consumers only
 ├── docs/
 │   ├── adr/                 # architecture decision records
-│   └── architecture/        # current architecture and module rules
+│   ├── architecture/        # current architecture and module rules
+│   └── requirements/        # module behavior and migration specifications
 ├── e2e/                     # full-stack acceptance journeys
 ├── ops/
 │   ├── compose/             # local and small-production topology
@@ -55,3 +56,4 @@ Maven modules.
 See [the backend structure](apps/backend/README.md) and
 [the architecture guide](docs/architecture/README.md) before adding code. The detailed migration
 convention is [Backend code structure and module interaction](docs/architecture/code-structure.md).
+Module behavior and migration decisions live in [requirements specifications](docs/requirements/).

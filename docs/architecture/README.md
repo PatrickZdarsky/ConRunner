@@ -18,5 +18,6 @@ At a high level:
   plans, shifts, and staffing behavior.
 - `platform` contains technical mechanisms only; it must not become a shared business model.
 
-Record material choices in an ADR before implementation. The current migration focus is identity and
-shift; dispatch package design is intentionally deferred.
+Record material choices in an ADR before implementation. Module behavior and compatibility choices
+belong in [requirements specifications](../requirements/). The current migration focus is identity,
+event catalogue, and shift; dispatch package design is intentionally deferred.
