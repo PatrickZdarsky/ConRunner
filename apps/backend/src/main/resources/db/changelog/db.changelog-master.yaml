@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/identity/db.changelog-identity.yaml
+  - include:
+      file: db/changelog/eventcatalog/db.changelog-eventcatalog.yaml
