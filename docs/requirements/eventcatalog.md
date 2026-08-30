@@ -29,6 +29,9 @@ requirements when their first real caller is introduced.
 | `EC-EVENT-001` | Implemented | An event must have a non-blank name and a time range whose end is strictly after its start. | [Event service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/event/EventServiceTest.java) |
 | `EC-EVENT-002` | Implemented | Event names must be unique without regard to case. Event links must be absolute URLs and duplicate type/URL pairs are retained once. | [Event service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/event/EventServiceTest.java) |
 | `EC-EVENT-003` | Implemented | An event is open at a supplied instant when its end is at or after that instant. | [Event service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/event/EventServiceTest.java) |
+| `EC-EVENT-004` | Planned | Authorized event-catalogue administration can create, change, archive, and delete events. Archive/delete behavior must be explicit about dependent catalogue records and must not cascade into shift, schedule, audit, or dispatch data. | `ADM1`, legacy event CRUD |
+| `EC-EVENT-005` | Planned | Event cloning is an explicit cross-module workflow. It creates a new event identity and may ask owning modules to copy selected configuration; it never copies volunteers, assignments, invites, audit history, credentials, or dispatch records by default. | `ADM2`, legacy event clone |
+| `EC-EVENT-006` | Planned | A structured event-setup import validates its input and reports item-level failures before applying typed catalogue and staffing setup commands. It does not bypass module validation or create cross-module JPA coupling. | Legacy workbook import, platform migration direction |
 | `EC-ROOM-001` | Implemented | A room belongs to exactly one existing event and its name is unique within that event, without regard to case. The same room name is allowed in another event. | [Room service and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/room/RoomServiceTest.java) and [catalogue persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/EventCatalogPersistenceTest.java) |
 | `EC-ROOM-002` | Implemented | An imported read-only room cannot be changed or deleted. But it can still be linked to from a session. | [Room service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/room/RoomServiceTest.java) and [session service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/session/SessionServiceTest.java) |
 | `EC-ROOM-003` | Implemented | Deleting a mutable room clears its room reference from existing sessions rather than deleting those sessions. | [Catalogue persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/EventCatalogPersistenceTest.java) |
@@ -36,6 +39,7 @@ requirements when their first real caller is introduced.
 | `EC-SESSION-002` | Implemented | A session can reference only a room belonging to the same event. | [Session service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/session/SessionServiceTest.java) |
 | `EC-SESSION-003` | Implemented | Session names must be unique within an event without regard to case. | [Session service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/session/SessionServiceTest.java) |
 | `EC-SESSION-004` | Implemented | Session suggestions may filter by case-insensitive name and by an overlapping time range with a non-negative tolerance. | [Session service tests](../../apps/backend/src/test/java/at/control/shiftcontrol/eventcatalog/session/SessionServiceTest.java) |
+| `EC-SESSION-005` | Planned | Authorized catalogue administration can manage mutable event, room, and session metadata. Imported read-only records remain integration-managed; their update/delete rules are enforced by the responsible owner module. | `ADM1`, `ADM6`, legacy activity/location CRUD |
 
 ## Ownership and interactions
 
@@ -62,8 +66,8 @@ than take over their catalogue identity.
 
 ## Open questions
 
-| ID | Question | Decision needed by |
-| --- | --- | --- |
-| `EC-OPEN-001` | Which room capabilities from legacy `additionalProperties` are required, and which belong in the future venue/room model? | Before importing legacy room data or building venue management. |
-| `EC-OPEN-002` | Which source is canonical for event, room, submission, and session data once Pretalx synchronization is introduced? | Before building the Pretalx adapter. |
-| `EC-OPEN-003` | Which catalogue reads need synchronous named APIs for `shift` and `schedule`? | When the first consuming use case is migrated. |
+| ID | Question                                                                                                                                                                                           | Decision needed by |
+| --- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| --- |
+| `EC-OPEN-001` | Which room capabilities from legacy `additionalProperties` are required, and which belong in the future venue/room model? => the ability for this to be added later should be kept in mind         | Before importing legacy room data or building venue management. |
+| `EC-OPEN-002` | Which source is canonical for event, room, submission, and session data once Pretalx synchronization is introduced? => pretalx integration is gonne be handled later on and can be ignored for now | Before building the Pretalx adapter. |
+| `EC-OPEN-003` | Which catalogue reads need synchronous named APIs for `shift` and `schedule`? => What is meant by this question?                                                                                   | When the first consuming use case is migrated. |

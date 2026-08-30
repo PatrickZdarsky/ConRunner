@@ -1,8 +1,8 @@
 # Requirements specifications
 
-Requirements specifications describe the intended, observable behavior of a module. They are kept
-with the code so a migration does not accidentally treat the legacy implementation as the only
-source of truth.
+Requirements specifications describe the intended, observable behavior of ShiftControl modules.
+They are kept with the code so the migration does not accidentally treat the legacy implementation
+as the only source of truth.
 
 They are deliberately lean:
 
@@ -14,8 +14,22 @@ They are deliberately lean:
   requirement records the resulting behavior.
 - Design details such as private method names, JPA annotations, and REST routing do not belong here.
 
-Create a module specification from [the template](0000-module-template.md) when its first behavior
-is migrated. Do not pre-fill specifications for placeholder modules.
+The initial event-catalogue slice used [the template](0000-module-template.md). The documents now
+also establish the approved target baseline for modules that are not yet implemented, so migration
+work has a requirement to implement rather than merely a legacy service to copy.
+
+## Sources and precedence
+
+[Product baseline and traceability](product-baseline.md) records the responsibility-sheet coverage,
+legacy evidence, and the ownership decisions that intentionally replace legacy design. When sources
+disagree, apply this order:
+
+1. A newer explicit product or ownership decision in the architecture plan or project context.
+2. These requirements specifications, once reviewed.
+3. The responsibility sheet for product intent.
+4. The old `shiftservice` code and tests as behavioral evidence only.
+
+In particular, legacy package/entity ownership and implementation shortcuts are not requirements.
 
 ## Requirement IDs and status
 
@@ -25,9 +39,20 @@ IDs are never reused. A requirement is one of:
 - **Implemented**: behavior and at least one test exist in this repository.
 - **Planned**: agreed direction without an implementation yet.
 - **Open**: an intentional unresolved decision that blocks behavior or data migration.
+- **Retired**: a legacy behavior intentionally excluded from the target system.
 
 Current specifications:
 
-| Module | Specification | Status |
+| Area | Specification | Status |
 | --- | --- | --- |
+| Product baseline | [Sources, reconciliation, and traceability](product-baseline.md) | Draft baseline for review |
+| Identity | [Identity requirements](identity.md) | Foundation implemented |
 | Event catalogue | [Event catalogue requirements](eventcatalog.md) | First non-HTTP slice implemented |
+| Shift staffing | [Shift requirements](shift.md) | Planned migration target |
+| Programme scheduling | [Schedule requirements](schedule.md) | Planned |
+| Pretalx integration | [Pretalx integration requirements](integrations-pretalx.md) | Planned |
+| Communications | [Communications requirements](communications.md) | Planned migration target |
+| Audit | [Audit requirements](audit.md) | Planned migration target |
+| Risk | [Risk requirements](risk.md) | Planned migration target |
+| Dispatch | [Dispatch requirements](dispatch.md) | Discovery and constraints only |
+| Platform | [Platform requirements](platform.md) | Cross-cutting planned target |
