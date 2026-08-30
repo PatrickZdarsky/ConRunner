@@ -22,10 +22,12 @@ is accepted.
 
 - `eventcatalog` provides stable event/session/room identities.
 - `schedule` owns draft placement and immutable published versions.
-- `workforce` may reference published schedule item identifiers but owns volunteer shifts and
-  assignments.
-- `dispatch` reads stable schedule/workforce identifiers through module APIs and owns its operational
-  state and timeline.
+- `identity` provides the stable user ID and external-login mapping. It does not own volunteers,
+  plan access, or live operational status.
+- `shift` may reference published schedule item identifiers and owns volunteer profiles, plan
+  membership/access, shift plans, shifts, and staffing assignments.
+- `dispatch` reads stable schedule and shift identifiers through module APIs. It may reference a
+  user ID for a responder, but owns that responder's live operational state and its timeline.
 - `integrations.pretalx` translates remote data into integration-neutral commands and values.
 - `communications`, `audit`, and `risk` react through explicit APIs/events; they do not query another
   module's tables.

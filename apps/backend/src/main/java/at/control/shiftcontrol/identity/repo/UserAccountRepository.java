@@ -45,24 +45,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     Page<UUID> searchUserIds(@Param("pattern") String pattern, Pageable pageable);
 
-//    @Query("""
-//        select distinct userAccount
-//        from UserAccount userAccount
-//        left join fetch userAccount.externalIdentities externalIdentity
-//        where :platformAdminRole member of userAccount.applicationRoles
-//            or exists (
-//                select 1
-//                from ExternalIdentity relevantIdentity
-//                where relevantIdentity.userAccount = userAccount
-//                    and exists (
-//                        select 1
-//                        from Volunteer volunteer
-//                        where volunteer.id = relevantIdentity.subject
-//                    )
-//            )
-//        """)
-//    List<UserAccountEntity> findAllRelevantWithExternalIdentities();
-
     @Query("""
         select distinct userAccount
         from UserAccountEntity userAccount

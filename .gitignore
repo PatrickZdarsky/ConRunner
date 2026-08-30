@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local project handoff notes
+PROJECT_CONTEXT.md

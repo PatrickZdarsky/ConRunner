@@ -1,9 +1,9 @@
 # ShiftControl
 
 ShiftControl is being rebuilt as a monorepo containing a modular-monolith backend, one web client,
-and the operational material needed to release them together. The repository currently contains
-only the generated Spring backend and architectural scaffolding; no code has been migrated from the
-existing system.
+and the operational material needed to release them together. The backend currently contains the
+identity foundation and architectural module scaffolding; `shiftservice` domain behavior is migrated
+incrementally from the existing system.
 
 ## Repository layout
 
@@ -46,7 +46,7 @@ Maven modules.
   module's JPA entities or repositories.
 - In-process domain events coordinate committed internal behavior. External side effects will use a
   transactional outbox when that infrastructure is introduced.
-- Scheduling, workforce, and dispatch remain separate domain modules even though they share one
+- Shift staffing, programme scheduling, and dispatch remain separate domain modules even though they share one
   deployable and database.
 - External integrations live behind anti-corruption adapters; Pretalx models do not become core
   schedule models.

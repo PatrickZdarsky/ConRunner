@@ -10,11 +10,11 @@ All modules are direct children of `at.control.shiftcontrol`:
 
 | Module | Ownership |
 | --- | --- |
-| `identity` | Local profiles, external identities, and capability evaluation |
+| `identity` | Stable local user IDs, external identities, authentication, and global capabilities |
 | `eventcatalog` | Event, venue, room, session, and submission identities |
 | `schedule` | Drafts, constraints, validation, publication, and immutable schedule versions |
-| `workforce` | Shift planning, roles, positions, assignments, trades, and rewards |
-| `dispatch` | Live operational cases/tasks, resources, assignments, escalation, and timeline |
+| `shift` | Volunteers, plan membership/access, shift plans, shifts, roles, assignments, trades, and rewards |
+| `dispatch` | Live operational cases/tasks, responder/resource state, escalation, and timeline |
 | `communications` | Notification preferences, records, templates, and delivery attempts |
 | `audit` | Sanitized audit records, retention, export, and query support |
 | `risk` | Trust/risk policies, evaluation state, and alerts |
@@ -23,6 +23,10 @@ All modules are direct children of `at.control.shiftcontrol`:
 
 The Pretalx adapter starts under `integrations.pretalx`. Pretalx transport types stay there; the
 event catalog and schedule modules define their own models.
+
+`shift` owns the staffing domain as one cohesive module. Its volunteer profiles and plan membership
+records reference identity's UUID user ID. `dispatch` may reference that same ID, but owns live
+operational responder state and must not access shift persistence directly.
 
 ## Package convention
 
