@@ -13,9 +13,9 @@ import at.control.shiftcontrol.eventcatalog.event.EventData;
 import at.control.shiftcontrol.eventcatalog.event.EventDetails;
 import at.control.shiftcontrol.eventcatalog.event.EventService;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogConflictException;
-import at.control.shiftcontrol.eventcatalog.room.RoomData;
-import at.control.shiftcontrol.eventcatalog.room.RoomDetails;
-import at.control.shiftcontrol.eventcatalog.room.RoomService;
+import at.control.shiftcontrol.eventcatalog.location.LocationData;
+import at.control.shiftcontrol.eventcatalog.location.LocationDetails;
+import at.control.shiftcontrol.eventcatalog.location.LocationService;
 import at.control.shiftcontrol.eventcatalog.session.SessionData;
 import at.control.shiftcontrol.eventcatalog.session.SessionDetails;
 import at.control.shiftcontrol.eventcatalog.session.SessionService;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Import;
 import jakarta.persistence.EntityManager;
 
 @DataJpaTest
-@Import({TestcontainersConfiguration.class, EventService.class, RoomService.class, SessionService.class})
+@Import({TestcontainersConfiguration.class, EventService.class, LocationService.class, SessionService.class})
 class EventCatalogPersistenceTest {
     private static final Instant START = Instant.parse("2026-05-12T07:00:00Z");
     private static final Instant END = Instant.parse("2026-05-12T22:00:00Z");
@@ -36,7 +36,7 @@ class EventCatalogPersistenceTest {
     private EventService eventService;
 
     @Autowired
-    private RoomService roomService;
+    private LocationService locationService;
 
     @Autowired
     private SessionService sessionService;
@@ -45,40 +45,40 @@ class EventCatalogPersistenceTest {
     private EntityManager entityManager;
 
     @Test
-    void persistsAnEventRoomAndSessionWithStableUuidReferences() {
+    void persistsAnEventLocationAndSessionWithStableUuidReferences() {
         EventDetails event = eventService.create(event("ShiftControl Fest", START, END));
-        RoomDetails room = roomService.create(event.id(), new RoomData("Main Hall", "Center stage", "https://example.test/hall"));
+        LocationDetails location = locationService.create(event.id(), new LocationData("Main Hall", "Center stage", "https://example.test/hall"));
         SessionDetails session = sessionService.create(event.id(), new SessionData("Opening ceremony", "Welcome",
-            START.plusSeconds(3600), START.plusSeconds(7200), room.id()));
+            START.plusSeconds(3600), START.plusSeconds(7200), location.id()));
 
-        assertEquals(event.id(), room.eventId());
+        assertEquals(event.id(), location.eventId());
         assertEquals(event.id(), session.eventId());
-        assertEquals(room.id(), session.roomId());
+        assertEquals(location.id(), session.locationId());
     }
 
     @Test
-    void deletingARoomKeepsTheLegacySetNullBehaviourForSessions() {
+    void deletingALocationKeepsTheLegacySetNullBehaviourForSessions() {
         EventDetails event = eventService.create(event("ShiftControl Fest", START, END));
-        RoomDetails room = roomService.create(event.id(), new RoomData("Main Hall", null, null));
+        LocationDetails location = locationService.create(event.id(), new LocationData("Main Hall", null, null));
         SessionDetails session = sessionService.create(event.id(), new SessionData("Opening ceremony", null,
-            START.plusSeconds(3600), START.plusSeconds(7200), room.id()));
+            START.plusSeconds(3600), START.plusSeconds(7200), location.id()));
 
-        roomService.delete(room.id());
+        locationService.delete(location.id());
         entityManager.flush();
         entityManager.clear();
 
-        assertNull(sessionService.get(session.id()).roomId());
+        assertNull(sessionService.get(session.id()).locationId());
     }
 
     @Test
     void enforcesCaseInsensitiveNamesWithinTheirEventButNotAcrossEvents() {
         EventDetails first = eventService.create(event("ShiftControl Fest", START, END));
         EventDetails second = eventService.create(event("Different Fest", START, END));
-        roomService.create(first.id(), new RoomData("Main Hall", null, null));
-        roomService.create(second.id(), new RoomData("Main Hall", null, null));
+        locationService.create(first.id(), new LocationData("Main Hall", null, null));
+        locationService.create(second.id(), new LocationData("Main Hall", null, null));
 
         assertThrows(EventCatalogConflictException.class,
-            () -> roomService.create(first.id(), new RoomData("main hall", null, null)));
+            () -> locationService.create(first.id(), new LocationData("main hall", null, null)));
     }
 
     @Test

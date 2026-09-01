@@ -198,6 +198,23 @@ through the project's Liquibase and operational configuration.
 - Test packages mirror production feature packages. Unit-test services/DAOs, repository-test query
   behavior, and add endpoint/integration tests for important authorization and state transitions.
 
+### Deferred reward guardrails
+
+`shift.reward` is a deferred feature, but its future persistence and assignment integration are
+constrained by [ADR-0001](../adr/0001-reward-wallet-and-award-invariants.md). Do not add mutable
+point balances to an existing aggregate as a shortcut. When reward work starts, its append-only
+ledger is the only balance authority, and ledger mutations occur in the same transaction as the
+explicit assignment transition that caused them.
+
+Do not let callers change an accepted assignment's volunteer through a repository or entity setter.
+The assignment feature owns explicit accept, unassign, auction-claim, and trade operations so a
+future reward feature can preserve immutable award terms through transfers. Preserve stable UUID
+references and do not use deletion cascades that would erase ledger attribution.
+
+Reward exports are authorized read-side behavior, not part of the ledger writer. Do not introduce a
+public reward-report endpoint, bearer share link, or reward-share token while the feature is
+deferred.
+
 ## Naming and anti-patterns
 
 Use names that reveal the feature and intent: `ShiftDao.searchAssigned`,

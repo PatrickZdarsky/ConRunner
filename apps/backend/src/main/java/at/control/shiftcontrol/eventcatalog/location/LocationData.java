@@ -1,13 +1,13 @@
-package at.control.shiftcontrol.eventcatalog.room;
+package at.control.shiftcontrol.eventcatalog.location;
 
 import java.net.URI;
 
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogValidationException;
 
-/** Validated room data accepted by the room service. */
-public record RoomData(String name, String description, String url) {
-    public RoomData {
-        name = required(name, "Room name");
+/** Validated location data accepted by the location service. */
+public record LocationData(String name, String description, String url) {
+    public LocationData {
+        name = required(name, "Location name");
         description = optional(description);
         url = optionalAbsoluteUrl(url);
     }
@@ -39,7 +39,7 @@ public record RoomData(String name, String description, String url) {
                 throw new IllegalArgumentException();
             }
         } catch (IllegalArgumentException exception) {
-            throw new EventCatalogValidationException("Room URL must be a valid absolute URL");
+            throw new EventCatalogValidationException("Location URL must be a valid absolute URL");
         }
         return normalized;
     }

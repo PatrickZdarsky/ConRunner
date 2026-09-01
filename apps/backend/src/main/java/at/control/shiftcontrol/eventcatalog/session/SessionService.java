@@ -9,8 +9,8 @@ import at.control.shiftcontrol.eventcatalog.event.EventRepository;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogConflictException;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogNotFoundException;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogValidationException;
-import at.control.shiftcontrol.eventcatalog.room.RoomEntity;
-import at.control.shiftcontrol.eventcatalog.room.RoomRepository;
+import at.control.shiftcontrol.eventcatalog.location.LocationEntity;
+import at.control.shiftcontrol.eventcatalog.location.LocationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class SessionService {
     private final EventRepository eventRepository;
-    private final RoomRepository roomRepository;
+    private final LocationRepository locationRepository;
     private final SessionRepository sessionRepository;
 
-    public SessionService(EventRepository eventRepository, RoomRepository roomRepository, SessionRepository sessionRepository) {
+    public SessionService(EventRepository eventRepository, LocationRepository locationRepository, SessionRepository sessionRepository) {
         this.eventRepository = eventRepository;
-        this.roomRepository = roomRepository;
+        this.locationRepository = locationRepository;
         this.sessionRepository = sessionRepository;
     }
 
@@ -33,7 +33,7 @@ public class SessionService {
         if (data == null) {
             throw new EventCatalogValidationException("Session data is required");
         }
-        validateEventAndRoom(event, data);
+        validateEventAndLocation(event, data);
         assertNameAvailable(eventId, data.name(), null);
 
         SessionEntity session = new SessionEntity();
@@ -52,7 +52,7 @@ public class SessionService {
         if (data == null) {
             throw new EventCatalogValidationException("Session data is required");
         }
-        validateEventAndRoom(getEvent(session.getEventId()), data);
+        validateEventAndLocation(getEvent(session.getEventId()), data);
         assertNameAvailable(session.getEventId(), data.name(), session);
         apply(session, data);
         return toDetails(sessionRepository.save(session));
@@ -107,15 +107,15 @@ public class SessionService {
             .orElseThrow(() -> new EventCatalogNotFoundException("Session not found: " + sessionId));
     }
 
-    private void validateEventAndRoom(CatalogEventEntity event, SessionData data) {
+    private void validateEventAndLocation(CatalogEventEntity event, SessionData data) {
         if (data.startTime().isBefore(event.getStartTime()) || data.endTime().isAfter(event.getEndTime())) {
             throw new EventCatalogValidationException("Session time range must be within event time range");
         }
-        if (data.roomId() != null) {
-            RoomEntity room = roomRepository.findById(data.roomId())
-                .orElseThrow(() -> new EventCatalogNotFoundException("Room not found: " + data.roomId()));
-            if (!event.getId().equals(room.getEventId())) {
-                throw new EventCatalogValidationException("Session room must belong to the same event");
+        if (data.locationId() != null) {
+            LocationEntity location = locationRepository.findById(data.locationId())
+                .orElseThrow(() -> new EventCatalogNotFoundException("Location not found: " + data.locationId()));
+            if (!event.getId().equals(location.getEventId())) {
+                throw new EventCatalogValidationException("Session location must belong to the same event");
             }
         }
     }
@@ -134,7 +134,7 @@ public class SessionService {
         session.setDescription(data.description());
         session.setStartTime(data.startTime());
         session.setEndTime(data.endTime());
-        session.setRoomId(data.roomId());
+        session.setLocationId(data.locationId());
     }
 
     private static boolean matchesName(SessionEntity session, SessionSuggestion suggestion) {
@@ -152,7 +152,7 @@ public class SessionService {
     }
 
     private static SessionDetails toDetails(SessionEntity session) {
-        return new SessionDetails(session.getId(), session.getEventId(), session.getRoomId(), session.getName(), session.getDescription(),
+        return new SessionDetails(session.getId(), session.getEventId(), session.getLocationId(), session.getName(), session.getDescription(),
             session.getStartTime(), session.getEndTime(), session.isReadOnly());
     }
 

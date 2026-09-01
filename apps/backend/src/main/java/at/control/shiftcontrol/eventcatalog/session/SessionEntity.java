@@ -27,8 +27,8 @@ public class SessionEntity {
     @Column(name = "event_id", nullable = false)
     private UUID eventId;
 
-    @Column(name = "room_id")
-    private UUID roomId;
+    @Column(name = "location_id")
+    private UUID locationId;
 
     @Column(nullable = false, length = 255)
     private String name;

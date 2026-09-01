@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.eventcatalog.room;
+package at.control.shiftcontrol.eventcatalog.location;
 
 import java.util.UUID;
 
@@ -17,8 +17,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "eventcatalog_room")
-public class RoomEntity {
+@Table(name = "eventcatalog_location")
+public class LocationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

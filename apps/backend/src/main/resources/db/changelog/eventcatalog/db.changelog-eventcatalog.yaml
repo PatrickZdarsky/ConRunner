@@ -87,11 +87,11 @@ databaseChangeLog:
             columnNames: event_id, type, url
             constraintName: uk_eventcatalog_event_link
   - changeSet:
-      id: eventcatalog-002-create-rooms
+      id: eventcatalog-002-create-locations
       author: shiftcontrol
       changes:
         - createTable:
-            tableName: eventcatalog_room
+            tableName: eventcatalog_location
             columns:
               - column:
                   name: id
@@ -126,18 +126,18 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addForeignKeyConstraint:
-            baseTableName: eventcatalog_room
+            baseTableName: eventcatalog_location
             baseColumnNames: event_id
-            constraintName: fk_eventcatalog_room_event
+            constraintName: fk_eventcatalog_location_event
             referencedTableName: eventcatalog_event
             referencedColumnNames: id
             onDelete: CASCADE
         - sql:
-            sql: CREATE UNIQUE INDEX uk_eventcatalog_room_event_name_ci ON eventcatalog_room (event_id, lower(name))
+            sql: CREATE UNIQUE INDEX uk_eventcatalog_location_event_name_ci ON eventcatalog_location (event_id, lower(name))
             splitStatements: false
         - createIndex:
-            tableName: eventcatalog_room
-            indexName: idx_eventcatalog_room_event
+            tableName: eventcatalog_location
+            indexName: idx_eventcatalog_location_event
             columns:
               - column:
                   name: event_id
@@ -160,7 +160,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: room_id
+                  name: location_id
                   type: UUID
               - column:
                   name: name
@@ -199,9 +199,9 @@ databaseChangeLog:
             onDelete: CASCADE
         - addForeignKeyConstraint:
             baseTableName: eventcatalog_session
-            baseColumnNames: room_id
-            constraintName: fk_eventcatalog_session_room
-            referencedTableName: eventcatalog_room
+            baseColumnNames: location_id
+            constraintName: fk_eventcatalog_session_location
+            referencedTableName: eventcatalog_location
             referencedColumnNames: id
             onDelete: SET NULL
         - sql:

@@ -14,8 +14,8 @@ import at.control.shiftcontrol.eventcatalog.event.CatalogEventEntity;
 import at.control.shiftcontrol.eventcatalog.event.EventRepository;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogConflictException;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogValidationException;
-import at.control.shiftcontrol.eventcatalog.room.RoomEntity;
-import at.control.shiftcontrol.eventcatalog.room.RoomRepository;
+import at.control.shiftcontrol.eventcatalog.location.LocationEntity;
+import at.control.shiftcontrol.eventcatalog.location.LocationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class SessionServiceTest {
     private EventRepository eventRepository;
 
     @Mock
-    private RoomRepository roomRepository;
+    private LocationRepository locationRepository;
 
     @Mock
     private SessionRepository sessionRepository;
@@ -40,16 +40,16 @@ class SessionServiceTest {
     private SessionService sessionService;
 
     @Test
-    void create_preservesTheLegacyActivityTimeAndRoomRelationship() {
+    void create_preservesTheLegacyActivityTimeAndLocationRelationship() {
         UUID eventId = UUID.randomUUID();
-        UUID roomId = UUID.randomUUID();
+        UUID locationId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
         CatalogEventEntity event = event(eventId);
-        RoomEntity room = room(roomId, eventId, false);
+        LocationEntity location = location(locationId, eventId, false);
         SessionData data = new SessionData("Opening ceremony", "Welcome", EVENT_START.plusSeconds(3600),
-            EVENT_START.plusSeconds(7200), roomId);
+            EVENT_START.plusSeconds(7200), locationId);
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location));
         when(sessionRepository.existsByEventIdAndNameIgnoreCase(eventId, "Opening ceremony")).thenReturn(false);
         when(sessionRepository.save(any(SessionEntity.class))).thenAnswer(invocation -> {
             SessionEntity session = invocation.getArgument(0);
@@ -61,7 +61,7 @@ class SessionServiceTest {
 
         assertEquals(sessionId, result.id());
         assertEquals(eventId, result.eventId());
-        assertEquals(roomId, result.roomId());
+        assertEquals(locationId, result.locationId());
         assertEquals(data.startTime(), result.startTime());
     }
 
@@ -76,32 +76,32 @@ class SessionServiceTest {
     }
 
     @Test
-    void create_rejectsARoomFromAnotherEvent() {
+    void create_rejectsALocationFromAnotherEvent() {
         UUID eventId = UUID.randomUUID();
         UUID otherEventId = UUID.randomUUID();
-        UUID roomId = UUID.randomUUID();
+        UUID locationId = UUID.randomUUID();
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event(eventId)));
-        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room(roomId, otherEventId, false)));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location(locationId, otherEventId, false)));
         SessionData data = new SessionData("Opening ceremony", null, EVENT_START.plusSeconds(1),
-            EVENT_START.plusSeconds(3600), roomId);
+            EVENT_START.plusSeconds(3600), locationId);
 
         assertThrows(EventCatalogValidationException.class, () -> sessionService.create(eventId, data));
     }
 
     @Test
-    void create_allowsAReadOnlyImportedRoomFromTheSameEvent() {
+    void create_allowsAReadOnlyImportedLocationFromTheSameEvent() {
         UUID eventId = UUID.randomUUID();
-        UUID roomId = UUID.randomUUID();
+        UUID locationId = UUID.randomUUID();
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event(eventId)));
-        when(roomRepository.findById(roomId)).thenReturn(Optional.of(room(roomId, eventId, true)));
+        when(locationRepository.findById(locationId)).thenReturn(Optional.of(location(locationId, eventId, true)));
         when(sessionRepository.existsByEventIdAndNameIgnoreCase(eventId, "Opening ceremony")).thenReturn(false);
         when(sessionRepository.save(any(SessionEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
         SessionData data = new SessionData("Opening ceremony", null, EVENT_START.plusSeconds(1),
-            EVENT_START.plusSeconds(3600), roomId);
+            EVENT_START.plusSeconds(3600), locationId);
 
         SessionDetails result = sessionService.create(eventId, data);
 
-        assertEquals(roomId, result.roomId());
+        assertEquals(locationId, result.locationId());
     }
 
     @Test
@@ -145,12 +145,12 @@ class SessionServiceTest {
         return event;
     }
 
-    private static RoomEntity room(UUID id, UUID eventId, boolean readOnly) {
-        RoomEntity room = new RoomEntity();
-        room.setId(id);
-        room.setEventId(eventId);
-        room.setReadOnly(readOnly);
-        return room;
+    private static LocationEntity location(UUID id, UUID eventId, boolean readOnly) {
+        LocationEntity location = new LocationEntity();
+        location.setId(id);
+        location.setEventId(eventId);
+        location.setReadOnly(readOnly);
+        return location;
     }
 
     private static SessionEntity session(UUID id, UUID eventId, String title, Instant start, Instant end) {

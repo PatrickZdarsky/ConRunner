@@ -11,7 +11,7 @@ All modules are direct children of `at.control.shiftcontrol`:
 | Module | Ownership |
 | --- | --- |
 | `identity` | Stable local user IDs, external identities, authentication, and global capabilities |
-| `eventcatalog` | Event, venue, room, session, and submission identities |
+| `eventcatalog` | Event, venue, location, session, and submission identities |
 | `schedule` | Drafts, constraints, validation, publication, and immutable schedule versions |
 | `shift` | Volunteers, plan membership/access, shift plans, shifts, roles, assignments, trades, and rewards |
 | `dispatch` | Live operational cases/tasks, responder/resource state, escalation, and timeline |

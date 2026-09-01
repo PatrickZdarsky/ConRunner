@@ -2,7 +2,7 @@
 
 Status: WIP — out of scope for the current migration
 Owner: `at.control.shiftcontrol.integrations.pretalx`
-Last reviewed: 2026-08-30
+Last reviewed: 2026-08-31
 
 ## Purpose and scope
 
@@ -11,8 +11,8 @@ runs, checkpoints, and publish/reconciliation work. It converts Pretalx response
 values for event catalogue and schedule; it never becomes the canonical owner of a local schedule
 decision or staffing assignment.
 
-The legacy synchronizer is evidence of required room/session import behavior, but its matching by
-event name, room name, and session title is explicitly retired.
+The legacy synchronizer is evidence of required location/session import behavior, but its matching
+by event name, location name, and session title is explicitly retired.
 
 No Pretalx credentials, mappings, synchronization, or adapter code belong in the current migration.
 This document preserves the later design constraints so Stage 2 scheduling work does not recreate
@@ -24,7 +24,7 @@ the unsafe legacy integration.
 | --- | --- | --- | --- |
 | `PTX-SEC-001` | WIP | Each connection credential has an internal UUID, encrypted recoverable secret material, label, host, masked presentation, creation time, and health/status. Full secrets are never returned in lists or placed in URLs, logs, audit records, events, or error messages. | Architecture P0, legacy Pretalx key API |
 | `PTX-MAP-001` | WIP | Every imported external object is mapped by provider, Pretalx instance, event slug, object type, and external identifier. Name/title matching is not an identity strategy. | Architecture P1, legacy sync review |
-| `PTX-PULL-001` | WIP | The adapter fetches all required pages and normalizes remote event, room, submission, and slot values into a stable internal contract before any owner module persists them. | `S3`, architecture adapter flow |
+| `PTX-PULL-001` | WIP | The adapter fetches all required pages and normalizes remote event, room, submission, and slot values into a stable internal contract before any owner module persists them. Pretalx room values become event-catalogue locations. | `S3`, architecture adapter flow |
 | `PTX-PULL-002` | WIP | Remote timestamps are interpreted with an explicit source/event timezone and converted without using the application server's default timezone. | Architecture P1 |
 | `PTX-SYNC-001` | WIP | A sync run records its connection, event scope, start/end time, checkpoint, per-object outcome, detected remote revision/hash, and failure details. One failed object does not roll back unrelated events or objects. | `S3`, architecture adapter flow |
 | `PTX-SYNC-002` | WIP | Synchronization reconciles remote create, change, rename, cancellation, and deletion by stable mapping. It is idempotent and safe when rerun after a partial failure. | Architecture P1 |
@@ -46,6 +46,6 @@ the unsafe legacy integration.
 
 | ID | Question | Decision needed by |
 | --- | --- | --- |
-| `PTX-OPEN-001` | WIP — What is the field-level source-of-truth matrix for event metadata, rooms/capabilities, sessions/submissions, and room/time placement? | Before the first sync migration. |
+| `PTX-OPEN-001` | WIP — What is the field-level source-of-truth matrix for event metadata, locations/capabilities, sessions/submissions, and location/time placement? | Before the first sync migration. |
 | `PTX-OPEN-002` | WIP — Which Pretalx API version, endpoints, webhook support, and remote revision fields are guaranteed by the deployed organizer instances? | Before adapter implementation. |
 | `PTX-OPEN-003` | WIP — Which remote deletions may be automatically mirrored, and which require organizer review because local published or staffing data exists? | Before destructive reconciliation. |

@@ -6,7 +6,7 @@ import java.util.UUID;
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogValidationException;
 
 /** Validated session data accepted by the session service. */
-public record SessionData(String name, String description, Instant startTime, Instant endTime, UUID roomId) {
+public record SessionData(String name, String description, Instant startTime, Instant endTime, UUID locationId) {
     public SessionData {
         name = required(name, "Session name");
         description = optional(description);
