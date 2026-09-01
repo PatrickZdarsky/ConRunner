@@ -1,0 +1,431 @@
+databaseChangeLog:
+  - changeSet:
+      id: shift-001-create-plans-memberships-roles-and-invites
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: shift_volunteer
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: shift_plan
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_description
+                  type: VARCHAR(255)
+              - column:
+                  name: long_description
+                  type: VARCHAR(1024)
+              - column:
+                  name: default_staffing_mode
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: archived_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: CREATE UNIQUE INDEX uk_shift_plan_event_name_ci ON shift_plan (event_id, lower(name))
+            splitStatements: false
+        - createIndex:
+            tableName: shift_plan
+            indexName: idx_shift_plan_event
+            columns:
+              - column:
+                  name: event_id
+        - createTable:
+            tableName: shift_plan_membership
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: planner
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: volunteer_changes_restricted
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_plan_membership
+            baseColumnNames: plan_id
+            constraintName: fk_shift_plan_membership_plan
+            referencedTableName: shift_plan
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: shift_plan_membership
+            columnNames: plan_id, user_id
+            constraintName: uk_shift_plan_membership_user
+        - createIndex:
+            tableName: shift_plan_membership
+            indexName: idx_shift_plan_membership_user
+            columns:
+              - column:
+                  name: user_id
+        - createTable:
+            tableName: shift_plan_membership_role
+            columns:
+              - column:
+                  name: membership_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: shift_plan_membership_role
+            columnNames: membership_id, role_id
+            constraintName: pk_shift_plan_membership_role
+        - addForeignKeyConstraint:
+            baseTableName: shift_plan_membership_role
+            baseColumnNames: membership_id
+            constraintName: fk_shift_plan_membership_role_membership
+            referencedTableName: shift_plan_membership
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - createTable:
+            tableName: shift_role
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(1024)
+              - column:
+                  name: self_assignable
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_role
+            baseColumnNames: plan_id
+            constraintName: fk_shift_role_plan
+            referencedTableName: shift_plan
+            referencedColumnNames: id
+        - sql:
+            sql: CREATE UNIQUE INDEX uk_shift_role_plan_name_ci ON shift_role (plan_id, lower(name))
+            splitStatements: false
+        - createTable:
+            tableName: shift_plan_invite
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: raw_code
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: type
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: use_limit
+                  type: INTEGER
+              - column:
+                  name: uses
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: revoked_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_plan_invite
+            baseColumnNames: plan_id
+            constraintName: fk_shift_plan_invite_plan
+            referencedTableName: shift_plan
+            referencedColumnNames: id
+        - sql:
+            sql: ALTER TABLE shift_plan_invite ADD CONSTRAINT ck_shift_plan_invite_limit CHECK (use_limit IS NULL OR use_limit > 0)
+            splitStatements: false
+        - createIndex:
+            tableName: shift_plan_invite
+            indexName: idx_shift_plan_invite_plan
+            columns:
+              - column:
+                  name: plan_id
+        - createTable:
+            tableName: shift_plan_invite_role
+            columns:
+              - column:
+                  name: invite_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: shift_plan_invite_role
+            columnNames: invite_id, role_id
+            constraintName: pk_shift_plan_invite_role
+        - addForeignKeyConstraint:
+            baseTableName: shift_plan_invite_role
+            baseColumnNames: invite_id
+            constraintName: fk_shift_plan_invite_role_invite
+            referencedTableName: shift_plan_invite
+            referencedColumnNames: id
+            onDelete: CASCADE
+  - changeSet:
+      id: shift-002-create-staffing-shifts-and-position-slots
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: shift_staffing_shift
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_description
+                  type: VARCHAR(255)
+              - column:
+                  name: long_description
+                  type: VARCHAR(1024)
+              - column:
+                  name: start_time
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location_id
+                  type: UUID
+              - column:
+                  name: session_id
+                  type: UUID
+              - column:
+                  name: staffing_mode_override
+                  type: VARCHAR(32)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_staffing_shift
+            baseColumnNames: plan_id
+            constraintName: fk_shift_staffing_shift_plan
+            referencedTableName: shift_plan
+            referencedColumnNames: id
+        - sql:
+            sql: ALTER TABLE shift_staffing_shift ADD CONSTRAINT ck_shift_staffing_shift_time CHECK (end_time > start_time)
+            splitStatements: false
+        - sql:
+            sql: ALTER TABLE shift_staffing_shift ADD CONSTRAINT ck_shift_staffing_shift_location_source CHECK (NOT (location_id IS NOT NULL AND session_id IS NOT NULL))
+            splitStatements: false
+        - createIndex:
+            tableName: shift_staffing_shift
+            indexName: idx_shift_staffing_shift_plan_start
+            columns:
+              - column:
+                  name: plan_id
+              - column:
+                  name: start_time
+        - createTable:
+            tableName: shift_position_slot
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: staffing_shift_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(1024)
+              - column:
+                  name: desired_volunteer_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: required_role_id
+                  type: UUID
+              - column:
+                  name: skip_auto_assignment
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_position_slot
+            baseColumnNames: staffing_shift_id
+            constraintName: fk_shift_position_slot_staffing_shift
+            referencedTableName: shift_staffing_shift
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: shift_position_slot
+            baseColumnNames: required_role_id
+            constraintName: fk_shift_position_slot_required_role
+            referencedTableName: shift_role
+            referencedColumnNames: id
+            onDelete: SET NULL
+        - sql:
+            sql: ALTER TABLE shift_position_slot ADD CONSTRAINT ck_shift_position_slot_desired_count CHECK (desired_volunteer_count > 0)
+            splitStatements: false
+        - sql:
+            sql: CREATE UNIQUE INDEX uk_shift_position_slot_name_ci ON shift_position_slot (staffing_shift_id, lower(name))
+            splitStatements: false

@@ -1,6 +1,6 @@
 # Shift staffing requirements
 
-Status: Planned migration target
+Status: Implemented through the plan, membership, and staffing-shift foundation; later workflow slices remain planned
 Owner: `at.control.shiftcontrol.shift`
 Last reviewed: 2026-09-01
 
@@ -24,7 +24,7 @@ not target requirements.
 | Shift plan | A staffing workspace for one event, with members, planners, roles, staffing policy, shifts, and incentives. |
 | Staffing mode | The plan's default volunteer-change policy: `SELF_SIGNUP`, `SUPERVISED`, or `LOCKED`. |
 | Shift mode override | `INHERIT`, or an explicit staffing mode for one staffing shift. `INHERIT` uses the plan's mode; persistence may represent it as `null`, but APIs expose its meaning explicitly. |
-| Staffing shift | A piece of volunteer work with a time range, optional Stage-1 catalogue-session reference (later a published-schedule-item reference), and position slots. It is distinct from a programme session. |
+| Staffing shift | A piece of volunteer work with a time range, an optional direct catalogue-location reference when it is not tied to a programme session, an optional Stage-1 catalogue-session reference (later a published-schedule-item reference), and position slots. When a session is present, its current catalogue location is the shift's location context. A staffing shift is distinct from a programme session. |
 | Position slot | A named demand on a staffing shift, optionally requiring a plan role and a number of volunteers. |
 | Assignment | A volunteer's accepted relation to a position slot. A pending join request is not an accepted assignment and does not reserve capacity; a pending leave request and an auction offer retain the current assignment until resolved. |
 | Auction offer | An accepted assignment offered by its holder for atomic replacement. It remains occupied until a qualified claimant replaces the holder, the holder withdraws it, or a plan-state transition resolves it. |
@@ -36,30 +36,30 @@ not target requirements.
 
 | ID | Status | Requirement | Legacy/responsibility source |
 | --- | --- | --- | --- |
-| `SH-VOL-001` | Planned | A volunteer profile references exactly one identity UUID. The module creates or updates it only for staffing needs and does not copy OIDC issuer, subject, names, or global roles. | `AU1`, legacy `Volunteer` |
-| `SH-VOL-002` | Planned | A volunteer's membership is unique per shift plan and records whether the user is a volunteer, planner, or both. A planner is also a volunteer of that plan. | `V12`, `SP1`, legacy invite join behavior |
-| `SH-VOL-003` | Planned | Staffing roles are scoped to the shift plan. A volunteer can hold roles in one plan without gaining them in another plan of the same event. | `SP10`, `ADM3`, legacy `Role` |
-| `SH-PLAN-001` | Planned | A shift plan belongs to one event and has a non-blank name unique within that event. It contains its own roles, staffing shifts, staffing policy, and incentive configuration. | `SP1`, `ADM1`, legacy `ShiftPlanServiceImpl` |
-| `SH-PLAN-002` | Planned | A volunteer may read only plans they belong to. A planner may manage only plans they plan; a platform capability may grant a deliberate override. Every PII-bearing read and mutation applies this scope. | `SP1`, `V2`, `ADM5` |
-| `SH-PLAN-003` | Planned | A plan has a default staffing mode of `SELF_SIGNUP`, `SUPERVISED`, or `LOCKED`; new plans default to `SELF_SIGNUP`. The effective mode controls volunteer assignment changes and is not an authorization substitute for plan scope. | `SP7`, `SP5`, legacy `LockStatus` |
-| `SH-POLICY-001` | Planned | A staffing shift has an `INHERIT` mode override by default, or one explicit staffing mode. Its effective mode is its explicit override when present, otherwise the plan's current default mode. An explicit override deliberately takes precedence over the plan mode for that shift. | Product decision |
+| `SH-VOL-001` | Implemented | A volunteer profile references exactly one identity UUID. The module creates or updates it only for staffing needs and does not copy OIDC issuer, subject, names, or global roles. | [Shift plan tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftPlanServiceTest.java) |
+| `SH-VOL-002` | Implemented | A volunteer's membership is unique per shift plan and records whether the user is a volunteer, planner, or both. A planner is also a volunteer of that plan. | [Plan invite and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
+| `SH-VOL-003` | Implemented | Staffing roles are scoped to the shift plan. A volunteer can hold roles in one plan without gaining them in another plan of the same event. | [Shift role tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftRoleServiceTest.java) |
+| `SH-PLAN-001` | Implemented | A shift plan belongs to one event and has a non-blank name unique within that event. It contains its own roles, staffing shifts, and staffing policy. Incentive configuration is deliberately deferred to `shift.reward`. | [Shift plan and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftPlanServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
+| `SH-PLAN-002` | Implemented | A volunteer may read only plans they belong to. A planner may manage only plans they plan; a platform capability may grant a deliberate override. Every PII-bearing read and mutation applies this scope. | [Plan access tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanAccessServiceTest.java) |
+| `SH-PLAN-003` | Implemented | A plan has a default staffing mode of `SELF_SIGNUP`, `SUPERVISED`, or `LOCKED`; new plans default to `SELF_SIGNUP`. The effective mode controls volunteer assignment changes and is not an authorization substitute for plan scope. | [Shift plan tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftPlanServiceTest.java) |
+| `SH-POLICY-001` | Implemented | A staffing shift has an `INHERIT` mode override by default, or one explicit staffing mode. Its effective mode is its explicit override when present, otherwise the plan's current default mode. An explicit override deliberately takes precedence over the plan mode for that shift. | [Staffing shift tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) |
 | `SH-POLICY-002` | Planned | The volunteer actions permitted by each effective mode follow the staffing-mode matrix below. A volunteer may perform an action only when they have plan scope, are not individually restricted from volunteer changes, and satisfy the action's eligibility rules. | Product decision, legacy policy review |
 | `SH-POLICY-003` | Planned | A scoped planner or platform administrator may directly assign, unassign, and accept or decline existing requests in every staffing mode, including `LOCKED`. Such intervention remains subject to authorization and validation; an override of an ordinary volunteer constraint requires an explicit reason and audit record. | Product decision, legacy planner behavior |
 | `SH-POLICY-004` | Planned | A staffing-mode change is one atomic, auditable command. It records the actor, old and new modes, every automatically resolved workflow item, and the effective application transition policy. Required affected-volunteer notifications are requested durably after commit. | Product decision, audit/outbox baseline |
 | `SH-POLICY-005` | Planned | Entering plan-level `LOCKED` cancels every open trade and closes every open auction in the plan. Closing an auction restores the offering volunteer's assignment to accepted; accepted assignments and pending join/leave requests otherwise remain unchanged for planner review. This cleanup applies even where an individual shift has an explicit mode override. | Product decision |
 | `SH-POLICY-006` | Planned | Entering plan-level `SELF_SIGNUP` resolves current supervised workflows using application configuration evaluated for that command: join requests default to `ACCEPT_ALL_IF_VALID` (alternative `DECLINE_ALL`), leave requests default to `ACCEPT_ALL` (alternative `DECLINE_ALL`), and open auctions default to `UNASSIGN_OFFERER` (alternative `KEEP_OPEN`). Existing open trades remain open because trade is permitted in both modes. | Product decision |
 | `SH-POLICY-007` | Planned | `ACCEPT_ALL_IF_VALID` accepts every pending join request only when all remain valid and capacity exists for all of them; otherwise the mode change fails without partial resolution. `KEEP_OPEN` retains an auction as an occupied assignment that can be claimed or canceled in `SELF_SIGNUP`; ordinary self-sign-up cannot bypass it. A later configuration change never changes a completed transition retroactively. | Product decision |
-| `SH-PLAN-004` | Planned | A planner or authorized administrator can create, revoke, list, and delete plan invites within their scope. Invite types distinguish volunteer and planner membership. | `SP13`, `ADM4`, legacy invite services |
-| `SH-PLAN-005` | Planned | An invite may have expiry, a positive use limit, and plan-scoped roles to grant. Redeeming it is idempotent for an existing member, increments usage only for a new membership, and may extend eligible roles. | `V12`, legacy `ShiftPlanServiceImpl` |
-| `SH-PLAN-006` | Planned | Invite codes and calendar-share links are bearer capabilities: they are generated with sufficient entropy, stored one-way hashed where recovery is unnecessary, shown only through an authorized issuance flow, and never included in logs, audit payloads, events, or URL paths used for administrative deletion. | Architecture P0, legacy invite/share tokens |
+| `SH-PLAN-004` | Implemented | A planner or authorized administrator can create, revoke, list, and delete plan invites within their scope. Invite types distinguish volunteer and planner membership. | [Plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java) |
+| `SH-PLAN-005` | Implemented | An invite may have expiry, a positive use limit, and plan-scoped roles to grant. Redeeming it is idempotent for an existing member, increments usage only for a new membership, and may extend eligible roles. | [Plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java) |
+| `SH-PLAN-006` | WIP | Invite codes and calendar-share links are bearer capabilities: they are generated with sufficient entropy and never included in logs, audit payloads, events, or URL paths used for administrative deletion. By approved product decision, each invite's raw code is the stored redemption key and is returned only to an authorized plan planner so they can redisplay its invite link after creation; this deliberately increases the impact of a database compromise. The invite-code portion is implemented and covered by [plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java); calendar links remain with `SH-VIEW-004`. | Architecture P0, product decision 2026-09-01 |
 | `SH-PLAN-007` | Planned | Leaving a plan follows the plan staffing policy and deterministically handles active assignments, requests, trades, and rewards. Leaving never silently leaves orphaned staffing state. | `V12`, legacy `leavePlan` |
 | `SH-PLAN-008` | Planned | Plan deletion or archival has an explicit data-impact policy. It must preserve required audit and reward-ledger history and must not depend on JPA cascading across other modules. | `ADM1`, legacy cascade model |
 
 ## Staffing-mode matrix
 
-`SH-POLICY-002` is implemented using this matrix. An explicit shift override supplies the effective
-mode for actions on that shift. Plan-level entry into `LOCKED` still performs the cleanup in
-`SH-POLICY-005` across the entire plan before later shift-level actions are considered.
+`SH-POLICY-002` will be implemented using this matrix when the assignment workflow is added. An
+explicit shift override already supplies the effective mode; the action rules and plan-level
+transition cleanup remain deferred until that workflow exists.
 
 | Volunteer action | `SELF_SIGNUP` | `SUPERVISED` | `LOCKED` |
 | --- | --- | --- | --- |
@@ -75,11 +75,11 @@ mode for actions on that shift. Plan-level entry into `LOCKED` still performs th
 
 | ID | Status | Requirement | Legacy/responsibility source |
 | --- | --- | --- | --- |
-| `SH-SHIFT-001` | Planned | A staffing shift has a non-blank name and a valid time range within its event. In Stage 1, an optional programme link references a session from the same event and never mutates its catalogue data. A later Stage 2 schedule item replaces that reference when live schedule management is introduced. | `SP2`, `SP3`, legacy `ShiftServiceImpl` |
-| `SH-SHIFT-002` | Planned | A staffing shift may carry descriptions, staffing-specific incentives, and the optional Stage-1 session reference. Current programme location/time context remains catalogue-owned; future editable placement remains schedule-owned. | `SP2`, `SP3`, ownership baseline |
-| `SH-SHIFT-003` | Planned | An authorized planner can set, change, or clear a staffing shift's mode override. Its displayed effective mode is derived from that override and the plan mode. A shift override controls volunteer actions for that shift; it never removes planner/admin authority defined in `SH-POLICY-003`. | `SP5`, product decision |
-| `SH-ROLE-001` | Planned | A plan role has a non-blank name unique within the plan, a description, a self-assignability policy, and optional reward-rate data. Only plan-scoped planners can manage roles and assign or remove them from plan members. | `SP4`, `SP10`, `ADM3`, legacy `RoleServiceImpl` |
-| `SH-SLOT-001` | Planned | A position slot belongs to one staffing shift and has a name unique within that shift, a desired volunteer count, optional required role, optional reward override, and an explicit auto-assignment exclusion flag. | `SP4`, legacy `PositionSlotServiceImpl` |
+| `SH-SHIFT-001` | Implemented | A staffing shift has a non-blank name and a valid time range within its event. In Stage 1, an optional programme link references a session from the same event and never mutates its catalogue data. A later Stage 2 schedule item replaces that reference when live schedule management is introduced. | [Staffing shift tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) |
+| `SH-SHIFT-002` | Implemented | A staffing shift may carry descriptions, an optional direct catalogue-location reference when no session is linked, and an optional Stage-1 session reference. A direct location must belong to the plan event. When a session is linked, its current catalogue location is used instead and a direct location is not allowed. Current programme location/time context remains catalogue-owned; future editable placement remains schedule-owned. Reward incentives remain deferred with `shift.reward`. | [Staffing shift and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
+| `SH-SHIFT-003` | Implemented | An authorized planner can set, change, or clear a staffing shift's mode override. Its displayed effective mode is derived from that override and the plan mode. A shift override controls volunteer actions for that shift; it never removes planner/admin authority defined in `SH-POLICY-003`. | [Staffing shift tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) |
+| `SH-ROLE-001` | Implemented | A plan role has a non-blank name unique within the plan, a description, and a self-assignability policy. Optional reward-rate data is introduced only by the deferred versioned `shift.reward` feature. Only plan-scoped planners can manage roles and assign or remove them from plan members. | [Shift role tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftRoleServiceTest.java) |
+| `SH-SLOT-001` | Implemented | A position slot belongs to one staffing shift and has a name unique within that shift, a desired volunteer count, optional required role, and an explicit auto-assignment exclusion flag. Its optional reward override is introduced only by the deferred versioned `shift.reward` feature. | [Position slot and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/PositionSlotServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
 | `SH-SLOT-002` | Planned | The desired volunteer count cannot be reduced below active accepted assignments. Deleting or materially changing a slot follows an explicit assignment-impact policy. | Legacy position-slot validation |
 
 ## Assignment, availability, trade, and attendance
@@ -125,6 +125,39 @@ balances to volunteer, event, plan, slot, or assignment state; keep assignment o
 explicit application use cases; retain stable UUID references; and do not introduce public or
 bearer-link reward reporting. These are design constraints, not authorization to add reward
 runtime behavior early.
+
+## Legacy compatibility assessment — foundation stages
+
+The legacy `ShiftPlanIT`, `PositionSlotIT`, role-service, and planner-slot tests were reviewed
+while implementing the first three stages. The following behaviours are retained in the new domain
+model: a newly created plan has a default staffing mode; planner membership also grants volunteer
+membership; roles are plan-scoped; self-assignable roles may be self-managed; volunteer and planner
+invites can grant roles; a planner invite upgrades an existing volunteer; slots are scoped to one
+shift and may require a role; and shift/slot names retain their local uniqueness rules.
+
+The following are intentional, documented corrections rather than accidental incompatibilities:
+
+- Invite codes are random bearer capabilities retained as the redeemable value and returned only
+  in planner-authorized invite management so a planner can redisplay the invite link. This is a
+  deliberate reduction in database-compromise resistance, not an accidental leak.
+- All shift-plan, role, invite, shift, and slot service operations enforce plan membership or
+  planner scope, with a deliberate platform-administrator override. This closes legacy paths that
+  relied on scattered or absent authorization checks.
+- A staffing shift must be within its event and an optional direct location must be from that event.
+  One legacy integration fixture persisted a January shift under a February event directly through
+  the repository; it did not establish a service-level contract and is rejected by the new required
+  validation.
+- The new shift may be standalone at a catalogue location. If it is linked to a catalogue session,
+  that session's current location is authoritative; the schema and command validation prohibit a
+  conflicting direct location.
+- Legacy role reward rates, plan default rates, shift bonuses, and slot overrides are intentionally
+  not represented. ADR-0001 requires a later versioned reward policy and immutable award terms, so
+  preserving those mutable fields here would make the future implementation less safe.
+
+Legacy assignment, request, auction, trade, attendance, notification-event, and reward assertions
+are not implemented in these stages. Their target behaviour remains planned in the requirements
+above; this foundation avoids an entity graph or cascade design that would constrain those later
+workflows.
 
 ## Open questions
 
