@@ -22,6 +22,7 @@ public class ShiftPlanService {
     private final VolunteerProfileService volunteerProfileService;
     private final EventCatalogQuery eventCatalogQuery;
     private final PlanAccess planAccess;
+    private final PlanModeTransitionService planModeTransitionService;
     private final Clock clock;
 
     @Transactional
@@ -79,16 +80,8 @@ public class ShiftPlanService {
         return toDetails(shiftPlanRepository.save(plan));
     }
 
-    /** Central transition point; request/trade cleanup is added with the assignment slice. */
-    @Transactional
     public ShiftPlanDetails changeStaffingMode(UUID planId, StaffingMode mode) {
-        planAccess.requirePlanner(planId);
-        if (mode == null) {
-            throw new at.control.shiftcontrol.shift.error.ShiftValidationException("Staffing mode is required");
-        }
-        ShiftPlanEntity plan = requirePlan(planId);
-        plan.setDefaultStaffingMode(mode);
-        return toDetails(shiftPlanRepository.save(plan));
+        return planModeTransitionService.change(planId, mode);
     }
 
     ShiftPlanEntity requirePlan(UUID planId) {

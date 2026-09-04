@@ -43,12 +43,12 @@ not target requirements.
 | `SH-PLAN-002` | Implemented | A volunteer may read only plans they belong to. A planner may manage only plans they plan; a platform capability may grant a deliberate override. Every PII-bearing read and mutation applies this scope. | [Plan access tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanAccessServiceTest.java) |
 | `SH-PLAN-003` | Implemented | A plan has a default staffing mode of `SELF_SIGNUP`, `SUPERVISED`, or `LOCKED`; new plans default to `SELF_SIGNUP`. The effective mode controls volunteer assignment changes and is not an authorization substitute for plan scope. | [Shift plan tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftPlanServiceTest.java) |
 | `SH-POLICY-001` | Implemented | A staffing shift has an `INHERIT` mode override by default, or one explicit staffing mode. Its effective mode is its explicit override when present, otherwise the plan's current default mode. An explicit override deliberately takes precedence over the plan mode for that shift. | [Staffing shift tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) |
-| `SH-POLICY-002` | Planned | The volunteer actions permitted by each effective mode follow the staffing-mode matrix below. A volunteer may perform an action only when they have plan scope, are not individually restricted from volunteer changes, and satisfy the action's eligibility rules. | Product decision, legacy policy review |
-| `SH-POLICY-003` | Planned | A scoped planner or platform administrator may directly assign, unassign, and accept or decline existing requests in every staffing mode, including `LOCKED`. Such intervention remains subject to authorization and validation; an override of an ordinary volunteer constraint requires an explicit reason and audit record. | Product decision, legacy planner behavior |
-| `SH-POLICY-004` | Planned | A staffing-mode change is one atomic, auditable command. It records the actor, old and new modes, every automatically resolved workflow item, and the effective application transition policy. Required affected-volunteer notifications are requested durably after commit. | Product decision, audit/outbox baseline |
+| `SH-POLICY-002` | WIP | The implemented assignment commands enforce the effective-mode matrix for direct join/leave and supervised requests, plus membership and individual volunteer-change restrictions. Auction and trade rows remain deferred. | [Assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-POLICY-003` | Implemented | A scoped planner or platform administrator may directly assign, unassign, and accept or decline existing requests in every staffing mode, including `LOCKED`. Such intervention remains subject to authorization and validation; an override of an ordinary volunteer constraint requires an explicit reason and is retained in immutable assignment-transition history and the command result. | [Assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-POLICY-004` | WIP | A staffing-mode change is an atomic, auditable command: it locks the plan, records actor, old/new modes, default policy, and automatic request resolutions, and validates all automatic join acceptances before writing any. Durable after-commit communication requests remain to be connected when the communications outbox contract exists. | [Plan-mode transition tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanModeTransitionServiceTest.java) |
 | `SH-POLICY-005` | Planned | Entering plan-level `LOCKED` cancels every open trade and closes every open auction in the plan. Closing an auction restores the offering volunteer's assignment to accepted; accepted assignments and pending join/leave requests otherwise remain unchanged for planner review. This cleanup applies even where an individual shift has an explicit mode override. | Product decision |
-| `SH-POLICY-006` | Planned | Entering plan-level `SELF_SIGNUP` resolves current supervised workflows using application configuration evaluated for that command: join requests default to `ACCEPT_ALL_IF_VALID` (alternative `DECLINE_ALL`), leave requests default to `ACCEPT_ALL` (alternative `DECLINE_ALL`), and open auctions default to `UNASSIGN_OFFERER` (alternative `KEEP_OPEN`). Existing open trades remain open because trade is permitted in both modes. | Product decision |
-| `SH-POLICY-007` | Planned | `ACCEPT_ALL_IF_VALID` accepts every pending join request only when all remain valid and capacity exists for all of them; otherwise the mode change fails without partial resolution. `KEEP_OPEN` retains an auction as an occupied assignment that can be claimed or canceled in `SELF_SIGNUP`; ordinary self-sign-up cannot bypass it. A later configuration change never changes a completed transition retroactively. | Product decision |
+| `SH-POLICY-006` | WIP | Entering plan-level `SELF_SIGNUP` currently applies the recorded bootstrap policy `ACCEPT_ALL_IF_VALID_AND_ACCEPT_ALL_LEAVES`: pending join requests are accepted only after batch validation and pending leave requests are accepted. Per-command application configuration, auctions, and trades remain deferred. | [Plan-mode transition tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanModeTransitionServiceTest.java) |
+| `SH-POLICY-007` | WIP | The implemented `ACCEPT_ALL_IF_VALID` portion accepts every pending join request only when all remain valid, no candidate overlaps another accepted candidate, and capacity supports the complete batch; otherwise the transaction fails without partial resolution. `KEEP_OPEN` awaits the deferred auction model. | [Plan-mode transition tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanModeTransitionServiceTest.java) |
 | `SH-PLAN-004` | Implemented | A planner or authorized administrator can create, revoke, list, and delete plan invites within their scope. Invite types distinguish volunteer and planner membership. | [Plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java) |
 | `SH-PLAN-005` | Implemented | An invite may have expiry, a positive use limit, and plan-scoped roles to grant. Redeeming it is idempotent for an existing member, increments usage only for a new membership, and may extend eligible roles. | [Plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java) |
 | `SH-PLAN-006` | WIP | Invite codes and calendar-share links are bearer capabilities: they are generated with sufficient entropy and never included in logs, audit payloads, events, or URL paths used for administrative deletion. By approved product decision, each invite's raw code is the stored redemption key and is returned only to an authorized plan planner so they can redisplay its invite link after creation; this deliberately increases the impact of a database compromise. The invite-code portion is implemented and covered by [plan invite tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/PlanInviteServiceTest.java); calendar links remain with `SH-VIEW-004`. | Architecture P0, product decision 2026-09-01 |
@@ -57,9 +57,10 @@ not target requirements.
 
 ## Staffing-mode matrix
 
-`SH-POLICY-002` will be implemented using this matrix when the assignment workflow is added. An
-explicit shift override already supplies the effective mode; the action rules and plan-level
-transition cleanup remain deferred until that workflow exists.
+Direct join/leave and supervised join/leave requests now use this matrix and an explicit shift
+override remains authoritative. Auction and trade rows remain deferred. Plan-level transition
+cleanup currently resolves assignment requests only; it will gain auction/trade cleanup with those
+workflow models.
 
 | Volunteer action | `SELF_SIGNUP` | `SUPERVISED` | `LOCKED` |
 | --- | --- | --- | --- |
@@ -80,17 +81,17 @@ transition cleanup remain deferred until that workflow exists.
 | `SH-SHIFT-003` | Implemented | An authorized planner can set, change, or clear a staffing shift's mode override. Its displayed effective mode is derived from that override and the plan mode. A shift override controls volunteer actions for that shift; it never removes planner/admin authority defined in `SH-POLICY-003`. | [Staffing shift tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/StaffingShiftServiceTest.java) |
 | `SH-ROLE-001` | Implemented | A plan role has a non-blank name unique within the plan, a description, and a self-assignability policy. Optional reward-rate data is introduced only by the deferred versioned `shift.reward` feature. Only plan-scoped planners can manage roles and assign or remove them from plan members. | [Shift role tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/plan/ShiftRoleServiceTest.java) |
 | `SH-SLOT-001` | Implemented | A position slot belongs to one staffing shift and has a name unique within that shift, a desired volunteer count, optional required role, and an explicit auto-assignment exclusion flag. Its optional reward override is introduced only by the deferred versioned `shift.reward` feature. | [Position slot and persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/PositionSlotServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
-| `SH-SLOT-002` | Planned | The desired volunteer count cannot be reduced below active accepted assignments. Deleting or materially changing a slot follows an explicit assignment-impact policy. | Legacy position-slot validation |
+| `SH-SLOT-002` | WIP | The desired volunteer count cannot be reduced below occupied accepted or pending-leave assignments. Deleting or materially changing a slot still needs its explicit assignment-impact policy. | [Position slot tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/positionslot/PositionSlotServiceTest.java) |
 
 ## Assignment, availability, trade, and attendance
 
 | ID | Status | Requirement | Legacy/responsibility source |
 | --- | --- | --- | --- |
-| `SH-ASSIGN-001` | Planned | Every assignment decision is evaluated atomically against plan membership, individual volunteer restrictions, required role, effective shift mode, existing assignment state, slot capacity, overlapping accepted assignments, and applicable unavailability. The result exposes machine-readable reasons when volunteer sign-up is unavailable. | `V5`, `SP6`, legacy eligibility states |
-| `SH-ASSIGN-002` | Planned | In effective `SELF_SIGNUP`, a volunteer may directly join or leave an eligible slot. Joining creates an accepted assignment only after all eligibility checks succeed and cannot overfill a slot under concurrent requests. | `V5`, legacy join flow |
-| `SH-ASSIGN-003` | Planned | In effective `SUPERVISED`, a volunteer may submit and withdraw a join or leave request. A join request does not reserve capacity; a leave request retains its accepted assignment. Only a scoped planner/admin accepting the request changes the number of filled positions. Each transition is recorded and notifies the relevant people through communications. | `SP6`, `V7`, product decision |
-| `SH-ASSIGN-004` | Planned | A scoped planner can directly assign or unassign eligible plan members. Any policy or constraint override must be explicit, authorized, recorded with a reason, and visible in the result. | `SP6`, legacy planner assignment |
-| `SH-AVAIL-001` | Planned | A volunteer can declare event-scoped unavailability with a valid time range. It cannot overlap another incompatible constraint or an accepted assignment unless an explicit authorized override is recorded. | `V7`, legacy `TimeConstraintServiceImpl` |
+| `SH-ASSIGN-001` | Implemented | Every direct-assignment decision is re-evaluated while holding the plan, volunteer, and slot locks against plan membership, individual restrictions, required role, effective mode, existing state, capacity, accepted/pending-leave overlaps, and ordinary unavailability. `AssignmentEligibility` exposes stable enum reasons; an ineligible command carries that result rather than requiring clients to parse prose. | [Eligibility and assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/AssignmentEligibilityServiceTest.java) and [assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-ASSIGN-002` | Implemented | In effective `SELF_SIGNUP`, a volunteer may directly join or leave an eligible slot. Joining creates an accepted assignment only after the locked eligibility check succeeds; the locked slot prevents concurrent overfill. | [Assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-ASSIGN-003` | WIP | In effective `SUPERVISED`, a volunteer may submit and withdraw a join or leave request. A join request does not reserve capacity; a leave request retains occupancy. Only planner/admin acceptance changes occupancy and every state transition is immutable history. Durable communications notifications await the communications outbox contract. | [Eligibility, assignment, and mode-transition tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/AssignmentEligibilityServiceTest.java) and [assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-ASSIGN-004` | Implemented | A scoped planner can directly assign or unassign eligible plan members in every staffing mode. The only supported ordinary-constraint overrides are membership restriction, required role, conflicting assignment, and availability; each requires an explicit reason, is persisted, and is returned with the decision. Capacity, missing membership, and duplicate assignment are never overridden. | [Assignment workflow tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/assignment/StaffingAssignmentServiceTest.java) |
+| `SH-AVAIL-001` | Implemented | A volunteer can declare ordinary event-scoped unavailability with a valid time range. It cannot overlap another ordinary declaration or an occupied assignment unless a platform-authorized override records its reason. The volunteer-profile lock serializes this with assignment changes. | [Availability tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/availability/AvailabilityServiceTest.java) and [shift persistence tests](../../apps/backend/src/test/java/at/control/shiftcontrol/shift/ShiftPersistenceTest.java) |
 | `SH-AVAIL-002` | Planned | Emergency unavailability is represented separately from ordinary unavailability and uses event-timezone whole-day boundaries. Its downstream notifications or reassignment workflow are durable work, not an in-transaction network call. | `SP16`, legacy emergency constraint |
 | `SH-TRADE-001` | Planned | A trade is contained within one event and one shift plan and may be initiated only between two accepted assignments. Both volunteers must remain eligible, authorized, and in an effective mode other than `LOCKED`; pending requests and auction offers cannot be traded. | `V8`, `V11`, legacy trade service, product decision |
 | `SH-TRADE-002` | Planned | A trade recipient explicitly accepts or declines an open trade. An inverse trade request never auto-executes a trade. Acceptance atomically revalidates both volunteers and swaps the assignments; it cancels related open trades deterministically. | `V8`, `V11`, legacy trade service, product decision |
@@ -128,12 +129,15 @@ runtime behavior early.
 
 ## Legacy compatibility assessment — foundation stages
 
-The legacy `ShiftPlanIT`, `PositionSlotIT`, role-service, and planner-slot tests were reviewed
-while implementing the first three stages. The following behaviours are retained in the new domain
-model: a newly created plan has a default staffing mode; planner membership also grants volunteer
-membership; roles are plan-scoped; self-assignable roles may be self-managed; volunteer and planner
-invites can grant roles; a planner invite upgrades an existing volunteer; slots are scoped to one
-shift and may require a role; and shift/slot names retain their local uniqueness rules.
+The legacy `ShiftPlanIT`, `PositionSlotIT`, role-service, planner-slot, eligibility, and
+time-constraint tests were reviewed while implementing the first three stages. The following
+behaviours are retained in the new domain model: a newly created plan has a default staffing mode;
+planner membership also grants volunteer membership; roles are plan-scoped; self-assignable roles
+may be self-managed; volunteer and planner invites can grant roles; a planner invite upgrades an
+existing volunteer; slots are scoped to one shift and may require a role; and shift/slot names
+retain their local uniqueness rules. Direct self-sign-up stays limited to `SELF_SIGNUP`; supervised
+join requests do not consume capacity; leave requests retain capacity; accepted assignments and
+ordinary unavailability conflict by time range.
 
 The following are intentional, documented corrections rather than accidental incompatibilities:
 
@@ -153,11 +157,18 @@ The following are intentional, documented corrections rather than accidental inc
 - Legacy role reward rates, plan default rates, shift bonuses, and slot overrides are intentionally
   not represented. ADR-0001 requires a later versioned reward policy and immutable award terms, so
   preserving those mutable fields here would make the future implementation less safe.
+- Legacy assignment state was spread across request, assignment, and auction representations. The
+  replacement keeps one assignment identity per `(position slot, volunteer)` and writes immutable
+  transition records. This preserves request/accept/decline history while avoiding capacity being
+  double-counted by parallel records.
+- The old time-constraint service treated ordinary availability as event-scoped and rejected
+  overlap with assignments. The replacement retains those rules and deliberately keeps emergency,
+  event-timezone whole-day constraints separate for `SH-AVAIL-002`.
 
-Legacy assignment, request, auction, trade, attendance, notification-event, and reward assertions
-are not implemented in these stages. Their target behaviour remains planned in the requirements
-above; this foundation avoids an entity graph or cascade design that would constrain those later
-workflows.
+Auctions, trades, emergency availability, attendance, durable communication requests, and rewards
+remain deferred. Their target behaviour remains planned in the requirements above; the assignment
+identity, transition history, and plan-mode audit record avoid an entity graph or cascade design
+that would constrain those later workflows.
 
 ## Open questions
 

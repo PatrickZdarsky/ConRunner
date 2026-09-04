@@ -42,6 +42,9 @@ class ShiftPlanServiceTest {
     private PlanAccess planAccess;
 
     @Mock
+    private PlanModeTransitionService planModeTransitionService;
+
+    @Mock
     private Clock clock;
 
     @InjectMocks
@@ -87,13 +90,14 @@ class ShiftPlanServiceTest {
     void changingTheDefaultModeIsScopedToAPlanner() {
         UUID planId = UUID.randomUUID();
         ShiftPlanEntity plan = plan(planId);
-        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
-        when(planRepository.save(plan)).thenReturn(plan);
+        ShiftPlanDetails changed = new ShiftPlanDetails(planId, plan.getEventId(), plan.getName(), null, null,
+            StaffingMode.LOCKED, plan.getCreatedAt(), null);
+        when(planModeTransitionService.change(planId, StaffingMode.LOCKED)).thenReturn(changed);
 
         ShiftPlanDetails result = plans.changeStaffingMode(planId, StaffingMode.LOCKED);
 
         assertEquals(StaffingMode.LOCKED, result.defaultStaffingMode());
-        verify(planAccess).requirePlanner(planId);
+        verify(planModeTransitionService).change(planId, StaffingMode.LOCKED);
     }
 
     private static ShiftPlanEntity plan(UUID planId) {

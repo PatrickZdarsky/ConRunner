@@ -3,6 +3,7 @@ package at.control.shiftcontrol.shift.positionslot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import at.control.shiftcontrol.shift.assignment.StaffingAssignmentRepository;
+import at.control.shiftcontrol.shift.error.ShiftConflictException;
 import at.control.shiftcontrol.shift.error.ShiftValidationException;
 import at.control.shiftcontrol.shift.plan.PlanAccess;
 import at.control.shiftcontrol.shift.plan.ShiftRoleEntity;
@@ -31,6 +34,9 @@ class PositionSlotServiceTest {
 
     @Mock
     private ShiftRoleRepository roleRepository;
+
+    @Mock
+    private StaffingAssignmentRepository assignmentRepository;
 
     @Mock
     private PlanAccess planAccess;
@@ -78,6 +84,24 @@ class PositionSlotServiceTest {
         assertThrows(ShiftValidationException.class,
             () -> slots.create(staffingShiftId, new PositionSlotData("Door", null, 1, roleId, false)));
         assertThrows(ShiftValidationException.class, () -> new PositionSlotData("Door", null, 0, null, false));
+    }
+
+    @Test
+    void cannotReduceCapacityBelowOccupiedAssignments() {
+        UUID planId = UUID.randomUUID();
+        UUID staffingShiftId = UUID.randomUUID();
+        UUID slotId = UUID.randomUUID();
+        PositionSlotEntity slot = new PositionSlotEntity();
+        slot.setId(slotId);
+        slot.setStaffingShiftId(staffingShiftId);
+        slot.setName("Door");
+        slot.setDesiredVolunteerCount(2);
+        when(positionSlotRepository.findByIdForUpdate(slotId)).thenReturn(Optional.of(slot));
+        when(staffingShiftService.requireShift(staffingShiftId)).thenReturn(shift(staffingShiftId, planId));
+        when(assignmentRepository.countByPositionSlotIdAndStateIn(eq(slotId), any())).thenReturn(2L);
+
+        assertThrows(ShiftConflictException.class,
+            () -> slots.update(slotId, new PositionSlotData("Door", null, 1, null, false)));
     }
 
     private static StaffingShiftEntity shift(UUID shiftId, UUID planId) {

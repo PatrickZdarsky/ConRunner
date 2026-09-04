@@ -1,0 +1,8 @@
+package at.control.shiftcontrol.shift.plan;
+
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PlanModeTransitionRepository extends JpaRepository<PlanModeTransitionEntity, UUID> {
+}

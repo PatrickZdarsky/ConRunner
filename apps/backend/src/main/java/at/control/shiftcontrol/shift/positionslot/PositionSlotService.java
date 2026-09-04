@@ -4,6 +4,8 @@ import java.time.Clock;
 import java.util.Collection;
 import java.util.UUID;
 
+import at.control.shiftcontrol.shift.assignment.AssignmentEligibilityService;
+import at.control.shiftcontrol.shift.assignment.StaffingAssignmentRepository;
 import at.control.shiftcontrol.shift.error.ShiftConflictException;
 import at.control.shiftcontrol.shift.error.ShiftNotFoundException;
 import at.control.shiftcontrol.shift.error.ShiftValidationException;
@@ -20,6 +22,7 @@ public class PositionSlotService {
     private final PositionSlotRepository positionSlotRepository;
     private final StaffingShiftService staffingShiftService;
     private final ShiftRoleRepository roleRepository;
+    private final StaffingAssignmentRepository assignmentRepository;
     private final PlanAccess planAccess;
     private final Clock clock;
 
@@ -52,10 +55,15 @@ public class PositionSlotService {
 
     @Transactional
     public PositionSlotDetails update(UUID positionSlotId, PositionSlotData data) {
-        PositionSlotEntity slot = requireSlot(positionSlotId);
+        PositionSlotEntity slot = positionSlotRepository.findByIdForUpdate(positionSlotId)
+            .orElseThrow(() -> new ShiftNotFoundException("Position slot not found: " + positionSlotId));
         StaffingShiftEntity shift = staffingShiftService.requireShift(slot.getStaffingShiftId());
         planAccess.requirePlanner(shift.getPlanId());
         assertUniqueName(slot.getStaffingShiftId(), data.name(), slot);
+        long occupied = assignmentRepository.countByPositionSlotIdAndStateIn(slot.getId(), AssignmentEligibilityService.OCCUPYING_STATES);
+        if (data.desiredVolunteerCount() < occupied) {
+            throw new ShiftConflictException("Position slot capacity cannot be reduced below occupied assignments");
+        }
         apply(data, slot, shift);
         return toDetails(positionSlotRepository.save(slot));
     }
