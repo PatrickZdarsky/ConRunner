@@ -668,3 +668,83 @@ databaseChangeLog:
                   name: plan_id
               - column:
                   name: occurred_at
+  - changeSet:
+      id: shift-004-restore-legacy-live-assignment-shape
+      author: shiftcontrol
+      changes:
+        - renameTable:
+            oldTableName: shift_staffing_shift
+            newTableName: shift_shift
+        - renameColumn:
+            tableName: shift_position_slot
+            oldColumnName: staffing_shift_id
+            newColumnName: shift_id
+            columnDataType: UUID
+        - sql:
+            sql: ALTER INDEX uk_shift_position_slot_name_ci RENAME TO uk_shift_position_slot_shift_name_ci
+            splitStatements: false
+        - renameTable:
+            oldTableName: shift_availability
+            newTableName: shift_time_constraint
+        - addColumn:
+            tableName: shift_time_constraint
+            columns:
+              - column:
+                  name: type
+                  type: VARCHAR(32)
+        - update:
+            tableName: shift_time_constraint
+            columns:
+              - column:
+                  name: type
+                  value: UNAVAILABLE
+        - addNotNullConstraint:
+            tableName: shift_time_constraint
+            columnName: type
+            columnDataType: VARCHAR(32)
+        - dropColumn:
+            tableName: shift_time_constraint
+            columnName: created_by_user_id
+        - dropColumn:
+            tableName: shift_time_constraint
+            columnName: authorized_override_reason
+        - delete:
+            tableName: shift_assignment
+            where: state IN ('DECLINED', 'WITHDRAWN', 'UNASSIGNED')
+        - update:
+            tableName: shift_assignment
+            columns:
+              - column:
+                  name: state
+                  value: REQUEST_FOR_ASSIGNMENT
+            where: state = 'JOIN_REQUESTED'
+        - update:
+            tableName: shift_assignment
+            columns:
+              - column:
+                  name: state
+                  value: AUCTION_REQUEST_FOR_UNASSIGN
+            where: state = 'LEAVE_REQUESTED'
+        - dropIndex:
+            tableName: shift_assignment
+            indexName: idx_shift_assignment_user_state
+        - renameColumn:
+            tableName: shift_assignment
+            oldColumnName: state
+            newColumnName: status
+            columnDataType: VARCHAR(32)
+        - dropColumn:
+            tableName: shift_assignment
+            columnName: authorized_override_reason
+        - createIndex:
+            tableName: shift_assignment
+            indexName: idx_shift_assignment_user_status
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: status
+        - dropTable:
+            tableName: shift_assignment_transition
+        - dropTable:
+            tableName: shift_plan_mode_transition

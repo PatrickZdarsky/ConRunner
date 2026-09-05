@@ -4,4 +4,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/eventcatalog/db.changelog-eventcatalog.yaml
   - include:
+      file: db/changelog/audit/db.changelog-audit.yaml
+  - include:
       file: db/changelog/shift/db.changelog-shift.yaml

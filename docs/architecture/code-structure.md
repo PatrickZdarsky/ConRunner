@@ -10,31 +10,41 @@ by feature so the files that change together are close together.
 ## Start with a module, then a feature
 
 Every direct child of `at.control.shiftcontrol` is a Spring Modulith application module. It owns its
-tables, Liquibase changes, state transitions, and HTTP endpoints. A module root normally contains
-only `package-info.java`; it is not a dumping ground for implementation classes.
+tables, Liquibase changes, state transitions, and HTTP endpoints. It is not a dumping ground for
+unrelated implementation classes.
 
 The existing empty `application`, `domain`, and `infrastructure` directories are transitional
 scaffolding from the initial project setup. Do not add new migrated code to them. Remove an empty
-scaffold package when its module receives real feature packages.
+scaffold package when its module receives real feature packages. Delete comment-only
+`package-info.java` files; retain one only where it supplies real module metadata, such as a
+Spring Modulith named interface.
 
 The `shift` module is the first substantial migration target. It owns volunteer profiles, plan
-membership/access, plans, shifts, positions/slots, assignments, trades, and rewards. A volunteer
-references identity's stable UUID user ID; it is not an identity entity.
+membership/access, plans, shifts, positions/slots, assignments, trades, time constraints, and
+rewards. A volunteer references identity's stable UUID user ID; it is not an identity entity.
+
+The shift migration is compatibility-first under
+[ADR-0002](../adr/0002-compatibility-first-shift-migration.md). Keep its established workflows
+cohesive: a feature package is an organizational aid, not a submodule or a reason to redesign a
+legacy workflow before its behavior and tests have been ported.
 
 Use feature packages within `shift` as code is migrated:
 
 ```text
 shift/
-├── package-info.java                  # Spring Modulith module metadata
-├── api/                               # created only when another module needs a synchronous API
-├── events/                            # created only when the module publishes integration events
+├── ShiftService.java
+├── TimeConstraintService.java
 ├── plan/
-├── volunteer/
 ├── positionslot/
-├── assignment/
-├── trade/
-└── reward/
+└── assignment/
 ```
+
+Do not create packages in advance and do not create `trade`, `reward`, or `availability`
+mini-modules merely to anticipate future work. `assignment` is an organizational package for the
+established live-assignment workflow, not a submodule. The established `ShiftPlanService`,
+`ShiftService`, `PositionSlotService`, `AssignmentService`, `AssignmentEligibilityService`, and
+`TimeConstraintService` may work across directly related shift persistence types while remaining
+inside this one application module.
 
 For example, the files for migrating position-slot preferences belong together:
 
@@ -52,10 +62,11 @@ shift/positionslot/
     └── PositionSlotSpecifications.java
 ```
 
-Do not create every folder in advance. Create a package when the first feature needs it. If a
-feature becomes crowded, split its HTTP types into `positionslot.web` and its persistence types into
-`positionslot.persistence`; do not introduce a global `dto`, `repo`, or `mapper` package for the
-entire application.
+Do not create every folder in advance. Create a package only when a concrete, cohesive workflow
+needs it. A crowded feature is not by itself a reason to introduce nested technical-layer packages
+such as `positionslot.web` or `positionslot.persistence`; first keep the workflow together and
+extract only a genuinely independent concern. Do not introduce a global `dto`, `repo`, or `mapper`
+package for the entire application.
 
 The same convention applies elsewhere: `eventcatalog.event`, `eventcatalog.venue`,
 `eventcatalog.session`, `schedule.planning`, `schedule.publication`, and `schedule.constraint` are
@@ -192,6 +203,9 @@ through the project's Liquibase and operational configuration.
   application master changelog.
 - Migrate a legacy entity, its repositories/DAOs, services, endpoints, DTOs, mappers, and tests as
   one feature slice. Do not first copy every entity into a new shared model.
+- For `shift`, legacy behavior and tests are the default specification. Record every intended
+  behavioral change before coding it, with its requirement/ADR and replacement test. Do not replace
+  a live workflow record with a new history model solely to prepare for a future feature.
 - Prefer a new UUID-backed schema designed for its owner module over preserving an old entity shape
   solely because it was shared by the legacy services.
 - Keep compatibility adapters only at an API edge and delete them once callers have migrated.
@@ -200,11 +214,11 @@ through the project's Liquibase and operational configuration.
 
 ### Deferred reward guardrails
 
-`shift.reward` is a deferred feature, but its future persistence and assignment integration are
-constrained by [ADR-0001](../adr/0001-reward-wallet-and-award-invariants.md). Do not add mutable
-point balances to an existing aggregate as a shortcut. When reward work starts, its append-only
-ledger is the only balance authority, and ledger mutations occur in the same transaction as the
-explicit assignment transition that caused them.
+Reward work is deferred inside the cohesive `shift` module and is constrained by
+[ADR-0001](../adr/0001-reward-wallet-and-award-invariants.md). Do not add mutable point balances to
+an existing aggregate as a shortcut. When reward work starts, its append-only ledger is the only
+balance authority, and ledger mutations occur in the same transaction as the explicit assignment
+operation that caused them. Do not extract a reward mini-module as a prerequisite.
 
 Do not let callers change an accepted assignment's volunteer through a repository or entity setter.
 The assignment feature owns explicit accept, unassign, auction-claim, and trade operations so a

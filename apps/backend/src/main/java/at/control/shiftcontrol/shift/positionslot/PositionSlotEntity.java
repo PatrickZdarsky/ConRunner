@@ -24,8 +24,8 @@ public class PositionSlotEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "staffing_shift_id", nullable = false, updatable = false)
-    private UUID staffingShiftId;
+    @Column(name = "shift_id", nullable = false, updatable = false)
+    private UUID shiftId;
 
     @Column(nullable = false, length = 255)
     private String name;

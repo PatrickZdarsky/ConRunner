@@ -21,3 +21,7 @@ At a high level:
 Record material choices in an ADR before implementation. Module behavior and compatibility choices
 belong in [requirements specifications](../requirements/). The current migration focus is identity,
 event catalogue, and shift; dispatch package design is intentionally deferred.
+
+The shift migration follows [ADR-0002](../adr/0002-compatibility-first-shift-migration.md): legacy
+workflow behavior and tests are the default baseline, while UUID ownership, `PlanAccess`, atomic
+mutation handling, and other approved improvements remain in place.

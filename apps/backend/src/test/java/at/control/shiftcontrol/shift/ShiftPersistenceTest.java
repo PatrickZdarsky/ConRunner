@@ -9,20 +9,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import at.control.shiftcontrol.TestcontainersConfiguration;
-import at.control.shiftcontrol.shift.assignment.AssignmentState;
-import at.control.shiftcontrol.shift.assignment.AssignmentTransitionEntity;
-import at.control.shiftcontrol.shift.assignment.AssignmentTransitionRepository;
-import at.control.shiftcontrol.shift.assignment.StaffingAssignmentEntity;
-import at.control.shiftcontrol.shift.assignment.StaffingAssignmentRepository;
-import at.control.shiftcontrol.shift.availability.AvailabilityEntity;
-import at.control.shiftcontrol.shift.availability.AvailabilityRepository;
+import at.control.shiftcontrol.shift.assignment.AssignmentEntity;
+import at.control.shiftcontrol.shift.assignment.AssignmentRepository;
+import at.control.shiftcontrol.shift.assignment.AssignmentStatus;
 import at.control.shiftcontrol.shift.plan.PlanInviteEntity;
 import at.control.shiftcontrol.shift.plan.PlanInviteRepository;
 import at.control.shiftcontrol.shift.plan.PlanInviteType;
 import at.control.shiftcontrol.shift.plan.PlanMembershipEntity;
 import at.control.shiftcontrol.shift.plan.PlanMembershipRepository;
-import at.control.shiftcontrol.shift.plan.PlanModeTransitionEntity;
-import at.control.shiftcontrol.shift.plan.PlanModeTransitionRepository;
 import at.control.shiftcontrol.shift.plan.ShiftPlanEntity;
 import at.control.shiftcontrol.shift.plan.ShiftPlanRepository;
 import at.control.shiftcontrol.shift.plan.ShiftRoleEntity;
@@ -30,8 +24,6 @@ import at.control.shiftcontrol.shift.plan.ShiftRoleRepository;
 import at.control.shiftcontrol.shift.plan.StaffingMode;
 import at.control.shiftcontrol.shift.positionslot.PositionSlotEntity;
 import at.control.shiftcontrol.shift.positionslot.PositionSlotRepository;
-import at.control.shiftcontrol.shift.positionslot.StaffingShiftEntity;
-import at.control.shiftcontrol.shift.positionslot.StaffingShiftRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -42,35 +34,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 class ShiftPersistenceTest {
     private static final Instant NOW = Instant.parse("2026-05-01T12:00:00Z");
 
-    @org.springframework.beans.factory.annotation.Autowired
-    private ShiftPlanRepository planRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private PlanMembershipRepository membershipRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private ShiftRoleRepository roleRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private PlanInviteRepository inviteRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private StaffingShiftRepository staffingShiftRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private PositionSlotRepository positionSlotRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private AvailabilityRepository availabilityRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private StaffingAssignmentRepository assignmentRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private AssignmentTransitionRepository assignmentTransitionRepository;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    private PlanModeTransitionRepository modeTransitionRepository;
+    @org.springframework.beans.factory.annotation.Autowired private ShiftPlanRepository planRepository;
+    @org.springframework.beans.factory.annotation.Autowired private PlanMembershipRepository membershipRepository;
+    @org.springframework.beans.factory.annotation.Autowired private ShiftRoleRepository roleRepository;
+    @org.springframework.beans.factory.annotation.Autowired private PlanInviteRepository inviteRepository;
+    @org.springframework.beans.factory.annotation.Autowired private ShiftRepository shiftRepository;
+    @org.springframework.beans.factory.annotation.Autowired private PositionSlotRepository positionSlotRepository;
+    @org.springframework.beans.factory.annotation.Autowired private TimeConstraintRepository timeConstraintRepository;
+    @org.springframework.beans.factory.annotation.Autowired private AssignmentRepository assignmentRepository;
 
     @Test
     void persistsThePlanMembershipRoleInviteShiftAndSlotAggregate() {
@@ -84,7 +55,6 @@ class ShiftPersistenceTest {
         role = roleRepository.saveAndFlush(role);
         membership.getRoleIds().add(role.getId());
         membershipRepository.saveAndFlush(membership);
-
         PlanInviteEntity invite = new PlanInviteEntity();
         invite.setPlanId(plan.getId());
         invite.setCode("invite-code");
@@ -94,18 +64,9 @@ class ShiftPersistenceTest {
         invite.setCreatedAt(NOW);
         invite.setRoleIds(Set.of(role.getId()));
         invite = inviteRepository.saveAndFlush(invite);
-
-        StaffingShiftEntity shift = new StaffingShiftEntity();
-        shift.setPlanId(plan.getId());
-        shift.setName("Information desk");
-        shift.setStartTime(NOW);
-        shift.setEndTime(NOW.plusSeconds(3600));
-        shift.setLocationId(UUID.randomUUID());
-        shift.setCreatedAt(NOW);
-        shift = staffingShiftRepository.saveAndFlush(shift);
-
+        ShiftEntity shift = saveShift(plan);
         PositionSlotEntity slot = new PositionSlotEntity();
-        slot.setStaffingShiftId(shift.getId());
+        slot.setShiftId(shift.getId());
         slot.setName("Door");
         slot.setDesiredVolunteerCount(2);
         slot.setRequiredRoleId(role.getId());
@@ -119,9 +80,8 @@ class ShiftPersistenceTest {
 
     @Test
     void databasePreventsAmbiguousLocationSources() {
-        ShiftPlanEntity plan = savePlan("Operations");
-        StaffingShiftEntity invalid = new StaffingShiftEntity();
-        invalid.setPlanId(plan.getId());
+        ShiftEntity invalid = new ShiftEntity();
+        invalid.setPlanId(savePlan("Operations").getId());
         invalid.setName("Information desk");
         invalid.setStartTime(NOW);
         invalid.setEndTime(NOW.plusSeconds(3600));
@@ -129,67 +89,40 @@ class ShiftPersistenceTest {
         invalid.setSessionId(UUID.randomUUID());
         invalid.setCreatedAt(NOW);
 
-        assertThrows(DataIntegrityViolationException.class, () -> staffingShiftRepository.saveAndFlush(invalid));
+        assertThrows(DataIntegrityViolationException.class, () -> shiftRepository.saveAndFlush(invalid));
     }
 
     @Test
-    void persistsAvailabilityAssignmentAndTheirImmutableTransitionHistory() {
+    void persistsLiveAssignmentsAndTypedTimeConstraintsWithoutTransitionTables() {
         ShiftPlanEntity plan = savePlan("Operations");
-        StaffingShiftEntity shift = new StaffingShiftEntity();
-        shift.setPlanId(plan.getId());
-        shift.setName("Information desk");
-        shift.setStartTime(NOW);
-        shift.setEndTime(NOW.plusSeconds(3600));
-        shift.setCreatedAt(NOW);
-        shift = staffingShiftRepository.saveAndFlush(shift);
+        ShiftEntity shift = saveShift(plan);
         PositionSlotEntity slot = new PositionSlotEntity();
-        slot.setStaffingShiftId(shift.getId());
+        slot.setShiftId(shift.getId());
         slot.setName("Door");
         slot.setDesiredVolunteerCount(1);
         slot.setCreatedAt(NOW);
         slot = positionSlotRepository.saveAndFlush(slot);
         UUID userId = UUID.randomUUID();
-
-        AvailabilityEntity availability = new AvailabilityEntity();
-        availability.setEventId(plan.getEventId());
-        availability.setUserId(userId);
-        availability.setStartTime(NOW.plusSeconds(7200));
-        availability.setEndTime(NOW.plusSeconds(10800));
-        availability.setCreatedByUserId(userId);
-        availability.setCreatedAt(NOW);
-        availability = availabilityRepository.saveAndFlush(availability);
-
-        StaffingAssignmentEntity assignment = new StaffingAssignmentEntity();
+        TimeConstraintEntity constraint = new TimeConstraintEntity();
+        constraint.setEventId(plan.getEventId());
+        constraint.setUserId(userId);
+        constraint.setType(TimeConstraintType.UNAVAILABLE);
+        constraint.setStartTime(NOW.plusSeconds(7200));
+        constraint.setEndTime(NOW.plusSeconds(10800));
+        constraint.setCreatedAt(NOW);
+        constraint = timeConstraintRepository.saveAndFlush(constraint);
+        AssignmentEntity assignment = new AssignmentEntity();
         assignment.setPositionSlotId(slot.getId());
         assignment.setUserId(userId);
-        assignment.setState(AssignmentState.ACCEPTED);
+        assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignment.setCreatedAt(NOW);
         assignment.setUpdatedAt(NOW);
         assignment = assignmentRepository.saveAndFlush(assignment);
-        AssignmentTransitionEntity assignmentTransition = new AssignmentTransitionEntity();
-        assignmentTransition.setAssignmentId(assignment.getId());
-        assignmentTransition.setToState(AssignmentState.ACCEPTED);
-        assignmentTransition.setActorUserId(userId);
-        assignmentTransition.setOccurredAt(NOW);
-        assignmentTransitionRepository.saveAndFlush(assignmentTransition);
 
-        PlanModeTransitionEntity modeTransition = new PlanModeTransitionEntity();
-        modeTransition.setPlanId(plan.getId());
-        modeTransition.setActorUserId(userId);
-        modeTransition.setOldMode(StaffingMode.SELF_SIGNUP);
-        modeTransition.setNewMode(StaffingMode.SUPERVISED);
-        modeTransition.setApplicationPolicy("NO_REQUEST_RESOLUTION");
-        modeTransition.setResolvedJoinRequestCount(0);
-        modeTransition.setResolvedLeaveRequestCount(0);
-        modeTransition.setOccurredAt(NOW);
-        modeTransition = modeTransitionRepository.saveAndFlush(modeTransition);
-
-        assertEquals(availability.getId(), availabilityRepository.findById(availability.getId()).orElseThrow().getId());
-        assertEquals(AssignmentState.ACCEPTED, assignmentRepository.findById(assignment.getId()).orElseThrow().getState());
-        assertTrue(assignmentRepository.existsOccupiedAssignmentOverlapping(plan.getEventId(), userId, NOW, NOW.plusSeconds(3600)));
+        assertEquals(TimeConstraintType.UNAVAILABLE, timeConstraintRepository.findById(constraint.getId()).orElseThrow().getType());
+        assertEquals(AssignmentStatus.ACCEPTED, assignmentRepository.findById(assignment.getId()).orElseThrow().getStatus());
         assertTrue(assignmentRepository.existsOccupiedAssignmentOverlappingShift(userId, NOW, NOW.plusSeconds(3600),
-            Set.of(AssignmentState.ACCEPTED, AssignmentState.LEAVE_REQUESTED)));
-        assertEquals(modeTransition.getNewMode(), modeTransitionRepository.findById(modeTransition.getId()).orElseThrow().getNewMode());
+            Set.of(AssignmentStatus.ACCEPTED)));
     }
 
     private ShiftPlanEntity savePlan(String name) {
@@ -199,5 +132,15 @@ class ShiftPersistenceTest {
         plan.setDefaultStaffingMode(StaffingMode.SELF_SIGNUP);
         plan.setCreatedAt(NOW);
         return planRepository.saveAndFlush(plan);
+    }
+
+    private ShiftEntity saveShift(ShiftPlanEntity plan) {
+        ShiftEntity shift = new ShiftEntity();
+        shift.setPlanId(plan.getId());
+        shift.setName("Information desk");
+        shift.setStartTime(NOW);
+        shift.setEndTime(NOW.plusSeconds(3600));
+        shift.setCreatedAt(NOW);
+        return shiftRepository.saveAndFlush(shift);
     }
 }

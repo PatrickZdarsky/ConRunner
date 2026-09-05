@@ -7,7 +7,7 @@ Last reviewed: 2026-08-31
 ## Purpose and scope
 
 Schedule is deliberately staged. The current migration needs only enough programme context for
-staffing shifts to refer to event sessions. It does not need a schedule editor, schedule versions,
+shifts to refer to event sessions. It does not need a schedule editor, schedule versions,
 or Pretalx synchronization.
 
 Stage 1 therefore reuses the event catalogue's current event, location, and session data. The current
@@ -21,7 +21,7 @@ Stage 1 is the only schedule scope that may be implemented during the current st
 
 | ID | Status | Requirement |
 | --- | --- | --- |
-| `SCH1-REF-001` | Planned | A staffing shift may optionally reference a session from the same event. A staffing shift is valid without a session reference. |
+| `SCH1-REF-001` | Planned | A shift may optionally reference a session from the same event. A shift is valid without a session reference. |
 | `SCH1-REF-002` | Planned | The optional session reference supplies programme context only. `shift` does not mutate the session, its location, or its time range. |
 | `SCH1-READ-001` | Planned | Shift-facing reads can obtain the current session name, time range, and location for the referenced session through a small named catalogue read API or an equivalent immutable value. No catalogue entity or repository crosses the module boundary. |
 | `SCH1-READ-002` | Planned | Volunteer and planner views show only schedule context the requester is already authorized to see through their event/plan access. |
@@ -39,7 +39,7 @@ impact of a schedule change on staffing work.
 | --- | --- | --- |
 | `SCH2-DRAFT-001` | WIP | Authorized editors can manage schedule placement as drafts, with explicit event timezone, location, time, ordering, validation, and author/version information. |
 | `SCH2-PUBLISH-001` | WIP | Publishing creates an immutable released version; later edits create another draft rather than mutating the released version. |
-| `SCH2-IMPACT-001` | WIP | A live schedule change identifies affected staffing shifts and gives planners a deliberate notification/approval path. It never silently rewrites assignments. |
+| `SCH2-IMPACT-001` | WIP | A live schedule change identifies affected shifts and gives planners a deliberate notification/approval path. It never silently rewrites assignments. |
 | `SCH2-PRETALX-001` | WIP | Schedule publication and reconciliation with Pretalx use the later Pretalx integration contract, stable external mappings, durable work, and a field-level source-of-truth decision. |
 
 ## Later decision

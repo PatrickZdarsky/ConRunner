@@ -30,17 +30,18 @@ operational responder state and must not access shift persistence directly.
 
 ## Package convention
 
-Use module-first, feature-local packages—not an `application` / `domain` / `infrastructure` split.
-For example, migrated shift code belongs under features such as `shift.plan`, `shift.volunteer`,
-`shift.positionslot`, and `shift.assignment`, where endpoints, services, DAOs, repositories, query
-Specifications, and boundary mappers remain close to their feature.
+Use module-first packages—not an `application` / `domain` / `infrastructure` split. Create a shift
+subpackage only for an established, cohesive workflow; it is an organizational aid, never another
+application module. Under [ADR-0002](../../docs/adr/0002-compatibility-first-shift-migration.md),
+the established shift workflows remain cohesive rather than being divided into trade, availability,
+or reward mini-modules. The `assignment` package is an organizational home for the live-assignment
+workflow, not a submodule.
 
 The existing empty layer directories are transitional scaffolding; do not add new migrated code to
-them.
-
-The root package normally contains only module metadata. A subpackage becomes cross-module-visible
-only when it is deliberately annotated as a Spring Modulith named `api` or `events` interface. The
-full rules and examples are in [the backend code-structure guide](../../docs/architecture/code-structure.md).
+them. Delete comment-only `package-info.java` files; retain one only where it supplies actual
+module metadata. A subpackage becomes cross-module-visible only when it is deliberately annotated
+as a Spring Modulith named `api` or `events` interface. The full rules and examples are in [the
+backend code-structure guide](../../docs/architecture/code-structure.md).
 
 Tests mirror their production feature package. Cross-module boundary verification belongs in
 `at.control.shiftcontrol.architecture`; full-stack journeys belong in the repository-level `e2e`

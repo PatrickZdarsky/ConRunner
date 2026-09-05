@@ -12,9 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PositionSlotRepository extends JpaRepository<PositionSlotEntity, UUID> {
-    boolean existsByStaffingShiftIdAndNameIgnoreCase(UUID staffingShiftId, String name);
+    boolean existsByShiftIdAndNameIgnoreCase(UUID shiftId, String name);
 
-    Collection<PositionSlotEntity> findAllByStaffingShiftIdOrderByNameAsc(UUID staffingShiftId);
+    Collection<PositionSlotEntity> findAllByShiftIdOrderByNameAsc(UUID shiftId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select slot from PositionSlotEntity slot where slot.id = :positionSlotId")

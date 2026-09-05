@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: audit-001-create-audit-entry
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: audit_entry
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: occurred_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: module
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: action
+                  type: VARCHAR(96)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject_type
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: previous_state
+                  type: VARCHAR(64)
+              - column:
+                  name: new_state
+                  type: VARCHAR(64)
+              - column:
+                  name: reason
+                  type: VARCHAR(1024)
+        - createIndex:
+            tableName: audit_entry
+            indexName: idx_audit_entry_subject_time
+            columns:
+              - column:
+                  name: subject_type
+              - column:
+                  name: subject_id
+              - column:
+                  name: occurred_at

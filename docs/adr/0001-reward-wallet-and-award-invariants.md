@@ -43,18 +43,19 @@ Assignment ownership changes are explicit application use cases. They must not b
 arbitrary entity/repository updates. Assignment identities and any future reward-origin references
 must remain stable enough to connect an earning, reversal, and transfer audit trail.
 
-### Future reward boundary
+### Future reward implementation
 
-When the feature is implemented, `shift.reward` owns:
+When the feature is implemented, the cohesive `shift` module owns:
 
 - versioned reward-policy configuration and reward quotes;
 - append-only ledger posting and balance queries;
 - immutable award terms and reversals; and
 - reward redemption and benefit-grant records.
 
-The assignment use case owns its transaction boundary and invokes the reward feature as part of the
-same transaction. A ledger is the only source of balance changes; no user, event, plan, slot, or
-assignment table is a mutable point-balance store.
+The assignment use case owns its transaction boundary and invokes its reward collaborators as part
+of the same transaction. This does not require a separate application module or mini-module. A
+ledger is the only source of balance changes; no user, event, plan, slot, or assignment table is a
+mutable point-balance store.
 
 Ledger entries use a durable operation/source identity that is enforced as unique by the database.
 Reversals reference their original earning entry. Retrying a completed acceptance, removal, or
@@ -78,8 +79,8 @@ rewards.
 This ADR does not authorize implementing reward tables, endpoints, exports, or redemption flows
 in the current stage. Until that work begins, migration work must:
 
-- use stable UUIDs for shift-owned identities and retain historical references without cross-module
-  cascade deletion;
+- use stable UUIDs for shift-owned identities and retain historical references in audit/reward
+  records without cross-module cascade deletion;
 - centralize accepted-assignment, unassignment, auction, and trade transitions in application
   services;
 - avoid a mutable point balance or a temporary point-accounting shortcut in existing aggregates;
@@ -93,7 +94,8 @@ in the current stage. Until that work begins, migration work must:
 - A transferred assignment deliberately may retain a historic lower or higher amount than a new
   assignment for the same slot would receive today.
 - The future ledger needs an immutable award/origin reference, a unique idempotency key, and a
-  reversal link; copying the legacy `source_key` column alone is insufficient.
+  reversal link; it cannot depend on retaining a deleted live assignment row. Copying the legacy
+  `source_key` column alone is insufficient.
 - The future export implementation is a read-side concern and must not inherit from or mutate the
   reward writer.
 - Existing generic event metadata can retain the legacy redemption URL temporarily, but no later

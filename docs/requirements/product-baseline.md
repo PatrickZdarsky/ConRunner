@@ -68,4 +68,6 @@ repository tests, plus entities in its sibling `shiftcontrol-lib`. Important beh
 `PlannerPositionSlotServiceImpl`, `AssignmentServiceImpl`,
 `AssignmentSwitchRequestServiceImpl`, `TimeConstraintServiceImpl`, reward-points services,
 `PretalxSyncService`, notification services, and their corresponding tests. Requirements below cite
-legacy behavior only as a migration reference; they do not grant legacy source precedence.
+legacy behavior only as a migration reference unless ADR-0002 applies. ADR-0002 makes legacy shift
+workflow behavior and tests the default migration baseline, except for its explicitly recorded
+improvements and later documented divergences.
