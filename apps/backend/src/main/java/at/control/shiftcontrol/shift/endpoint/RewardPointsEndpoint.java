@@ -2,9 +2,9 @@ package at.control.shiftcontrol.shift.endpoint;
 
 import java.util.Collection;
 
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
 import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsExportDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
@@ -38,7 +38,7 @@ public class RewardPointsEndpoint {
     private final RewardPointsLedgerService rewardPointsLedgerService;
     private final RewardPointsService rewardPointsService;
     private final RewardPointsExportService rewardPointsExportService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
 
     @GetMapping()
     @Operation(
@@ -46,8 +46,8 @@ public class RewardPointsEndpoint {
         description = "Get total reward points of the current user"
     )
     public TotalPointsDto getCurrentUserTotalRewardPoints() throws NotFoundException {
-        var currentUser = userProvider.getCurrentUser();
-        return rewardPointsLedgerService.getTotalPoints(currentUser.getUserId());
+        var actor = currentActor.get();
+        return rewardPointsLedgerService.getTotalPoints(actor.requireUserId().toString());
     }
 
     @GetMapping("/events")
@@ -56,8 +56,8 @@ public class RewardPointsEndpoint {
         description = "Get reward points per event for the current user"
     )
     public Collection<EventPointsDto> getCurrentUserEventRewardPoints() throws NotFoundException {
-        var currentUser = userProvider.getCurrentUser();
-        return rewardPointsLedgerService.getPointsGroupedByEvent(currentUser.getUserId());
+        var actor = currentActor.get();
+        return rewardPointsLedgerService.getPointsGroupedByEvent(actor.requireUserId().toString());
     }
 
     @GetMapping("/events/{eventId}")
@@ -66,8 +66,8 @@ public class RewardPointsEndpoint {
         description = "Get reward points for a specific event for the current user"
     )
     public EventPointsDto getCurrentUserRewardPointsForEvent(@PathVariable long eventId) throws NotFoundException {
-        var currentUser = userProvider.getCurrentUser();
-        return rewardPointsLedgerService.getPointsForEvent(currentUser.getUserId(), eventId);
+        var actor = currentActor.get();
+        return rewardPointsLedgerService.getPointsForEvent(actor.requireUserId().toString(), eventId);
     }
 
     @GetMapping("/export")

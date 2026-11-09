@@ -6,17 +6,22 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
+import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
 
 @Component
 @RequiredArgsConstructor
 public class CurrentSubjectProfileResolver {
-    private final ApplicationUserProvider applicationUserProvider;
+    private final CurrentShiftActor currentActor;
     private final OidcProviderProps oidcProviderProps;
 
     public CurrentSubjectProfile resolveCurrentSubject() {
-        Jwt jwt = applicationUserProvider.getCurrentJwt();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getDetails() instanceof Jwt jwt)) {
+            throw new UnauthorizedException("Authentication does not expose a decoded JWT");
+        }
         String subject = jwt.getClaimAsString("sub");
         if (subject == null) {
             throw new IllegalArgumentException("User token does not contain 'sub' claim");
@@ -28,13 +33,13 @@ public class CurrentSubjectProfileResolver {
         return new CurrentSubjectProfile(
             jwt.getIssuer().toString(),
             subject,
-            firstNonBlank(jwt.getClaimAsString(oidcProviderProps.usernameClaim()), applicationUserProvider.getCurrentUser().getUsername()),
+            firstNonBlank(jwt.getClaimAsString(oidcProviderProps.usernameClaim()), currentActor.get().getName()),
             jwt.getClaimAsString("given_name"),
             jwt.getClaimAsString("family_name"),
             jwt.getClaimAsString("email"),
             firstNonBlank(jwt.getClaimAsString("picture"), jwt.getClaimAsString("profile")),
             jwt.getClaims().containsKey("email_verified") ? jwt.getClaimAsBoolean("email_verified") : null,
-            applicationUserProvider.currentUserHasAuthority("ADMIN")
+            currentActor.get().isPlatformAdmin()
         );
     }
 

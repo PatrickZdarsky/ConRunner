@@ -1,13 +1,12 @@
-package at.control.shiftcontrol.shift.auth.impl;
+package at.control.shiftcontrol.shift.auth;
 
 import at.control.shiftcontrol.identity.AuthenticatedActor;
-import at.control.shiftcontrol.shift.auth.UserAttributeProvider;
-import at.control.shiftcontrol.shift.auth.user.ShiftActor;
 import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import lombok.NonNull;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -16,9 +15,18 @@ import org.springframework.stereotype.Service;
 public class CurrentShiftActor {
     private final UserAttributeProvider userAttributeProvider;
 
+    public Optional<ShiftActor> find() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+            || !(authentication.getPrincipal() instanceof AuthenticatedActor actor)) {
+            return Optional.empty();
+        }
+        return Optional.of(new ShiftActor(actor, userAttributeProvider));
+    }
+
     public @NonNull ShiftActor get() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException("No authentication found");
         }
 

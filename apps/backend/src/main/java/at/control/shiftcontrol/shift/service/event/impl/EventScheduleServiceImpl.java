@@ -18,7 +18,7 @@ import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
 import at.control.shiftcontrol.shift.lib.type.ShiftRelevance;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.ActivityDao;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.ShiftDao;
@@ -58,7 +58,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
     private final SecurityHelper securityHelper;
     private final StatisticService statisticService;
     private final EligibilityService eligibilityService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
 
     @Override
     public EventScheduleLayoutDto getEventScheduleLayout(long eventId, EventScheduleFilterDto filterDto) {
@@ -69,7 +69,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             .map(entry -> buildScheduleLayoutDto(entry.getKey(), entry.getValue()))
             .toList();
 
-        var userId = userProvider.getCurrentUser().getUserId();
+        var userId = currentActor.get().requireUserId().toString();
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
                 userId,
                 filterDto).stream()
@@ -163,7 +163,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
 
     private String validateEventAccessAndGetUserId(Event event) {
         securityHelper.assertUserIsAllowedToAccessEvent(event);
-        return userProvider.getCurrentUser().getUserId();
+        return currentActor.get().requireUserId().toString();
     }
 
     private boolean isSignupPossible(PositionSlot slot, Volunteer volunteer) {
@@ -209,14 +209,14 @@ public class EventScheduleServiceImpl implements EventScheduleService {
 
         // get shifts without location
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
-                userProvider.getCurrentUser().getUserId(),
+                currentActor.get().requireUserId().toString(),
                 searchDto).stream()
             .filter(shift -> shift.getLocation() == null)
             .filter(securityHelper::isUserInPlan)
             .toList();
 
         var filteredShiftsWithoutLocation = getShiftsBasedOnViewModes(eventId,
-            userProvider.getCurrentUser().getUserId(),
+            currentActor.get().requireUserId().toString(),
             searchDto,
             shiftsWithoutLocation);
 

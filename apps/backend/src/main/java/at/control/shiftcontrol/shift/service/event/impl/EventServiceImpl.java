@@ -23,7 +23,7 @@ import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
 import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
 import at.control.shiftcontrol.shift.lib.exception.ValidationException;
 import at.control.shiftcontrol.identity.AdminOnly;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.RewardPointsTransactionDao;
 import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
@@ -55,7 +55,7 @@ public class EventServiceImpl implements EventService {
     private final VolunteerDao volunteerDao;
     private final RewardPointsTransactionDao rewardPointsTransactionDao;
     private final StatisticService statisticService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
     private final UserLookupService userDirectoryService;
@@ -71,13 +71,13 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventDto> search(EventSearchDto searchDto) {
         var filteredEvents = eventDao.search(searchDto);
-        var currentUser = userProvider.getCurrentUser();
+        var actor = currentActor.get();
 
         // skip filtering for admin users
-        if (securityHelper.isUserAdmin(currentUser)) {
+        if (securityHelper.isUserAdmin(actor)) {
             return EventMapper.toEventDto(filteredEvents);
         }
-        String userId = currentUser.getUserId();
+        String userId = actor.requireUserId().toString();
 
         var volunteer = volunteerDao.getById(userId);
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();

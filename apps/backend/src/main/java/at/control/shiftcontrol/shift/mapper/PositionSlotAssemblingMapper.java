@@ -14,7 +14,7 @@ import at.control.shiftcontrol.shift.entity.PositionSlot;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;
 import at.control.shiftcontrol.shift.dao.PositionSlotDao;
@@ -30,7 +30,7 @@ import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 @Service
 public class PositionSlotAssemblingMapper {
     private final EligibilityService eligibilityService;
-    private final ApplicationUserProvider applicationUserProvider;
+    private final CurrentShiftActor currentActor;
     private final VolunteerDao volunteerDao;
     private final AssignmentDao assignmentDao;
     private final PositionSlotDao positionSlotDao;
@@ -41,8 +41,8 @@ public class PositionSlotAssemblingMapper {
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
 
     public PositionSlotDto assemble(@NonNull PositionSlot positionSlot) {
-        var currentUser = applicationUserProvider.getCurrentUser();
-        var volunteer = volunteerDao.getById(currentUser.getUserId());
+        var actor = currentActor.get();
+        var volunteer = volunteerDao.getById(actor.requireUserId().toString());
         var preferenceValue = positionSlotDao.getPreference(volunteer.getId(), positionSlot.getId());
         var rewardPointsDto = rewardPointsAssemblingMapper.toDto(positionSlot);
 
@@ -79,7 +79,7 @@ public class PositionSlotAssemblingMapper {
 
         var signupState = eligibilityService.getSignupStateForPositionSlot(positionSlot, volunteer);
         if (signupState != PositionSignupState.NOT_ELIGIBLE
-            && !currentUser.isVolunteerInPlan(positionSlot.getShift().getShiftPlan().getId())) {
+            && !actor.isVolunteerInPlan(positionSlot.getShift().getShiftPlan().getId())) {
             signupState = PositionSignupState.NOT_ELIGIBLE;
         }
 

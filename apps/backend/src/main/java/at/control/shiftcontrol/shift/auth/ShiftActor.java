@@ -1,8 +1,8 @@
-package at.control.shiftcontrol.shift.auth.user;
+package at.control.shiftcontrol.shift.auth;
 
 import at.control.shiftcontrol.identity.AuthenticatedActor;
 import at.control.shiftcontrol.identity.Authorities;
-import at.control.shiftcontrol.shift.auth.UserAttributeProvider;
+import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 
 import lombok.Getter;
@@ -27,6 +27,10 @@ public class ShiftActor {
         return actor.userId();
     }
 
+    public UUID requireUserId() {
+        return getUserId().orElseThrow(() -> new UnauthorizedException("A human user is required"));
+    }
+
     public String getName() {
         return actor.name();
     }
@@ -41,6 +45,10 @@ public class ShiftActor {
 
     public boolean isLockedInPlan(long shiftPlanId) {
         return getLockedPlans().contains(shiftPlanId);
+    }
+
+    public boolean hasAuthority(String authority) {
+        return actor.authorities().stream().anyMatch(granted -> authority.equals(granted.getAuthority()));
     }
 
     public boolean isPlatformAdmin() {

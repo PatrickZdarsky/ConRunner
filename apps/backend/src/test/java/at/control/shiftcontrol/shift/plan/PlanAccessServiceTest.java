@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PlanAccessServiceTest {
     @Mock
-    private CurrentShiftActor currentShiftActor;
+    private CurrentShiftActor currentActor;
 
     @Mock
     private PlanMembershipRepository membershipRepository;
@@ -30,7 +30,7 @@ class PlanAccessServiceTest {
     void grantsScopeOnlyWhenTheActorHasTheRequiredMembership() {
         UUID planId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        when(currentShiftActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(userId, false));
+        when(currentActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(userId, false));
         when(membershipRepository.existsByPlanIdAndUserId(planId, userId)).thenReturn(true);
         when(membershipRepository.existsByPlanIdAndUserIdAndPlannerTrue(planId, userId)).thenReturn(false);
 
@@ -42,7 +42,7 @@ class PlanAccessServiceTest {
 
     @Test
     void platformAdministratorIsAnExplicitScopedOverride() {
-        when(currentShiftActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(UUID.randomUUID(), true));
+        when(currentActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(UUID.randomUUID(), true));
 
         assertDoesNotThrow(() -> access.requireMember(UUID.randomUUID()));
         assertDoesNotThrow(() -> access.requirePlanner(UUID.randomUUID()));

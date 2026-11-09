@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class UserAttributeProviderImpl implements UserAttributeProvider {
-    private LoadingCache<String, UserAttributes> attributesCache;
+    private LoadingCache<UUID, UserAttributes> attributesCache;
     private final VolunteerDao volunteerDao;
 
     @PostConstruct
@@ -28,7 +29,7 @@ public class UserAttributeProviderImpl implements UserAttributeProvider {
         attributesCache = Caffeine.newBuilder()
             .maximumSize(2000)
             .expireAfterAccess(java.time.Duration.ofMinutes(20))
-            .build((userId) -> volunteerDao.findById(userId)
+            .build((userId) -> volunteerDao.findById(userId.toString())
                 .map(volunteer -> new UserAttributes(
                     volunteer.getVolunteeringPlans().stream().map(ShiftPlan::getId).collect(Collectors.toUnmodifiableSet()),
                     volunteer.getPlanningPlans().stream().map(ShiftPlan::getId).collect(Collectors.toUnmodifiableSet()),
@@ -37,28 +38,28 @@ public class UserAttributeProviderImpl implements UserAttributeProvider {
     }
 
     @Override
-    public void invalidateUserCache(String userId) {
+    public void invalidateUserCache(UUID userId) {
         attributesCache.invalidate(userId);
     }
 
     @Override
-    public void invalidateUserCaches(Collection<String> userId) {
+    public void invalidateUserCaches(Collection<UUID> userId) {
         attributesCache.invalidateAll(userId);
     }
 
     @Override
-    public Set<Long> getPlansWhereUserIsVolunteer(@NonNull String userId) {
-        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.volunteerPlans).orElse(Collections.EMPTY_SET);
+    public Set<Long> getPlansWhereUserIsVolunteer(@NonNull UUID userId) {
+        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.volunteerPlans).orElse(Collections.emptySet());
     }
 
     @Override
-    public Set<Long> getPlansWhereUserIsPlanner(@NonNull String userId) {
-        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.plannerPlans).orElse(Collections.EMPTY_SET);
+    public Set<Long> getPlansWhereUserIsPlanner(@NonNull UUID userId) {
+        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.plannerPlans).orElse(Collections.emptySet());
     }
 
     @Override
-    public Set<Long> getPlansWhereUserIsLocked(@NonNull String userId) {
-        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.lockedPlans).orElse(Collections.EMPTY_SET);
+    public Set<Long> getPlansWhereUserIsLocked(@NonNull UUID userId) {
+        return Optional.ofNullable(attributesCache.get(userId)).map(attributes -> attributes.lockedPlans).orElse(Collections.emptySet());
     }
 
     @AllArgsConstructor

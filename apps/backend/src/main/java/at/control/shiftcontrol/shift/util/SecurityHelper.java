@@ -14,32 +14,32 @@ import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
 import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
+import at.control.shiftcontrol.shift.auth.ShiftActor;
 import at.control.shiftcontrol.shift.dao.EventDao;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityHelper {
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final EventDao eventDao;
 
-    public boolean isUserPlanner(long shiftPlanId, ShiftControlUser user) {
-        return user.isPlannerInPlan(shiftPlanId);
+    public boolean isUserPlanner(long shiftPlanId, ShiftActor actor) {
+        return actor.isPlannerInPlan(shiftPlanId);
     }
 
     public boolean isUserPlanner(long shiftPlanId) {
-        var currentUser = userProvider.getCurrentUser();
-        return isUserPlanner(shiftPlanId, currentUser);
+        var actor = currentActor.get();
+        return isUserPlanner(shiftPlanId, actor);
     }
 
     public void assertUserIsPlanner(long shiftPlanId) {
-        assertUserIsPlanner(shiftPlanId, userProvider.getCurrentUser());
+        assertUserIsPlanner(shiftPlanId, currentActor.get());
     }
 
-    public void assertUserIsPlanner(long shiftPlanId, ShiftControlUser user) {
-        if (!isUserPlanner(shiftPlanId, user)) {
+    public void assertUserIsPlanner(long shiftPlanId, ShiftActor actor) {
+        if (!isUserPlanner(shiftPlanId, actor)) {
             log.error("User is not a planner in shift plan with id: {}", shiftPlanId);
             throw new ForbiddenException("User is not a planner in shift plan.");
         }
@@ -82,17 +82,17 @@ public class SecurityHelper {
     }
     //     --------------------- Volunteer ---------------------
 
-    public boolean isVolunteerInPlan(long shiftPlanId, ShiftControlUser user) {
-        return user.isVolunteerInPlan(shiftPlanId);
+    public boolean isVolunteerInPlan(long shiftPlanId, ShiftActor actor) {
+        return actor.isVolunteerInPlan(shiftPlanId);
     }
 
     public boolean isVolunteerInPlan(long shiftPlanId) {
-        var currentUser = userProvider.getCurrentUser();
-        return isVolunteerInPlan(shiftPlanId, currentUser);
+        var actor = currentActor.get();
+        return isVolunteerInPlan(shiftPlanId, actor);
     }
 
-    public boolean isVolunteerLockedInPlan(long shiftPlanId, ShiftControlUser user) {
-        return user.isLockedInPlan(shiftPlanId);
+    public boolean isVolunteerLockedInPlan(long shiftPlanId, ShiftActor actor) {
+        return actor.isLockedInPlan(shiftPlanId);
     }
 
     public boolean isVolunteerLockedInPlan(ShiftPlan plan, Volunteer volunteer) {
@@ -100,23 +100,23 @@ public class SecurityHelper {
     }
 
     public boolean isUserOnlyVolunteerInPlan(long shiftPlanId) {
-        var currentUser = userProvider.getCurrentUser();
-        return isVolunteerInPlan(shiftPlanId, currentUser) && !isUserPlanner(shiftPlanId, currentUser);
+        var actor = currentActor.get();
+        return isVolunteerInPlan(shiftPlanId, actor) && !isUserPlanner(shiftPlanId, actor);
     }
 
-    public void assertUserIsVolunteer(long shiftPlanId, ShiftControlUser user, boolean needsWriteAccess) {
-        if (!isVolunteerInPlan(shiftPlanId, user)) {
+    public void assertUserIsVolunteer(long shiftPlanId, ShiftActor actor, boolean needsWriteAccess) {
+        if (!isVolunteerInPlan(shiftPlanId, actor)) {
             log.error("User is not a volunteer in plan with id: {}", shiftPlanId);
             throw new ForbiddenException("User is not a volunteer in plan.");
         }
-        if (needsWriteAccess && isVolunteerLockedInPlan(shiftPlanId, user)) {
+        if (needsWriteAccess && isVolunteerLockedInPlan(shiftPlanId, actor)) {
             log.error("User is locked in plan with id: {}", shiftPlanId);
             throw new ForbiddenException("User is locked in plan.");
         }
     }
 
     public void assertUserIsVolunteer(long shiftPlanId, boolean needsWriteAccess) {
-        assertUserIsVolunteer(shiftPlanId, userProvider.getCurrentUser(), needsWriteAccess);
+        assertUserIsVolunteer(shiftPlanId, currentActor.get(), needsWriteAccess);
     }
 
     public void assertUserIsVolunteer(ShiftPlan shiftPlan, boolean needsWriteAccess) {
@@ -172,8 +172,8 @@ public class SecurityHelper {
     //     --------------------- Volunteer or Planner ---------------------
 
     private boolean isUserInPlan(long shiftPlanId) {
-        var currentUser = userProvider.getCurrentUser();
-        return currentUser.isVolunteerInPlan(shiftPlanId) || currentUser.isPlannerInPlan(shiftPlanId);
+        var actor = currentActor.get();
+        return actor.isVolunteerInPlan(shiftPlanId) || actor.isPlannerInPlan(shiftPlanId);
     }
 
     public boolean isUserInPlan(Shift shift) {
@@ -216,20 +216,20 @@ public class SecurityHelper {
 
     //     --------------------- Admin ---------------------
     public boolean isUserAdmin() {
-        var currentUser = userProvider.getCurrentUser();
-        return isUserAdmin(currentUser);
+        var actor = currentActor.get();
+        return isUserAdmin(actor);
     }
 
-    public boolean isUserAdmin(ShiftControlUser user) {
-        return user.isPlatformAdmin()
-            || user.getAuthorities().stream().anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));
+    public boolean isUserAdmin(ShiftActor actor) {
+        return actor.isPlatformAdmin()
+            || actor.getActor().authorities().stream().anyMatch(authority -> "ADMIN".equals(authority.getAuthority()));
     }
 
     public boolean isNotUserAdmin() {
         return !isUserAdmin();
     }
 
-    public boolean isNotUserAdmin(ShiftControlUser user) {
-        return !isUserAdmin(user);
+    public boolean isNotUserAdmin(ShiftActor actor) {
+        return !isUserAdmin(actor);
     }
 }

@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
 import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
 import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotJoinErrorDto;
@@ -40,7 +40,7 @@ import at.control.shiftcontrol.shift.service.positionslot.PositionSlotService;
 @RequiredArgsConstructor
 public class PositionSlotItemEndpoint {
     private final PositionSlotService positionSlotService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
 
     @GetMapping
     @Operation(
@@ -57,7 +57,7 @@ public class PositionSlotItemEndpoint {
         description = "Get the assignment for a specific position slot in a shift for the current user"
     )
     public AssignmentDto getPositionSlotUserAssignment(@PathVariable String positionSlotId) {
-        return positionSlotService.getUserAssignment(ConvertUtil.idToLong(positionSlotId), userProvider.getCurrentUser().getUserId());
+        return positionSlotService.getUserAssignment(ConvertUtil.idToLong(positionSlotId), currentActor.get().requireUserId().toString());
     }
 
     @PutMapping
@@ -102,7 +102,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto joinPositionSlot(@PathVariable String positionSlotId, @RequestBody @Valid PositionSlotRequestDto requestDto) {
         return positionSlotService.join(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId(),
+            currentActor.get().requireUserId().toString(),
             requestDto
         );
     }
@@ -121,7 +121,7 @@ public class PositionSlotItemEndpoint {
     public void leavePositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leave(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
     @PostMapping("/join-request")
@@ -141,7 +141,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto joinRequestPositionSlot(@PathVariable String positionSlotId) {
         return positionSlotService.joinRequest(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId()
+            currentActor.get().requireUserId().toString()
         );
     }
 
@@ -159,7 +159,7 @@ public class PositionSlotItemEndpoint {
     public void leaveRequestPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leaveRequest(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
 
@@ -177,7 +177,7 @@ public class PositionSlotItemEndpoint {
     public void joinRequestWithdrawPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.joinRequestWithdraw(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId()
+            currentActor.get().requireUserId().toString()
         );
     }
 
@@ -195,7 +195,7 @@ public class PositionSlotItemEndpoint {
     public void leaveRequestWithdrawPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leaveRequestWithdraw(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
     @PutMapping("/preference")
@@ -208,7 +208,7 @@ public class PositionSlotItemEndpoint {
         @RequestBody @Valid PositionSlotPreferenceUpdateDto preferenceUpdateDto
     ) {
         positionSlotService.setPreference(
-            userProvider.getCurrentUser().getUserId(),
+            currentActor.get().requireUserId().toString(),
             ConvertUtil.idToLong(positionSlotId),
             preferenceUpdateDto.getPreferenceValue()
         );
@@ -223,7 +223,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto auctionAssignment(@PathVariable String positionSlotId) {
         return positionSlotService.createAuction(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
     @PutMapping("/claim-auction/{offeringUserId}")
@@ -238,7 +238,7 @@ public class PositionSlotItemEndpoint {
     ) {
         return positionSlotService.claimAuction(
             ConvertUtil.idToLong(positionSlotId), offeringUserId,
-            userProvider.getCurrentUser().getUserId(),
+            currentActor.get().requireUserId().toString(),
             requestDto);
     }
 
@@ -250,6 +250,6 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto cancelAuction(@PathVariable String positionSlotId) {
         return positionSlotService.cancelAuction(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 }

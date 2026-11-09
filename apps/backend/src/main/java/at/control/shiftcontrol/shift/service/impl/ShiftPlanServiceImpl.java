@@ -32,9 +32,9 @@ import at.control.shiftcontrol.shift.lib.type.LockStatus;
 import at.control.shiftcontrol.shift.lib.type.ShiftPlanInviteType;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.identity.AdminOnly;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.auth.UserAttributeProvider;
-import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
+import at.control.shiftcontrol.shift.auth.ShiftActor;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
@@ -73,7 +73,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     private final VolunteerDao volunteerDao;
 
     private final SecurityHelper securityHelper;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final ApplicationEventPublisher publisher;
     private final UserAttributeProvider userAttributeProvider;
     private final UserLookupService userDirectoryService;
@@ -188,8 +188,8 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     public @NonNull ShiftPlanInviteCreateResponseDto createShiftPlanInviteCode(long shiftPlanId, @NonNull ShiftPlanInviteCreateRequestDto requestDto) {
-        var currentUser = userProvider.getCurrentUser();
-        validatePermission(shiftPlanId, requestDto.getType(), currentUser);
+        var actor = currentActor.get();
+        validatePermission(shiftPlanId, requestDto.getType(), actor);
         final var shiftPlan = shiftPlanDao.getById(shiftPlanId);
         if (requestDto.getExpiresAt() != null && requestDto.getExpiresAt().isBefore(Instant.now())) {
             throw new BadRequestException("expiresAt must be in the future");
@@ -248,9 +248,9 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     public void revokeShiftPlanInvite(long inviteId) {
-        var currentUser = userProvider.getCurrentUser();
+        var actor = currentActor.get();
         var invite = shiftPlanInviteDao.getById(inviteId);
-        validatePermission(invite.getShiftPlan().getId(), invite.getType(), currentUser);
+        validatePermission(invite.getShiftPlan().getId(), invite.getType(), actor);
         invite.setActive(false);
         invite.setRevokedAt(Instant.now());
         publisher.publishEvent(ShiftPlanInviteEvent.inviteRevoked(invite));
@@ -259,19 +259,19 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     public void deleteShiftPlanInvite(long inviteId) {
-        var currentUser = userProvider.getCurrentUser();
+        var actor = currentActor.get();
         var invite = shiftPlanInviteDao.getById(inviteId);
-        validatePermission(invite.getShiftPlan().getId(), invite.getType(), currentUser);
+        validatePermission(invite.getShiftPlan().getId(), invite.getType(), actor);
         ShiftPlanInviteEvent inviteEvent = ShiftPlanInviteEvent.inviteDeleted(invite);
         shiftPlanInviteDao.delete(invite);
         publisher.publishEvent(inviteEvent);
     }
 
-    private void validatePermission(long shiftPlanId, ShiftPlanInviteType type, ShiftControlUser currentUser) {
+    private void validatePermission(long shiftPlanId, ShiftPlanInviteType type, ShiftActor actor) {
         if (type == ShiftPlanInviteType.VOLUNTEER_JOIN) {
-            securityHelper.assertUserIsPlanner(shiftPlanId, currentUser);
+            securityHelper.assertUserIsPlanner(shiftPlanId, actor);
         }
-        boolean isNotAdmin = securityHelper.isNotUserAdmin(currentUser);
+        boolean isNotAdmin = securityHelper.isNotUserAdmin(actor);
         // only allowed by admins
         if (type == ShiftPlanInviteType.PLANNER_JOIN && isNotAdmin) {
             throw new ForbiddenException("Only admins can create planner join invite codes.");
@@ -282,7 +282,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     public @NonNull ShiftPlanInviteDetailsDto getShiftPlanInviteDetails(@NonNull String inviteCode) {
         String userId;
         try {
-            userId = userProvider.getCurrentUser().getUserId();
+            userId = currentActor.get().requireUserId().toString();
         } catch (UnauthorizedException e) {
             // user not logged in, proceed without user context
             userId = "";
@@ -342,7 +342,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     @Override
     @Transactional
     public void joinShiftPlan(@NonNull @Valid ShiftPlanJoinRequestDto requestDto) {
-        String userId = userProvider.getCurrentUser().getUserId();
+        String userId = currentActor.get().requireUserId().toString();
         String inviteCode = requestDto.getInviteCode().trim();
         ShiftPlanInvite invite = shiftPlanInviteDao.getByCode(inviteCode);
         validateInvite(invite);
@@ -358,7 +358,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         // Increase uses and invalidate cache if joined now
         if (joinedNow) {
-            userAttributeProvider.invalidateUserCache(userId);
+            userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
             invite.setUses(invite.getUses() + 1);
         }
         // auto-deactivate if max uses reached
@@ -448,8 +448,8 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     @Transactional
     public void leavePlan(long shiftPlanId) {
         var plan = shiftPlanDao.getById(shiftPlanId);
-        var user = userProvider.getCurrentUser();
-        if (!user.isVolunteerInPlan(shiftPlanId)) {
+        var actor = currentActor.get();
+        if (!actor.isVolunteerInPlan(shiftPlanId)) {
             throw new BadRequestException("User is not volunteer of the provided shiftPlan.");
         }
 
@@ -457,15 +457,15 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             throw new BadRequestException("Plan is managed by supervisor, leave is currently not possible.");
         }
 
-        var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, user.getUserId());
+        var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, actor.requireUserId().toString());
         if (!existingAssignments.isEmpty()) {
             assignmentDao.deleteAll(existingAssignments);
         }
 
-        var volunteer = volunteerDao.getById(user.getUserId());
+        var volunteer = volunteerDao.getById(actor.requireUserId().toString());
         volunteer.getVolunteeringPlans().remove(plan);
 
-        userAttributeProvider.invalidateUserCache(user.getUserId());
+        userAttributeProvider.invalidateUserCache(actor.requireUserId());
 
         publisher.publishEvent(LeavePlanEvent.leavePlan(volunteer, String.valueOf(shiftPlanId), existingAssignments));
     }

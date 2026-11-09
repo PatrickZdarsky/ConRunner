@@ -6,7 +6,7 @@ import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
 import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;
 import at.control.shiftcontrol.shift.dao.EventDao;
@@ -42,7 +42,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final VolunteerDao volunteerDao;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
     private final RewardPointsTransactionDao rewardPointsTransactionDao;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final ShiftAssemblingMapper shiftMapper;
     private final TradeMapper tradeMapper;
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
@@ -105,13 +105,13 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private String validateShiftPlanAccessAndGetUserId(long shiftPlanId) {
-        var currentUser = userProvider.getCurrentUser();
-        if (!(currentUser.isVolunteerInPlan(shiftPlanId) || currentUser.isPlannerInPlan(shiftPlanId))) {
+        var actor = currentActor.get();
+        if (!(actor.isVolunteerInPlan(shiftPlanId) || actor.isPlannerInPlan(shiftPlanId))) {
             log.error("User has no access to shift plan with id: {}", shiftPlanId);
             throw new ForbiddenException("User has no access to shift plan.");
         }
 
-        return currentUser.getUserId();
+        return actor.requireUserId().toString();
     }
 
     private ShiftPlan getShiftPlanOrThrow(long shiftPlanId) {

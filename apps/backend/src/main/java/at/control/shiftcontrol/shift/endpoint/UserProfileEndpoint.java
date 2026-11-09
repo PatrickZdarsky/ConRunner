@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.userprofile.CalendarShareIdDto;
 import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
@@ -26,7 +26,7 @@ import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarServic
 @RequestMapping(value = "api/v1/me", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserProfileEndpoint {
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final UserProfileService userProfileService;
     private final NotificationService notificationService;
     private final VolunteerCalendarService volunteerCalendarService;
@@ -37,7 +37,7 @@ public class UserProfileEndpoint {
         description = "Get profile data of the current user (account, notifications, unavailability)"
     )
     public UserProfileDto getCurrentUserProfile() {
-        return userProfileService.getUserProfile(userProvider.getCurrentUser().getUserId());
+        return userProfileService.getUserProfile(currentActor.get().requireUserId().toString());
     }
 
     @PatchMapping("/profile/notifications")
@@ -46,7 +46,7 @@ public class UserProfileEndpoint {
         description = "Update notification settings of the current user"
     )
     public NotificationSettingsDto updateNotificationSettings(@RequestBody @Valid NotificationSettingsDto updateDto) {
-        return notificationService.updateNotificationSetting(userProvider.getCurrentUser().getUserId(), updateDto);
+        return notificationService.updateNotificationSetting(currentActor.get().requireUserId().toString(), updateDto);
     }
 
     @PostMapping("/profile/calendar-share-id/regenerate")
@@ -55,6 +55,6 @@ public class UserProfileEndpoint {
         description = "Regenerate the calendar share id of the current user"
     )
     public CalendarShareIdDto regenerateCalendarShareId() {
-        return volunteerCalendarService.regenerateCalendarShareId(userProvider.getCurrentUser().getUserId());
+        return volunteerCalendarService.regenerateCalendarShareId(currentActor.get().requireUserId().toString());
     }
 }

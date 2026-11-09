@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.TimeConstraintCreateDto;
 import at.control.shiftcontrol.shift.dto.TimeConstraintDto;
 import at.control.shiftcontrol.shift.service.TimeConstraintService;
@@ -26,7 +26,7 @@ import at.control.shiftcontrol.shift.service.TimeConstraintService;
 @RequestMapping(value = "api/v1/events/{eventId}/time-constraints", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class TimeConstraintEndpoint {
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final TimeConstraintService timeConstraintService;
 
     @GetMapping()
@@ -35,7 +35,7 @@ public class TimeConstraintEndpoint {
         description = "Get time constraints of the current user"
     )
     public Collection<TimeConstraintDto> getTimeConstraints(@PathVariable String eventId) {
-        return timeConstraintService.getTimeConstraints(userProvider.getCurrentUser().getUserId(), ConvertUtil.idToLong(eventId));
+        return timeConstraintService.getTimeConstraints(currentActor.get().requireUserId().toString(), ConvertUtil.idToLong(eventId));
     }
 
     @PostMapping()
@@ -46,7 +46,7 @@ public class TimeConstraintEndpoint {
     public TimeConstraintDto createTimeConstraint(@PathVariable String eventId, @RequestBody TimeConstraintCreateDto createDto) {
         return timeConstraintService.createTimeConstraint(
             createDto,
-            userProvider.getCurrentUser().getUserId(),
+            currentActor.get().requireUserId().toString(),
             ConvertUtil.idToLong(eventId)
         );
     }
@@ -58,7 +58,7 @@ public class TimeConstraintEndpoint {
     )
     public void deleteTimeConstraint(@PathVariable String eventId, @PathVariable String timeConstraintId) {
         // Check that the time constraint belongs to the current user (throws NotFoundException if not)
-        timeConstraintService.getTimeConstraints(userProvider.getCurrentUser().getUserId(), ConvertUtil.idToLong(eventId));
+        timeConstraintService.getTimeConstraints(currentActor.get().requireUserId().toString(), ConvertUtil.idToLong(eventId));
         timeConstraintService.delete(ConvertUtil.idToLong(timeConstraintId));
     }
 }

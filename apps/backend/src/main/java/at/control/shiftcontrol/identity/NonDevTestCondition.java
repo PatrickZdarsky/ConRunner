@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.shift.auth;
+package at.control.shiftcontrol.identity;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Condition;

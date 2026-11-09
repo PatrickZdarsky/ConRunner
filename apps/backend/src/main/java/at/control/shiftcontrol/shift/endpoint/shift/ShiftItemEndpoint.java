@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.shift.ShiftDetailsDto;
 import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
 import at.control.shiftcontrol.shift.dto.shift.ShiftModificationDto;
@@ -30,7 +30,7 @@ import at.control.shiftcontrol.shift.service.ShiftService;
 @RequestMapping(value = "api/v1/shifts/{shiftId}", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class ShiftItemEndpoint {
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final ShiftService shiftService;
 
     @GetMapping()
@@ -39,7 +39,7 @@ public class ShiftItemEndpoint {
         description = "Get details for a specific shift of a shift plan"
     )
     public ShiftDetailsDto getShiftDetails(@PathVariable String shiftId) {
-        return shiftService.getShiftDetails(ConvertUtil.idToLong(shiftId), userProvider.getCurrentUser().getUserId());
+        return shiftService.getShiftDetails(ConvertUtil.idToLong(shiftId), currentActor.get().requireUserId().toString());
     }
 
     @PutMapping()

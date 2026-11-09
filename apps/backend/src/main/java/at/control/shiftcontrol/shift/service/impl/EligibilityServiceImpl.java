@@ -3,6 +3,7 @@ package at.control.shiftcontrol.shift.service.impl;
 import java.time.Instant;
 import java.util.Collection;
 
+import at.control.shiftcontrol.identity.Authorities;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,7 @@ import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
 import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
 import at.control.shiftcontrol.shift.lib.type.TradeStatus;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
-import at.control.shiftcontrol.shift.auth.Authorities;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.dao.PositionSlotDao;
 import at.control.shiftcontrol.shift.dao.TimeConstraintDao;
@@ -34,7 +34,7 @@ public class EligibilityServiceImpl implements EligibilityService {
     private final AssignmentDao assignmentDao;
     private final TimeConstraintDao timeConstraintDao;
 
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
 
     @Override
     public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull String userId) {
@@ -119,7 +119,7 @@ public class EligibilityServiceImpl implements EligibilityService {
                 // simply joining is not possible
                 throw new ConflictException(new PositionSlotJoinErrorDto(signupState));
             case NOT_ELIGIBLE:
-                if (!userProvider.currentUserHasAuthority(Authorities.CAN_JOIN_UNELIGIBLE_POSITIONS)) {
+                if (!currentActor.get().hasAuthority(Authorities.CAN_JOIN_UNELIGIBLE_POSITIONS)) {
                     throw new ConflictException(new PositionSlotJoinErrorDto(signupState));
                 }
                 break;
@@ -137,7 +137,7 @@ public class EligibilityServiceImpl implements EligibilityService {
             case SIGNED_UP, FULL, SIGNUP_VIA_TRADE, SIGNUP_POSSIBLE, SIGNUP_OR_TRADE, TIME_CONFLICT_ASSIGNMENT, TIME_CONFLICT_TIME_CONSTRAINT:
                 throw new ConflictException(new PositionSlotJoinErrorDto(signupState));
             case NOT_ELIGIBLE:
-                if (!userProvider.currentUserHasAuthority(Authorities.CAN_JOIN_UNELIGIBLE_POSITIONS)) {
+                if (!currentActor.get().hasAuthority(Authorities.CAN_JOIN_UNELIGIBLE_POSITIONS)) {
                     throw new ConflictException(new PositionSlotJoinErrorDto(signupState));
                 }
                 break;

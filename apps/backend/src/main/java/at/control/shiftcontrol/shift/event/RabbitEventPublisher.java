@@ -12,8 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import at.control.shiftcontrol.shift.lib.event.BaseEvent;
 import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.config.RabbitMqConfig;
 
 @Service
@@ -21,7 +20,7 @@ import at.control.shiftcontrol.shift.config.RabbitMqConfig;
 @RequiredArgsConstructor
 public class RabbitEventPublisher {
     private final RabbitTemplate rabbitTemplate;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final Tracer tracer;
 
     private static final String ROUTING_KEY_PREFIX = "shiftcontrol.";
@@ -51,12 +50,6 @@ public class RabbitEventPublisher {
 
     @Nullable
     private String getCurrentUserId() {
-        var userOpt = userProvider.getNullableApplicationUser();
-        if (userOpt.isPresent()) {
-            var user = (ShiftControlUser) userOpt.get();
-            return user.getUserId();
-        } else {
-            return null;
-        }
+        return currentActor.find().flatMap(actor -> actor.getUserId()).map(java.util.UUID::toString).orElse(null);
     }
 }

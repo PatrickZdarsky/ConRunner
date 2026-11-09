@@ -20,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
 import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
 import at.control.shiftcontrol.shift.service.userprofile.NotificationService;

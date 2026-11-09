@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
 import at.control.shiftcontrol.shift.lib.type.NotificationType;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
 import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
@@ -26,27 +26,27 @@ public class LocalUserProfileService implements UserProfileService {
     private final UserLookupService userDirectoryService;
     private final CurrentUserProfileSyncService currentUserProfileSyncService;
     private final NotificationService notificationService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
     private final SecurityHelper securityHelper;
     private final VolunteerDao volunteerDao;
     private final VolunteerCalendarService volunteerCalendarService;
 
     @Override
     public UserProfileDto getUserProfile(String userId) {
-        var currentUser = userProvider.getCurrentUser();
-        if (!userId.equals(currentUser.getUserId()) && securityHelper.isNotUserAdmin()) {
+        var actor = currentActor.get();
+        if (!userId.equals(actor.requireUserId().toString()) && securityHelper.isNotUserAdmin()) {
             throw new ForbiddenException("Access denied: cannot access other user's profile");
         }
 
         UserInfo user;
-        if (userId.equals(currentUser.getUserId())) {
+        if (userId.equals(actor.requireUserId().toString())) {
             user = currentUserProfileSyncService.syncCurrentSubjectIfStale();
         } else {
             user = userDirectoryService.getUserById(userId);
         }
 
         Volunteer volunteer = volunteerDao.findById(userId).orElse(null);
-        String calendarShareId = userId.equals(currentUser.getUserId())
+        String calendarShareId = userId.equals(actor.requireUserId().toString())
             ? volunteerCalendarService.getOrCreateCalendarShareId(userId).orElse(null)
             : null;
 

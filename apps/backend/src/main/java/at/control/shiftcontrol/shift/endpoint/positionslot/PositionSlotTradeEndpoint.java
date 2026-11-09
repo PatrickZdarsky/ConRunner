@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.trade.TradeCandidatesDto;
 import at.control.shiftcontrol.shift.dto.trade.TradeCreateDto;
 import at.control.shiftcontrol.shift.dto.trade.TradeDto;
@@ -29,7 +29,7 @@ import at.control.shiftcontrol.shift.service.AssignmentSwitchRequestService;
 @RequiredArgsConstructor
 public class PositionSlotTradeEndpoint {
     private final AssignmentSwitchRequestService assignmentSwitchRequestService;
-    private final ApplicationUserProvider userProvider;
+    private final CurrentShiftActor currentActor;
 
     @GetMapping("/{tradeId}")
     @Operation(
@@ -48,7 +48,7 @@ public class PositionSlotTradeEndpoint {
     public Collection<TradeCandidatesDto> getPositionSlotsToOffer(@PathVariable String positionSlotId) {
         return assignmentSwitchRequestService.getPositionSlotsToOffer(
             ConvertUtil.idToLong(positionSlotId),
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
     @PostMapping
@@ -59,7 +59,7 @@ public class PositionSlotTradeEndpoint {
     public Collection<TradeDto> createTrade(@RequestBody @Valid TradeCreateDto tradeCreateDto) {
         return assignmentSwitchRequestService.createTrade(
             tradeCreateDto,
-            userProvider.getCurrentUser().getUserId());
+            currentActor.get().requireUserId().toString());
     }
 
     @PutMapping("/{tradeId}/accept")
@@ -68,7 +68,7 @@ public class PositionSlotTradeEndpoint {
         description = "Accept a trade request for a specific position slot in a shift"
     )
     public TradeDto acceptTrade(@PathVariable String tradeId) {
-        return assignmentSwitchRequestService.acceptTrade(ConvertUtil.idToLong(tradeId), userProvider.getCurrentUser().getUserId());
+        return assignmentSwitchRequestService.acceptTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
     }
 
     @PutMapping("/{tradeId}/decline")
@@ -77,7 +77,7 @@ public class PositionSlotTradeEndpoint {
         description = "Decline a trade request for a specific position slot in a shift"
     )
     public TradeDto declineTrade(@PathVariable String tradeId) {
-        return assignmentSwitchRequestService.declineTrade(ConvertUtil.idToLong(tradeId), userProvider.getCurrentUser().getUserId());
+        return assignmentSwitchRequestService.declineTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
     }
 
     @PutMapping("/{tradeId}/cancel")
@@ -86,6 +86,6 @@ public class PositionSlotTradeEndpoint {
         description = "Cancel a request for a specific position slot in a shift"
     )
     public void cancelTrade(@PathVariable String tradeId) {
-        assignmentSwitchRequestService.cancelTrade(ConvertUtil.idToLong(tradeId), userProvider.getCurrentUser().getUserId());
+        assignmentSwitchRequestService.cancelTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
     }
 }
