@@ -99,6 +99,8 @@ public class JwtSecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/swagger-ui/**")
                 .permitAll()
+                .requestMatchers("/swagger-ui.html")
+                .permitAll()
                 .requestMatchers("/swagger")
                 .permitAll()
                 .requestMatchers("/v3/api-docs*/**")
