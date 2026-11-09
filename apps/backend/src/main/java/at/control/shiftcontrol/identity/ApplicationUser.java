@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -27,6 +28,26 @@ public abstract class ApplicationUser implements UserDetails, AuthenticatedActor
         this.authorities = authorities;
         this.username = username;
         this.enabled = enabled;
+    }
+
+    @Override
+    public ActorType type() {
+        return ActorType.HUMAN;
+    }
+
+    @Override
+    public String name() {
+        return username;
+    }
+
+    @Override
+    public Optional<UUID> userId() {
+        return Optional.of(userId);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> authorities() {
+        return authorities;
     }
 
     @Override

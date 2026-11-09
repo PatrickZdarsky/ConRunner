@@ -1,6 +1,8 @@
 package at.control.shiftcontrol.identity.auth;
 
 import at.control.shiftcontrol.identity.ApplicationUser;
+import at.control.shiftcontrol.identity.AuthenticatedActor;
+import at.control.shiftcontrol.identity.ActorType;
 import at.control.shiftcontrol.identity.auth.JwtTokenDecoder.DecodedJwtToken;
 import at.control.shiftcontrol.identity.config.props.MachineClientRegistration;
 import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
@@ -19,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -63,6 +66,25 @@ class JwtSecurityConfigTest {
     }
 
     @Test
+    void jwtAuthenticationConverter_exposesHumanActor() {
+        ApplicationUserSyncService syncService = mock(ApplicationUserSyncService.class);
+        TestApplicationUser user = new TestApplicationUser(true);
+        when(syncService.constructUserForLogin(org.mockito.ArgumentMatchers.any(DecodedJwtToken.class)))
+            .thenReturn(user);
+        Jwt jwt = jwt(ISSUER, AUDIENCE, Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+
+        var authentication = securityConfig(syncService).jwtAuthenticationConverter(properties()).convert(jwt);
+
+        assertSame(user, authentication.getPrincipal());
+        assertEquals(ActorType.HUMAN, user.type());
+        assertFalse(user.isMachine());
+        assertEquals(user.getUserId(), user.userId().orElseThrow());
+        assertEquals("pat", authentication.getName());
+        assertEquals(user.authorities(), authentication.getAuthorities());
+        assertSame(jwt, authentication.getDetails());
+    }
+
+    @Test
     void jwtAuthenticationConverter_usesOnlyConfiguredMachineAuthorities() {
         ApplicationUserSyncService syncService = mock(ApplicationUserSyncService.class);
         MachineClientAuthorizer authorizer = new MachineClientAuthorizer(List.of(
@@ -81,7 +103,14 @@ class JwtSecurityConfigTest {
 
         var authentication = config.jwtAuthenticationConverter(properties()).convert(machineJwt);
 
-        assertEquals(new MachineClientAuthorizer.MachinePrincipal("notification-worker"), authentication.getPrincipal());
+        AuthenticatedActor actor = (AuthenticatedActor) authentication.getPrincipal();
+        assertEquals(ActorType.MACHINE, actor.type());
+        assertTrue(actor.isMachine());
+        assertTrue(actor.userId().isEmpty());
+        assertEquals("notification-worker", actor.name());
+        assertEquals(actor.name(), authentication.getName());
+        assertEquals(actor.authorities(), authentication.getAuthorities());
+        assertSame(machineJwt, authentication.getDetails());
         assertEquals(List.of("notifications.recipients.read"),
             authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
         verifyNoInteractions(syncService);
