@@ -2,17 +2,18 @@ package at.control.shiftcontrol.shift.auth;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 
 import lombok.NonNull;
 
 public interface UserAttributeProvider {
-    void invalidateUserCache(String userId);
+    void invalidateUserCache(UUID userId);
 
-    void invalidateUserCaches(Collection<String> userId);
+    void invalidateUserCaches(Collection<UUID> userId);
 
-    Set<Long> getPlansWhereUserIsVolunteer(@NonNull String userId);
+    Set<Long> getPlansWhereUserIsVolunteer(@NonNull UUID userId);
 
-    Set<Long> getPlansWhereUserIsPlanner(@NonNull String userId);
+    Set<Long> getPlansWhereUserIsPlanner(@NonNull UUID userId);
 
-    Set<Long> getPlansWhereUserIsLocked(@NonNull String userId);
+    Set<Long> getPlansWhereUserIsLocked(@NonNull UUID userId);
 }
