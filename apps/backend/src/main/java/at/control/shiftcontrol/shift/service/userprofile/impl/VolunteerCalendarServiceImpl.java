@@ -17,17 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.common.UniqueCodeGenerator;
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.userprofile.CalendarShareIdDto;
-import at.shiftcontrol.shiftservice.repo.AssignmentRepository;
-import at.shiftcontrol.shiftservice.service.userprofile.VolunteerCalendarService;
+import at.control.shiftcontrol.shift.util.UniqueCodeGenerator;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.userprofile.CalendarShareIdDto;
+import at.control.shiftcontrol.shift.repo.AssignmentRepository;
+import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarService;
 
 @Service
 @RequiredArgsConstructor

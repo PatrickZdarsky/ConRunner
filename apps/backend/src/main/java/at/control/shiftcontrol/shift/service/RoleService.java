@@ -2,10 +2,10 @@ package at.control.shiftcontrol.shift.service;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleModificationDto;
-import at.shiftcontrol.shiftservice.dto.role.UserRoleAssignmentAssignDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.role.RoleModificationDto;
+import at.control.shiftcontrol.shift.dto.role.UserRoleAssignmentAssignDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 
 import lombok.NonNull;
 

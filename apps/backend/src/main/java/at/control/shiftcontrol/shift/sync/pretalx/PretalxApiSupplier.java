@@ -7,7 +7,7 @@ import org.springframework.web.client.RestClient;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.PretalxApiKey;
+import at.control.shiftcontrol.shift.entity.PretalxApiKey;
 import at.shiftcontrol.pretalxclient.api.EventsApi;
 import at.shiftcontrol.pretalxclient.api.RoomsApi;
 import at.shiftcontrol.pretalxclient.api.SlotsApi;

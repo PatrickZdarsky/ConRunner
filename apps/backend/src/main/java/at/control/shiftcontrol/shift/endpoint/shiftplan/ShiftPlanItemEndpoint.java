@@ -17,12 +17,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanModificationDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanPatchStatusDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanStatisticsDto;
-import at.shiftcontrol.shiftservice.service.ShiftPlanService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanModificationDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanPatchStatusDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanStatisticsDto;
+import at.control.shiftcontrol.shift.service.ShiftPlanService;
 
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 

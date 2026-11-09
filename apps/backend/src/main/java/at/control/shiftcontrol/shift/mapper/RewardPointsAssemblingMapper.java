@@ -1,8 +1,8 @@
 package at.control.shiftcontrol.shift.mapper;
 
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsDto;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsCalculator;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsDto;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsCalculator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

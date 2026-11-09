@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
-import at.shiftcontrol.shiftservice.repo.userprofile.NotificationSettingsRepository;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.repo.userprofile.NotificationSettingsRepository;
 
 @RequiredArgsConstructor
 @Component

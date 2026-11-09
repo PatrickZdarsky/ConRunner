@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.shiftservice.dao.BasicDao;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.dao.BasicDao;
 
 public interface RoleDao extends BasicDao<Role, Long> {
     List<Role> findAllByShiftPlanId(Long eventId);

@@ -5,13 +5,13 @@ import java.util.Collections;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.UserProfileDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @RequiredArgsConstructor
 @Service
@@ -22,7 +22,7 @@ public class UserProfileMapper {
         Volunteer volunteer,
         String calendarShareId
     ) {
-        Collection<at.shiftcontrol.shiftservice.dto.role.RoleDto> roles = volunteer == null
+        Collection<at.control.shiftcontrol.shift.dto.role.RoleDto> roles = volunteer == null
             ? Collections.emptySet()
             : RoleMapper.toRoleDto(volunteer.getRoles());
         Collection<String> volunteeringPlans = volunteer == null

@@ -1,15 +1,15 @@
 package at.control.shiftcontrol.shift.dto.shift;
 
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
 
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotPreferenceDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceDto;
 
 @Data
 @Builder

@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.AssignmentPart;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.AssignmentPart;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

@@ -9,8 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.TradeStatus;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.lib.type.TradeStatus;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
 
 @Data
 @NoArgsConstructor

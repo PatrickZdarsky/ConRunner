@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.lib.exception.PartiallyNotFoundException;
-import at.shiftcontrol.shiftservice.dao.role.RoleDao;
-import at.shiftcontrol.shiftservice.repo.role.RoleRepository;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
+import at.control.shiftcontrol.shift.dao.role.RoleDao;
+import at.control.shiftcontrol.shift.repo.role.RoleRepository;
 
 @RequiredArgsConstructor
 @Component

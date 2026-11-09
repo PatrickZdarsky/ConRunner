@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.TrustAlert;
-import at.shiftcontrol.shiftservice.dao.TrustAlertDao;
-import at.shiftcontrol.shiftservice.repo.TrustAlertRepository;
+import at.control.shiftcontrol.shift.entity.TrustAlert;
+import at.control.shiftcontrol.shift.dao.TrustAlertDao;
+import at.control.shiftcontrol.shift.repo.TrustAlertRepository;
 
 @RequiredArgsConstructor
 @Component

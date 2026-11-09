@@ -18,10 +18,10 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 import org.springframework.security.web.SecurityFilterChain;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.auth.NonDevTestCondition;
-import at.shiftcontrol.lib.auth.UserAuthenticationToken;
-import at.shiftcontrol.shiftservice.auth.config.props.OidcProviderProps;
-import at.shiftcontrol.shiftservice.userdirectory.current.CurrentUserProfileSyncService;
+import at.control.shiftcontrol.shift.auth.NonDevTestCondition;
+import at.control.shiftcontrol.shift.auth.UserAuthenticationToken;
+import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
+import at.control.shiftcontrol.shift.userdirectory.current.CurrentUserProfileSyncService;
 @Deprecated
 @Conditional(NonDevTestCondition.class)
 @EnableWebSecurity

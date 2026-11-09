@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.repo;
 
-import at.shiftcontrol.lib.entity.RewardPointsShareToken;
+import at.control.shiftcontrol.shift.entity.RewardPointsShareToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RewardPointsShareTokenRepository extends JpaRepository<RewardPointsShareToken, Long> {

@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.dao;
 import java.util.Collection;
 import java.util.Set;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
 
 public interface ShiftPlanDao extends BasicDao<ShiftPlan, Long> {
     Collection<ShiftPlan> findByEventId(Long eventId);

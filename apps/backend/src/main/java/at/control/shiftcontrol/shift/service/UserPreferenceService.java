@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.service;
 
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotPreferenceDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceDto;
 
 import lombok.NonNull;
 

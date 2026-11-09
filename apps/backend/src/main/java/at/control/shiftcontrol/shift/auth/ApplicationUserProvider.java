@@ -5,7 +5,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import at.shiftcontrol.lib.auth.impl.UserProviderImpl;
-import at.shiftcontrol.lib.exception.UnauthorizedException;
+import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
 import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
 @Deprecated
 @Component

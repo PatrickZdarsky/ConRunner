@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.entity;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

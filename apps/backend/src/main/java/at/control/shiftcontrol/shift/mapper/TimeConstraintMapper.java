@@ -4,11 +4,11 @@ import java.util.Collection;
 
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.TimeConstraint;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.shiftservice.dto.TimeConstraintCreateDto;
-import at.shiftcontrol.shiftservice.dto.TimeConstraintDto;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.TimeConstraint;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.dto.TimeConstraintCreateDto;
+import at.control.shiftcontrol.shift.dto.TimeConstraintDto;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class TimeConstraintMapper {

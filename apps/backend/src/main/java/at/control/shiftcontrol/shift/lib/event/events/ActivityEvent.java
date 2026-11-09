@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.ActivityPart;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.ActivityPart;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

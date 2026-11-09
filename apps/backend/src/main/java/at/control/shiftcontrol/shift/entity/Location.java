@@ -19,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import at.shiftcontrol.lib.util.JsonMapConverter;
+import at.control.shiftcontrol.shift.lib.util.JsonMapConverter;
 
 @Getter
 @Setter

@@ -10,13 +10,13 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.lib.util.TimeUtil;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsSnapshotDto;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsCalculator;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.util.TimeUtil;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsSnapshotDto;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsCalculator;
 
 @Service
 @RequiredArgsConstructor

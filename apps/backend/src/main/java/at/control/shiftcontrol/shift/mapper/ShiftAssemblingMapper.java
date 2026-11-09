@@ -2,10 +2,10 @@ package at.control.shiftcontrol.shift.mapper;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftContextDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftContextDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

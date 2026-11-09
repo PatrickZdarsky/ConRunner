@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.dto.rewardpoints;
 
-import at.shiftcontrol.lib.entity.RewardPointsTransaction;
+import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
 
 public record BookingResultDto(
     boolean created,

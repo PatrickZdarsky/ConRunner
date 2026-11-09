@@ -12,11 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dto.event.EventSearchDto;
-import at.shiftcontrol.shiftservice.dto.rows.PlanVolunteerIdRow;
-import at.shiftcontrol.shiftservice.repo.EventRepository;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dto.event.EventSearchDto;
+import at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow;
+import at.control.shiftcontrol.shift.repo.EventRepository;
 
 @RequiredArgsConstructor
 @Component

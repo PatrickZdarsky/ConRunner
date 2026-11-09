@@ -5,10 +5,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.exception.PartiallyNotFoundException;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanDao;
-import at.shiftcontrol.shiftservice.repo.ShiftPlanRepository;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
+import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
+import at.control.shiftcontrol.shift.repo.ShiftPlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;

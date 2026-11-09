@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.shiftservice.sync.pretalx.PretalxApiKeyData;
+import at.control.shiftcontrol.shift.sync.pretalx.PretalxApiKeyData;
 
 @Data
 @NoArgsConstructor

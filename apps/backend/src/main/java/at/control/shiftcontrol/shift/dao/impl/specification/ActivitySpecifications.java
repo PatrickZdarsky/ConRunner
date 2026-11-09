@@ -3,9 +3,9 @@ package at.control.shiftcontrol.shift.dao.impl.specification;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.util.TimeUtil;
-import at.shiftcontrol.shiftservice.dto.event.schedule.ActivityScheduleDaySearchDto;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.lib.util.TimeUtil;
+import at.control.shiftcontrol.shift.dto.event.schedule.ActivityScheduleDaySearchDto;
 import org.springframework.data.jpa.domain.Specification;
 
 public final class ActivitySpecifications {

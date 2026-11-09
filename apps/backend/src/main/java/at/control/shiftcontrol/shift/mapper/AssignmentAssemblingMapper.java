@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.type.TimeConstraintType;
-import at.shiftcontrol.shiftservice.dao.TimeConstraintDao;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentContextDto;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.dao.TimeConstraintDao;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @RequiredArgsConstructor
 @Service

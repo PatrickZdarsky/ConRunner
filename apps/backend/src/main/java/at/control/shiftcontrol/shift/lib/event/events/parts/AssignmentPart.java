@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 
 @Data
 @Builder

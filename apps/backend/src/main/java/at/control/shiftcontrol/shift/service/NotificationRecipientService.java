@@ -1,9 +1,9 @@
 package at.control.shiftcontrol.shift.service;
 
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsDto;
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsFilterDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsDto;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsFilterDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
 
 import lombok.NonNull;
 

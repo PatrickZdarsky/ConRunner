@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;

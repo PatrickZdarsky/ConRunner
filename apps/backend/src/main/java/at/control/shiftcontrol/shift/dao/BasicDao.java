@@ -6,7 +6,7 @@ import java.util.Optional;
 import lombok.NonNull;
 import org.slf4j.LoggerFactory;
 
-import at.shiftcontrol.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
 
 public interface BasicDao<T, K> {
     @NonNull

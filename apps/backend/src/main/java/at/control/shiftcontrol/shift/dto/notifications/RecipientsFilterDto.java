@@ -9,9 +9,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
-import at.shiftcontrol.lib.type.ReceiverAccessLevel;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.lib.type.ReceiverAccessLevel;
 
 @Data
 @RequiredArgsConstructor

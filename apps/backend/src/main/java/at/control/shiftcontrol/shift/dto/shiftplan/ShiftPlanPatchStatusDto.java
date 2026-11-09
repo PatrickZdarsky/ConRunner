@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import at.shiftcontrol.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
 
 @Data
 @Builder

@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
 
 @Data
 @Builder

@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import at.shiftcontrol.lib.entity.TimeConstraint;
-import at.shiftcontrol.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.entity.TimeConstraint;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
 
 @Repository
 public interface TimeConstraintRepository extends JpaRepository<TimeConstraint, Long> {

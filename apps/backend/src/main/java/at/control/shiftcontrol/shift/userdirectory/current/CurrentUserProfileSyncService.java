@@ -9,14 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.ExternalIdentity;
-import at.shiftcontrol.lib.entity.UserAccount;
-import at.shiftcontrol.lib.type.UserAccountStatus;
-import at.shiftcontrol.lib.type.UserProfileSource;
-import at.shiftcontrol.shiftservice.repo.userdirectory.ExternalIdentityRepository;
-import at.shiftcontrol.shiftservice.repo.userdirectory.UserAccountRepository;
-import at.shiftcontrol.shiftservice.service.VolunteerService;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.entity.ExternalIdentity;
+import at.control.shiftcontrol.shift.entity.UserAccount;
+import at.control.shiftcontrol.shift.lib.type.UserAccountStatus;
+import at.control.shiftcontrol.shift.lib.type.UserProfileSource;
+import at.control.shiftcontrol.shift.repo.userdirectory.ExternalIdentityRepository;
+import at.control.shiftcontrol.shift.repo.userdirectory.UserAccountRepository;
+import at.control.shiftcontrol.shift.service.VolunteerService;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @Service
 @RequiredArgsConstructor

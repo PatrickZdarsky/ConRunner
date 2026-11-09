@@ -8,21 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.ReceiverAccessLevel;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dao.NotificationSettingsDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsDto;
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsFilterDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
-import at.shiftcontrol.shiftservice.mapper.AccountInfoMapper;
-import at.shiftcontrol.shiftservice.service.NotificationRecipientService;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.ReceiverAccessLevel;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dao.NotificationSettingsDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsDto;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsFilterDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.mapper.AccountInfoMapper;
+import at.control.shiftcontrol.shift.service.NotificationRecipientService;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @Service
 @RequiredArgsConstructor

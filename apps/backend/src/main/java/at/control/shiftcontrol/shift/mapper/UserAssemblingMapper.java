@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.shiftservice.dto.user.ContactInfoDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventDto;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventDto;
+import at.control.shiftcontrol.shift.dto.user.UserPlanDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserAssemblingMapper {

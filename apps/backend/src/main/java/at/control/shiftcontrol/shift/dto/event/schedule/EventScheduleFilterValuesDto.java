@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

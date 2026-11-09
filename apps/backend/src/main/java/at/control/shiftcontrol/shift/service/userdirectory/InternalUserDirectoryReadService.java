@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.user.ContactInfoDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
 
 public interface InternalUserDirectoryReadService {
     @NonNull AccountInfoDto getUser(@NonNull String userId);

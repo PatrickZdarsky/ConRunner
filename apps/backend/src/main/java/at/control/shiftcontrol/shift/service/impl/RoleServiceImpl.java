@@ -9,25 +9,25 @@ import org.springframework.stereotype.Service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.events.RoleEvent;
-import at.shiftcontrol.lib.event.events.RoleVolunteerEvent;
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.lib.exception.ForbiddenException;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanDao;
-import at.shiftcontrol.shiftservice.dao.role.RoleDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleModificationDto;
-import at.shiftcontrol.shiftservice.dto.role.UserRoleAssignmentAssignDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
-import at.shiftcontrol.shiftservice.mapper.RoleMapper;
-import at.shiftcontrol.shiftservice.mapper.VolunteerAssemblingMapper;
-import at.shiftcontrol.shiftservice.service.RoleService;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.events.RoleEvent;
+import at.control.shiftcontrol.shift.lib.event.events.RoleVolunteerEvent;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
+import at.control.shiftcontrol.shift.dao.role.RoleDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.role.RoleModificationDto;
+import at.control.shiftcontrol.shift.dto.role.UserRoleAssignmentAssignDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.mapper.RoleMapper;
+import at.control.shiftcontrol.shift.mapper.VolunteerAssemblingMapper;
+import at.control.shiftcontrol.shift.service.RoleService;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

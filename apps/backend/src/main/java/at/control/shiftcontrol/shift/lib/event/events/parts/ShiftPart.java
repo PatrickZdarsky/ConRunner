@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.Shift;
+import at.control.shiftcontrol.shift.entity.Shift;
 
 @Data
 @AllArgsConstructor

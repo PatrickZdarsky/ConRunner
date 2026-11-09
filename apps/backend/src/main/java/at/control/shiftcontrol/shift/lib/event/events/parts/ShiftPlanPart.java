@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
 
 @AllArgsConstructor
 @Data

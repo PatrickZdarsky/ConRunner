@@ -1,7 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotPreferenceDto;
-import at.shiftcontrol.shiftservice.service.UserPreferenceService;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceDto;
+import at.control.shiftcontrol.shift.service.UserPreferenceService;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;

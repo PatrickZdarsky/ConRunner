@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
 
 public interface UserLookupService {
     UserInfo getUserById(String userId);

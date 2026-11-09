@@ -2,11 +2,11 @@ package at.control.shiftcontrol.shift.service.rewardpoints;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.exception.ConflictException;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsExportDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsShareTokenDto;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.lib.exception.ConflictException;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsExportDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenDto;
 
 public interface RewardPointsService {
     void onAssignmentAccepted(Assignment assignment) throws ConflictException;

@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
 
 @Repository
 public interface NotificationSettingsRepository extends JpaRepository<NotificationSettings, Long> {

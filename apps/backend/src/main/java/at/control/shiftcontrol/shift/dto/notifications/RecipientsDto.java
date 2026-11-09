@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.dto.notifications;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

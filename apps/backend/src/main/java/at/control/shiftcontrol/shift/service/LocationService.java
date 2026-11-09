@@ -2,8 +2,8 @@ package at.control.shiftcontrol.shift.service;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
-import at.shiftcontrol.shiftservice.dto.location.LocationModificationDto;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.location.LocationModificationDto;
 
 import lombok.NonNull;
 

@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.service.event;
 
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
 
 public interface EventCloneService {
     public EventDto cloneEvent(long eventId);

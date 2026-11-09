@@ -3,8 +3,8 @@ package at.control.shiftcontrol.shift.lib.event.events.parts;
 import java.time.Instant;
 import java.util.Map;
 
-import at.shiftcontrol.lib.entity.RewardPointsTransaction;
-import at.shiftcontrol.lib.type.RewardPointTransactionType;
+import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
+import at.control.shiftcontrol.shift.lib.type.RewardPointTransactionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;

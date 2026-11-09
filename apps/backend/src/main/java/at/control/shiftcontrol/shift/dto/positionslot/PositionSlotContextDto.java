@@ -1,7 +1,7 @@
 package at.control.shiftcontrol.shift.dto.positionslot;
 
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsDto;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

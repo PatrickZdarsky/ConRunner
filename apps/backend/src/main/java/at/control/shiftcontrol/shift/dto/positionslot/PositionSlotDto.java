@@ -12,12 +12,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.LockStatus;
-import at.shiftcontrol.lib.type.PositionSignupState;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeInfoDto;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsDto;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeInfoDto;
 
 
 @Data

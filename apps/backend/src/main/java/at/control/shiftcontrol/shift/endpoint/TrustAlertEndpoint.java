@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.endpoint;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.lib.dto.TrustAlertDto;
-import at.shiftcontrol.shiftservice.dto.TrustAlertDisplayDto;
-import at.shiftcontrol.shiftservice.service.TrustAlertService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.TrustAlertDto;
+import at.control.shiftcontrol.shift.dto.TrustAlertDisplayDto;
+import at.control.shiftcontrol.shift.service.TrustAlertService;
 
 @RestController
 @RequestMapping(value = "api/v1/trust-alerts", produces = MediaType.APPLICATION_JSON_VALUE)

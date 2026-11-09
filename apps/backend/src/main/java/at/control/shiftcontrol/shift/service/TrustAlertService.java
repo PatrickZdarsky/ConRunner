@@ -1,8 +1,8 @@
 package at.control.shiftcontrol.shift.service;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.lib.dto.TrustAlertDto;
-import at.shiftcontrol.shiftservice.dto.TrustAlertDisplayDto;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.TrustAlertDto;
+import at.control.shiftcontrol.shift.dto.TrustAlertDisplayDto;
 
 import lombok.NonNull;
 

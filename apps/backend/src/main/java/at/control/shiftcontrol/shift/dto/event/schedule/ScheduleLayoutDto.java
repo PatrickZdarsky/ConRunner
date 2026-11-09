@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.dto.event.schedule;
 
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

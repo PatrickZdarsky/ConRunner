@@ -10,25 +10,25 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.events.AssignmentSwitchEvent;
-import at.shiftcontrol.lib.event.events.ClaimedAuctionEvent;
-import at.shiftcontrol.lib.event.events.PositionSlotVolunteerEvent;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.type.TradeStatus;
-import at.shiftcontrol.shiftservice.dao.AssignmentDao;
-import at.shiftcontrol.shiftservice.dao.AssignmentSwitchRequestDao;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotRequestDto;
-import at.shiftcontrol.shiftservice.mapper.AssignmentAssemblingMapper;
-import at.shiftcontrol.shiftservice.mapper.TradeMapper;
-import at.shiftcontrol.shiftservice.service.AssignmentService;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsService;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.events.AssignmentSwitchEvent;
+import at.control.shiftcontrol.shift.lib.event.events.ClaimedAuctionEvent;
+import at.control.shiftcontrol.shift.lib.event.events.PositionSlotVolunteerEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.type.TradeStatus;
+import at.control.shiftcontrol.shift.dao.AssignmentDao;
+import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotRequestDto;
+import at.control.shiftcontrol.shift.mapper.AssignmentAssemblingMapper;
+import at.control.shiftcontrol.shift.mapper.TradeMapper;
+import at.control.shiftcontrol.shift.service.AssignmentService;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsService;
 
 @Service
 @RequiredArgsConstructor

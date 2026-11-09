@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.userdirectory;
 
-import at.shiftcontrol.lib.entity.UserAccount;
+import at.control.shiftcontrol.shift.entity.UserAccount;
 
 /**
  * Stable user information exposed to the rest of the application without leaking the persistence entity.

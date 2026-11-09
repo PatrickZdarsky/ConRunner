@@ -2,11 +2,11 @@ package at.control.shiftcontrol.shift.endpoint.shiftplan;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanCreateDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanModificationDto;
-import at.shiftcontrol.shiftservice.service.ShiftPlanService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanCreateDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanModificationDto;
+import at.control.shiftcontrol.shift.service.ShiftPlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

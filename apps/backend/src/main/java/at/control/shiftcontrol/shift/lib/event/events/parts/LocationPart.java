@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.Location;
+import at.control.shiftcontrol.shift.entity.Location;
 
 @AllArgsConstructor
 @Data

@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dto.event;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

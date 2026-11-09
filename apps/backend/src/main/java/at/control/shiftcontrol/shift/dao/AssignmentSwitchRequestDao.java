@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.AssignmentPair;
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.AssignmentPair;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
 
 public interface AssignmentSwitchRequestDao extends BasicDao<AssignmentSwitchRequest, Long> {
 

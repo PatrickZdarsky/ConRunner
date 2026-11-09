@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.dto.shift;
 import java.time.Instant;
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -14,10 +14,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.LockStatus;
-import at.shiftcontrol.shiftservice.dto.activity.ActivityDto;
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.dto.activity.ActivityDto;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
 
 @Data
 @NoArgsConstructor

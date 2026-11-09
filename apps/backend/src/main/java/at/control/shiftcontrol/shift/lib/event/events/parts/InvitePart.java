@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.entity.ShiftPlanInvite;
-import at.shiftcontrol.lib.type.ShiftPlanInviteType;
+import at.control.shiftcontrol.shift.entity.ShiftPlanInvite;
+import at.control.shiftcontrol.shift.lib.type.ShiftPlanInviteType;
 
 @AllArgsConstructor
 @Data

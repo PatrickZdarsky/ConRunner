@@ -1,20 +1,14 @@
 package at.control.shiftcontrol.shift.auth.impl;
 
-import java.util.Optional;
-
 import at.control.shiftcontrol.identity.AuthenticatedActor;
 import at.control.shiftcontrol.shift.auth.UserAttributeProvider;
 import at.control.shiftcontrol.shift.auth.user.ShiftActor;
 import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.auth.ApplicationUser;
-import at.shiftcontrol.lib.auth.UserProvider;
-import at.shiftcontrol.lib.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor

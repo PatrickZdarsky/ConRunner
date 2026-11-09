@@ -4,14 +4,14 @@ import java.util.Collection;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventBulkDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventUpdateDto;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanBulkDto;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanDto;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanUpdateDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventBulkDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventUpdateDto;
+import at.control.shiftcontrol.shift.dto.user.UserPlanBulkDto;
+import at.control.shiftcontrol.shift.dto.user.UserPlanDto;
+import at.control.shiftcontrol.shift.dto.user.UserPlanUpdateDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
 
 public interface UserAdministrationService {
     @NonNull PaginationDto<UserEventDto> getAllUsers(int page, int size, @NonNull UserSearchDto searchDt);

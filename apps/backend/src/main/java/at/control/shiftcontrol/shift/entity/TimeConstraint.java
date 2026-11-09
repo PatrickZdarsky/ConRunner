@@ -19,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import at.shiftcontrol.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
 
 
 @Getter

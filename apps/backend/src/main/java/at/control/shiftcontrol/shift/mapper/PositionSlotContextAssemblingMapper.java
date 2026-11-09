@@ -1,7 +1,7 @@
 package at.control.shiftcontrol.shift.mapper;
 
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotContextDto;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotContextDto;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -7,19 +7,19 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.util.TimeUtil;
-import at.shiftcontrol.shiftservice.dao.ShiftDao;
-import at.shiftcontrol.shiftservice.dto.OverallStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.OwnStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.event.schedule.ScheduleStatisticsDto;
-import at.shiftcontrol.shiftservice.service.EligibilityService;
-import at.shiftcontrol.shiftservice.service.StatisticService;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.util.TimeUtil;
+import at.control.shiftcontrol.shift.dao.ShiftDao;
+import at.control.shiftcontrol.shift.dto.OverallStatisticsDto;
+import at.control.shiftcontrol.shift.dto.OwnStatisticsDto;
+import at.control.shiftcontrol.shift.dto.event.schedule.ScheduleStatisticsDto;
+import at.control.shiftcontrol.shift.service.EligibilityService;
+import at.control.shiftcontrol.shift.service.StatisticService;
 
 @Service
 @RequiredArgsConstructor

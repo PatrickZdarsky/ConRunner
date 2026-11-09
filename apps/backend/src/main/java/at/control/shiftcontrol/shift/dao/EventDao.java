@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.shiftservice.dto.event.EventSearchDto;
-import at.shiftcontrol.shiftservice.dto.rows.PlanVolunteerIdRow;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.dto.event.EventSearchDto;
+import at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow;
 
 public interface EventDao extends BasicDao<Event, Long> {
     List<Event> search(EventSearchDto searchDto);

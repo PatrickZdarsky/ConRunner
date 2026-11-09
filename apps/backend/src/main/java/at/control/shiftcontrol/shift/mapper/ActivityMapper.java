@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.shiftservice.dto.activity.ActivityDto;
-import at.shiftcontrol.shiftservice.dto.activity.ActivityModificationDto;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.dto.activity.ActivityDto;
+import at.control.shiftcontrol.shift.dto.activity.ActivityModificationDto;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class ActivityMapper {

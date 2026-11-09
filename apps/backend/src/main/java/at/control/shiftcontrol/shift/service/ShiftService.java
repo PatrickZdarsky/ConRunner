@@ -3,10 +3,10 @@ package at.control.shiftcontrol.shift.service;
 import java.util.List;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDetailsDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftModificationDto;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDetailsDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftModificationDto;
 
 public interface ShiftService {
     @NonNull ShiftDetailsDto getShiftDetails(long shiftId, @NonNull String userId);

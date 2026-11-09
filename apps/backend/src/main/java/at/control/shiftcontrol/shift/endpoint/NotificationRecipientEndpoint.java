@@ -1,11 +1,11 @@
 package at.control.shiftcontrol.shift.endpoint;
 
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsDto;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsDto;
 
-import at.shiftcontrol.shiftservice.dto.notifications.RecipientsFilterDto;
+import at.control.shiftcontrol.shift.dto.notifications.RecipientsFilterDto;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
-import at.shiftcontrol.shiftservice.service.NotificationRecipientService;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.service.NotificationRecipientService;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +20,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.UserProfileDto;
-import at.shiftcontrol.shiftservice.service.userprofile.NotificationService;
-import at.shiftcontrol.shiftservice.service.userprofile.UserProfileService;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
+import at.control.shiftcontrol.shift.service.userprofile.NotificationService;
+import at.control.shiftcontrol.shift.service.userprofile.UserProfileService;
 
 @Slf4j
 @RestController

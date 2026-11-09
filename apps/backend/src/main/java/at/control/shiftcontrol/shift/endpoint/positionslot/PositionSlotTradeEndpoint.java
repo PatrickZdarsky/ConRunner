@@ -16,12 +16,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.trade.TradeCandidatesDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeCreateDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeDto;
-import at.shiftcontrol.shiftservice.service.AssignmentSwitchRequestService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.trade.TradeCandidatesDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeCreateDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeDto;
+import at.control.shiftcontrol.shift.service.AssignmentSwitchRequestService;
 
 @Slf4j
 @RestController

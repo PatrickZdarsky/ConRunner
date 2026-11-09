@@ -2,9 +2,9 @@ package at.control.shiftcontrol.shift.service;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.trade.TradeCandidatesDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeCreateDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeCandidatesDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeCreateDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeDto;
 
 import lombok.NonNull;
 

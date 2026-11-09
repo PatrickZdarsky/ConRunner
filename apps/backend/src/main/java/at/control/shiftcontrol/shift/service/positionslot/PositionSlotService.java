@@ -4,10 +4,10 @@ import java.util.Collection;
 
 import lombok.NonNull;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotModificationDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotRequestDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotModificationDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotRequestDto;
 
 public interface PositionSlotService {
     PositionSlotDto findById(@NonNull Long id);

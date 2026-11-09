@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import at.shiftcontrol.shiftservice.dto.OwnStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDashboardOverviewDto;
+import at.control.shiftcontrol.shift.dto.OwnStatisticsDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDashboardOverviewDto;
 
 @Data
 @Builder

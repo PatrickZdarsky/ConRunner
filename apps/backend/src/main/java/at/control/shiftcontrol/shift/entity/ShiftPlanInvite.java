@@ -21,7 +21,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.ShiftPlanInviteType;
+import at.control.shiftcontrol.shift.lib.type.ShiftPlanInviteType;
 
 
 @Data

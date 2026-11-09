@@ -6,17 +6,17 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.RolePart;
-import at.shiftcontrol.lib.event.events.parts.ShiftPlanRefPart;
-import at.shiftcontrol.lib.event.events.parts.VolunteerPart;
-import static at.shiftcontrol.lib.event.RoutingKeys.USERS_PLAN_BULK_ADD;
-import static at.shiftcontrol.lib.event.RoutingKeys.USERS_PLAN_BULK_REMOVE;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.RolePart;
+import at.control.shiftcontrol.shift.lib.event.events.parts.ShiftPlanRefPart;
+import at.control.shiftcontrol.shift.lib.event.events.parts.VolunteerPart;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.USERS_PLAN_BULK_ADD;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.USERS_PLAN_BULK_REMOVE;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

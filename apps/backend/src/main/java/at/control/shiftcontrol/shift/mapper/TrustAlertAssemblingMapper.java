@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.dto.TrustAlertDto;
-import at.shiftcontrol.lib.entity.TrustAlert;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.TrustAlertDisplayDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.dto.TrustAlertDto;
+import at.control.shiftcontrol.shift.entity.TrustAlert;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.TrustAlertDisplayDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @Component
 @RequiredArgsConstructor

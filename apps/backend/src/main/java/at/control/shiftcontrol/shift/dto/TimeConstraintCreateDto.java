@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
 
 @Data
 @NoArgsConstructor

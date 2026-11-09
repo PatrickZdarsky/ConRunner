@@ -13,13 +13,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.userprofile.CalendarShareIdDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.UserProfileDto;
-import at.shiftcontrol.shiftservice.service.userprofile.NotificationService;
-import at.shiftcontrol.shiftservice.service.userprofile.UserProfileService;
-import at.shiftcontrol.shiftservice.service.userprofile.VolunteerCalendarService;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.userprofile.CalendarShareIdDto;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
+import at.control.shiftcontrol.shift.service.userprofile.NotificationService;
+import at.control.shiftcontrol.shift.service.userprofile.UserProfileService;
+import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarService;
 
 @Slf4j
 @RestController

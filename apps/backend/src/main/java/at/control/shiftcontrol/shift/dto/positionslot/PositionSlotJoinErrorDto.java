@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.PositionSignupState;
+import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
 
 @Data
 @NoArgsConstructor

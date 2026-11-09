@@ -18,10 +18,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleModificationDto;
-import at.shiftcontrol.shiftservice.service.RoleService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.role.RoleModificationDto;
+import at.control.shiftcontrol.shift.service.RoleService;
 
 
 @Tag(

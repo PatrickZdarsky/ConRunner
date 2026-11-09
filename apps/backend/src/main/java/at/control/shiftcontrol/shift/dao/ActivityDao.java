@@ -3,8 +3,8 @@ package at.control.shiftcontrol.shift.dao;
 import java.util.Collection;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.shiftservice.dto.event.schedule.ActivityScheduleDaySearchDto;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.dto.event.schedule.ActivityScheduleDaySearchDto;
 
 public interface ActivityDao extends BasicDao<Activity, Long> {
     Collection<Activity> findAllByLocationId(Long locationId);

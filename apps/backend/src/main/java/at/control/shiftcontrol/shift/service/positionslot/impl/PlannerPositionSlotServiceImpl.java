@@ -10,32 +10,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.events.PositionSlotVolunteerEvent;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.lib.exception.ValidationException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dao.AssignmentDao;
-import at.shiftcontrol.shiftservice.dao.PositionSlotDao;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentAssignDto;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentFilterDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentPlannerInfoDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
-import at.shiftcontrol.shiftservice.mapper.AssignmentAssemblingMapper;
-import at.shiftcontrol.shiftservice.mapper.AssignmentPlannerInfoAssemblingMapper;
-import at.shiftcontrol.shiftservice.mapper.VolunteerAssemblingMapper;
-import at.shiftcontrol.shiftservice.service.AssignmentService;
-import at.shiftcontrol.shiftservice.service.EligibilityService;
-import at.shiftcontrol.shiftservice.service.positionslot.PlannerPositionSlotService;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.events.PositionSlotVolunteerEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.exception.ValidationException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dao.AssignmentDao;
+import at.control.shiftcontrol.shift.dao.PositionSlotDao;
+import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentAssignDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentFilterDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentPlannerInfoDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.mapper.AssignmentAssemblingMapper;
+import at.control.shiftcontrol.shift.mapper.AssignmentPlannerInfoAssemblingMapper;
+import at.control.shiftcontrol.shift.mapper.VolunteerAssemblingMapper;
+import at.control.shiftcontrol.shift.service.AssignmentService;
+import at.control.shiftcontrol.shift.service.EligibilityService;
+import at.control.shiftcontrol.shift.service.positionslot.PlannerPositionSlotService;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

@@ -14,10 +14,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftModificationDto;
-import at.shiftcontrol.shiftservice.service.ShiftService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftModificationDto;
+import at.control.shiftcontrol.shift.service.ShiftService;
 
 @Tag(
     name = "shift-endpoint"

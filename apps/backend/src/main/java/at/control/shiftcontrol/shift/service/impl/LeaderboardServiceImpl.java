@@ -12,17 +12,17 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.exception.ForbiddenException;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dto.leaderboard.LeaderBoardDto;
-import at.shiftcontrol.shiftservice.dto.leaderboard.RankDto;
-import at.shiftcontrol.shiftservice.service.LeaderboardService;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dto.leaderboard.LeaderBoardDto;
+import at.control.shiftcontrol.shift.dto.leaderboard.RankDto;
+import at.control.shiftcontrol.shift.service.LeaderboardService;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

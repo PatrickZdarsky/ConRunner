@@ -13,10 +13,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotModificationDto;
-import at.shiftcontrol.shiftservice.service.positionslot.PositionSlotService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotModificationDto;
+import at.control.shiftcontrol.shift.service.positionslot.PositionSlotService;
 
 @Tag(
     name = "position-slot-endpoint"

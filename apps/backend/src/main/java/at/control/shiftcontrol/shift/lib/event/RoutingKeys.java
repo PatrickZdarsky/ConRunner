@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class RoutingKeys {

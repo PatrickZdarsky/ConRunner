@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.TimeConstraintCreateDto;
-import at.shiftcontrol.shiftservice.dto.TimeConstraintDto;
-import at.shiftcontrol.shiftservice.service.TimeConstraintService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.TimeConstraintCreateDto;
+import at.control.shiftcontrol.shift.dto.TimeConstraintDto;
+import at.control.shiftcontrol.shift.service.TimeConstraintService;
 
 @Slf4j
 @RestController

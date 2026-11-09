@@ -5,12 +5,12 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.EventPart;
-import static at.shiftcontrol.lib.event.RoutingKeys.EVENT_CLONED;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.EventPart;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.EVENT_CLONED;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

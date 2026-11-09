@@ -5,11 +5,11 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.ShiftPart;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.ShiftPart;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

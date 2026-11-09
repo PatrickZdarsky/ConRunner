@@ -16,13 +16,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.annotation.InternalUserReadOnly;
-import at.shiftcontrol.shiftservice.dto.user.ContactInfoDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
-import at.shiftcontrol.shiftservice.dto.userdirectory.InternalUserLookupRequestDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
-import at.shiftcontrol.shiftservice.service.userdirectory.InternalUserDirectoryReadService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.identity.InternalUserReadOnly;
+import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.dto.userdirectory.InternalUserLookupRequestDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.service.userdirectory.InternalUserDirectoryReadService;
 
 @Tag(name = "internal-user-directory-endpoint")
 @RestController

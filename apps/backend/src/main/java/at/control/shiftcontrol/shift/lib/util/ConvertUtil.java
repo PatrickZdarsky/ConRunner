@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
 
 @Slf4j
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)

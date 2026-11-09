@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import at.shiftcontrol.lib.entity.TrustAlert;
-import at.shiftcontrol.lib.type.TrustAlertType;
+import at.control.shiftcontrol.shift.entity.TrustAlert;
+import at.control.shiftcontrol.shift.lib.type.TrustAlertType;
 
 @AllArgsConstructor
 @Data

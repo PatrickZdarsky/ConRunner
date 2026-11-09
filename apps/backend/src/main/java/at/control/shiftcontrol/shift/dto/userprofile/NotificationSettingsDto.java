@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
 
 @Data
 @NoArgsConstructor

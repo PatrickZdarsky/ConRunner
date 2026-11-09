@@ -2,8 +2,8 @@ package at.control.shiftcontrol.shift.dto.shiftplan;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentContextDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeInfoDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeInfoDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -11,12 +11,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.OverallStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.OwnStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.OverallStatisticsDto;
+import at.control.shiftcontrol.shift.dto.OwnStatisticsDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeDto;
 
 @Data
 @Builder

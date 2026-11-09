@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import at.shiftcontrol.lib.exception.ValidationException;
+import at.control.shiftcontrol.shift.lib.exception.ValidationException;
 
 @Component
 public class EventImportWorkbookParser {

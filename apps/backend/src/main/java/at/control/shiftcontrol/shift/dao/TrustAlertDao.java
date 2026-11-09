@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dao;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.TrustAlert;
+import at.control.shiftcontrol.shift.entity.TrustAlert;
 
 public interface TrustAlertDao {
     Collection<TrustAlert> getAllPaginated(long page, long size);

@@ -10,17 +10,17 @@ import org.springframework.stereotype.Service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.lib.event.events.NotificationSettingsEvent;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
-import at.shiftcontrol.shiftservice.dao.NotificationSettingsDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
-import at.shiftcontrol.shiftservice.mapper.NotificationSettingsMapper;
-import at.shiftcontrol.shiftservice.service.VolunteerService;
-import at.shiftcontrol.shiftservice.service.userprofile.NotificationService;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.lib.event.events.NotificationSettingsEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.dao.NotificationSettingsDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.mapper.NotificationSettingsMapper;
+import at.control.shiftcontrol.shift.service.VolunteerService;
+import at.control.shiftcontrol.shift.service.userprofile.NotificationService;
 
 @Service
 @RequiredArgsConstructor

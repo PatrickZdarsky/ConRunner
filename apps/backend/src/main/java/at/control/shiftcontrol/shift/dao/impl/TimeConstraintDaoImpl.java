@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.TimeConstraint;
-import at.shiftcontrol.lib.type.TimeConstraintType;
-import at.shiftcontrol.shiftservice.dao.TimeConstraintDao;
-import at.shiftcontrol.shiftservice.repo.TimeConstraintRepository;
+import at.control.shiftcontrol.shift.entity.TimeConstraint;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.dao.TimeConstraintDao;
+import at.control.shiftcontrol.shift.repo.TimeConstraintRepository;
 
 @RequiredArgsConstructor
 @Component

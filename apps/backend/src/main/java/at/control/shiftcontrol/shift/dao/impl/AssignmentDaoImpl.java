@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.shiftservice.dao.AssignmentDao;
-import at.shiftcontrol.shiftservice.repo.AssignmentRepository;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.dao.AssignmentDao;
+import at.control.shiftcontrol.shift.repo.AssignmentRepository;
 
 @RequiredArgsConstructor
 @Component

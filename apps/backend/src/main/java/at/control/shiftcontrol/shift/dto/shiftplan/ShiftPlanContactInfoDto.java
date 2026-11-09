@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.shiftservice.dto.user.ContactInfoDto;
+import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
 
 @Data
 @NoArgsConstructor

@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.lib.type.SocialMediaLinkType;
-import at.shiftcontrol.shiftservice.dto.event.SocialMediaLinkDto;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.type.SocialMediaLinkType;
+import at.control.shiftcontrol.shift.dto.event.SocialMediaLinkDto;
 
 public class SocialLinksParser {
     private SocialLinksParser() {

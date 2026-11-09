@@ -16,10 +16,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
-import at.shiftcontrol.shiftservice.dto.location.LocationModificationDto;
-import at.shiftcontrol.shiftservice.service.LocationService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.location.LocationModificationDto;
+import at.control.shiftcontrol.shift.service.LocationService;
 
 @Tag(
     name = "location-endpoint"

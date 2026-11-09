@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class NotificationSettingsMapper {

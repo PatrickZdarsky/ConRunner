@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.dto.shiftplan;
 
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanInviteDto;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanInviteDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

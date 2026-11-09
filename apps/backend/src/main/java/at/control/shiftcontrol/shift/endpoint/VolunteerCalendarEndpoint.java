@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.shiftservice.service.userprofile.VolunteerCalendarService;
+import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarService;
 
 @RestController
 @RequestMapping("api/v1/calendar")

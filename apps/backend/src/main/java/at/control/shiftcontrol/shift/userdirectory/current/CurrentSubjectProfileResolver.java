@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.auth.config.props.OidcProviderProps;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
 
 @Component
 @RequiredArgsConstructor

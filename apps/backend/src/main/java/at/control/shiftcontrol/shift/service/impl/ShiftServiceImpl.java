@@ -8,27 +8,27 @@ import io.micrometer.common.util.StringUtils;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.event.events.ShiftEvent;
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dao.ActivityDao;
-import at.shiftcontrol.shiftservice.dao.LocationDao;
-import at.shiftcontrol.shiftservice.dao.ShiftDao;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanDao;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDetailsDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftModificationDto;
-import at.shiftcontrol.shiftservice.mapper.EventMapper;
-import at.shiftcontrol.shiftservice.mapper.PaginationMapper;
-import at.shiftcontrol.shiftservice.mapper.ShiftAssemblingMapper;
-import at.shiftcontrol.shiftservice.mapper.ShiftPlanMapper;
-import at.shiftcontrol.shiftservice.service.ShiftService;
-import at.shiftcontrol.shiftservice.service.UserPreferenceService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.lib.event.events.ShiftEvent;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dao.ActivityDao;
+import at.control.shiftcontrol.shift.dao.LocationDao;
+import at.control.shiftcontrol.shift.dao.ShiftDao;
+import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDetailsDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftModificationDto;
+import at.control.shiftcontrol.shift.mapper.EventMapper;
+import at.control.shiftcontrol.shift.mapper.PaginationMapper;
+import at.control.shiftcontrol.shift.mapper.ShiftAssemblingMapper;
+import at.control.shiftcontrol.shift.mapper.ShiftPlanMapper;
+import at.control.shiftcontrol.shift.service.ShiftService;
+import at.control.shiftcontrol.shift.service.UserPreferenceService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

@@ -9,15 +9,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.shiftservice.dto.rows.PlanVolunteerIdRow;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     boolean existsByNameIgnoreCase(String name);
 
     @Query("""
-        SELECT new at.shiftcontrol.shiftservice.dto.rows.PlanVolunteerIdRow(
+        SELECT new at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow(
                 p.id,
                 p.name,
                 v.id

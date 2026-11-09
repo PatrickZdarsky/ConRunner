@@ -10,11 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
 import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
-import at.shiftcontrol.shiftservice.config.RabbitMqConfig;
+import at.control.shiftcontrol.shift.config.RabbitMqConfig;
 
 @Service
 @Slf4j

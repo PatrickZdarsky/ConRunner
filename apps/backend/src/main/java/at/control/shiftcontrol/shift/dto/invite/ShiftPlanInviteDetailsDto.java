@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.dto.invite;
 
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

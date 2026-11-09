@@ -2,9 +2,9 @@ package at.control.shiftcontrol.shift.mapper;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
-import at.shiftcontrol.shiftservice.dto.trade.TradeDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeInfoDto;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.dto.trade.TradeDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeInfoDto;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

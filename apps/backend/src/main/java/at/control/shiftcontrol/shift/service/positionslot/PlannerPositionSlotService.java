@@ -4,11 +4,11 @@ import java.util.Collection;
 
 import jakarta.validation.Valid;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentAssignDto;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentFilterDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentPlannerInfoDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentAssignDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentFilterDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentPlannerInfoDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 
 public interface PlannerPositionSlotService {
     Collection<AssignmentPlannerInfoDto> getSlots(long shiftPlanId, @Valid AssignmentFilterDto filterDto);

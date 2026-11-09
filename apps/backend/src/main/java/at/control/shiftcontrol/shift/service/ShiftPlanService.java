@@ -3,16 +3,16 @@ package at.control.shiftcontrol.shift.service;
 import java.util.Collection;
 import lombok.NonNull;
 
-import at.shiftcontrol.lib.type.LockStatus;
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanInviteCreateRequestDto;
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanInviteCreateResponseDto;
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanInviteDetailsDto;
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanInviteDto;
-import at.shiftcontrol.shiftservice.dto.invite.ShiftPlanJoinRequestDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanCreateDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanModificationDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanStatisticsDto;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanInviteCreateRequestDto;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanInviteCreateResponseDto;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanInviteDetailsDto;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanInviteDto;
+import at.control.shiftcontrol.shift.dto.invite.ShiftPlanJoinRequestDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanCreateDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanModificationDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanStatisticsDto;
 
 public interface ShiftPlanService {
     @NonNull Collection<ShiftPlanDto> getAllOfEvent(long eventId);

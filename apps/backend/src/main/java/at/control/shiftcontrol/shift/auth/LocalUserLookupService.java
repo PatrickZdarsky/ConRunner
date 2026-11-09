@@ -17,17 +17,17 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.lib.entity.ExternalIdentity;
-import at.shiftcontrol.lib.entity.UserAccount;
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
-import at.shiftcontrol.shiftservice.mapper.PaginationMapper;
-import at.shiftcontrol.shiftservice.repo.VolunteerRepository;
-import at.shiftcontrol.shiftservice.repo.userdirectory.ExternalIdentityRepository;
-import at.shiftcontrol.shiftservice.repo.userdirectory.UserAccountRepository;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.entity.ExternalIdentity;
+import at.control.shiftcontrol.shift.entity.UserAccount;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.mapper.PaginationMapper;
+import at.control.shiftcontrol.shift.repo.VolunteerRepository;
+import at.control.shiftcontrol.shift.repo.userdirectory.ExternalIdentityRepository;
+import at.control.shiftcontrol.shift.repo.userdirectory.UserAccountRepository;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @Deprecated
 @Service
@@ -63,7 +63,7 @@ public class LocalUserLookupService implements UserLookupService {
         Set<String> missingIds = new LinkedHashSet<>(requestedIds);
         missingIds.removeAll(resolvedUsers.keySet());
         volunteerRepository.findAllById(missingIds).stream()
-            .map(at.shiftcontrol.lib.entity.Volunteer::getId)
+            .map(at.control.shiftcontrol.shift.entity.Volunteer::getId)
             .forEach(userId -> resolvedUsers.put(userId, UserInfo.fallback(userId)));
 
         return requestedIds.stream()
@@ -79,7 +79,7 @@ public class LocalUserLookupService implements UserLookupService {
             .collect(Collectors.toMap(UserInfo::id, user -> user, (left, right) -> left, LinkedHashMap::new));
 
         volunteerRepository.findAll().stream()
-            .map(at.shiftcontrol.lib.entity.Volunteer::getId)
+            .map(at.control.shiftcontrol.shift.entity.Volunteer::getId)
             .forEach(userId -> usersById.putIfAbsent(userId, UserInfo.fallback(userId)));
 
         return sort(usersById.values());

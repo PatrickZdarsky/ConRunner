@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
 
 @Data
 @NoArgsConstructor

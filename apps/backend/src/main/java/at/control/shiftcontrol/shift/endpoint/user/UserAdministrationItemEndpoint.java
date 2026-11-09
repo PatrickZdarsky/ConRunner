@@ -14,10 +14,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanDto;
-import at.shiftcontrol.shiftservice.dto.user.UserPlanUpdateDto;
-import at.shiftcontrol.shiftservice.service.UserAdministrationService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.user.UserPlanDto;
+import at.control.shiftcontrol.shift.dto.user.UserPlanUpdateDto;
+import at.control.shiftcontrol.shift.service.UserAdministrationService;
 
 @Tag(
     name = "user-plan-endpoint"

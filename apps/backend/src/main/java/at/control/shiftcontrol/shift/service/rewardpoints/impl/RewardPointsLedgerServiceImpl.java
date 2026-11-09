@@ -11,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.RewardPointsTransaction;
-import at.shiftcontrol.lib.event.events.RewardPointTransactionEvent;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.lib.type.RewardPointTransactionType;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dao.RewardPointsTransactionDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.BookingResultDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.EventPointsDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsTransactionDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.TotalPointsDto;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsLedgerService;
+import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
+import at.control.shiftcontrol.shift.lib.event.events.RewardPointTransactionEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.shift.lib.type.RewardPointTransactionType;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dao.RewardPointsTransactionDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.rewardpoints.BookingResultDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsTransactionDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.TotalPointsDto;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsLedgerService;
 
 @Service
 @RequiredArgsConstructor

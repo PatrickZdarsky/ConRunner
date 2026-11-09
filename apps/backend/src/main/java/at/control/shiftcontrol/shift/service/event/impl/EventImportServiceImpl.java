@@ -19,27 +19,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.event.events.EventEvent;
-import at.shiftcontrol.lib.exception.ValidationException;
-import at.shiftcontrol.lib.type.LockStatus;
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dao.ActivityDao;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dao.LocationDao;
-import at.shiftcontrol.shiftservice.dao.ShiftDao;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanDao;
-import at.shiftcontrol.shiftservice.dto.event.EventExportDto;
-import at.shiftcontrol.shiftservice.dto.event.EventImportResultDto;
-import at.shiftcontrol.shiftservice.mapper.EventMapper;
-import at.shiftcontrol.shiftservice.mapper.ShiftAssemblingMapper;
-import at.shiftcontrol.shiftservice.service.event.EventImportService;
-import at.shiftcontrol.shiftservice.service.event.impl.importer.EventImportWorkbook;
-import at.shiftcontrol.shiftservice.service.event.impl.importer.EventImportWorkbookParser;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
+import at.control.shiftcontrol.shift.lib.exception.ValidationException;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dao.ActivityDao;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dao.LocationDao;
+import at.control.shiftcontrol.shift.dao.ShiftDao;
+import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
+import at.control.shiftcontrol.shift.dto.event.EventExportDto;
+import at.control.shiftcontrol.shift.dto.event.EventImportResultDto;
+import at.control.shiftcontrol.shift.mapper.EventMapper;
+import at.control.shiftcontrol.shift.mapper.ShiftAssemblingMapper;
+import at.control.shiftcontrol.shift.service.event.EventImportService;
+import at.control.shiftcontrol.shift.service.event.impl.importer.EventImportWorkbook;
+import at.control.shiftcontrol.shift.service.event.impl.importer.EventImportWorkbookParser;
 
 @Service
 @RequiredArgsConstructor

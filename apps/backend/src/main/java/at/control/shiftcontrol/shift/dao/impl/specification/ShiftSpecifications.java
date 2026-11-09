@@ -3,10 +3,10 @@ package at.control.shiftcontrol.shift.dao.impl.specification;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.util.TimeUtil;
-import at.shiftcontrol.shiftservice.dto.event.schedule.EventScheduleDaySearchDto;
-import at.shiftcontrol.shiftservice.dto.event.schedule.EventScheduleFilterDto;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.lib.util.TimeUtil;
+import at.control.shiftcontrol.shift.dto.event.schedule.EventScheduleDaySearchDto;
+import at.control.shiftcontrol.shift.dto.event.schedule.EventScheduleFilterDto;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 

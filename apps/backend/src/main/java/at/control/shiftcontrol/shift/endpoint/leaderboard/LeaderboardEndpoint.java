@@ -10,12 +10,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.exception.ForbiddenException;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.leaderboard.LeaderBoardDto;
-import at.shiftcontrol.shiftservice.service.LeaderboardService;
+import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.leaderboard.LeaderBoardDto;
+import at.control.shiftcontrol.shift.service.LeaderboardService;
 
 @Slf4j
 @RestController

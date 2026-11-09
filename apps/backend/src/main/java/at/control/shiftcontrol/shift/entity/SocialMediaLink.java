@@ -19,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import at.shiftcontrol.lib.type.SocialMediaLinkType;
+import at.control.shiftcontrol.shift.lib.type.SocialMediaLinkType;
 
 @Getter
 @Setter

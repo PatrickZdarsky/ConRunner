@@ -5,16 +5,16 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.user.ContactInfoDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
-import at.shiftcontrol.shiftservice.mapper.AccountInfoMapper;
-import at.shiftcontrol.shiftservice.mapper.PaginationMapper;
-import at.shiftcontrol.shiftservice.mapper.UserAssemblingMapper;
-import at.shiftcontrol.shiftservice.service.userdirectory.InternalUserDirectoryReadService;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.mapper.AccountInfoMapper;
+import at.control.shiftcontrol.shift.mapper.PaginationMapper;
+import at.control.shiftcontrol.shift.mapper.UserAssemblingMapper;
+import at.control.shiftcontrol.shift.service.userdirectory.InternalUserDirectoryReadService;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @Service
 @RequiredArgsConstructor

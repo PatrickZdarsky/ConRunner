@@ -5,14 +5,14 @@ import java.util.Collection;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.events.parts.ShiftPlanPart;
-import at.shiftcontrol.lib.event.events.parts.VolunteerPart;
-import static at.shiftcontrol.lib.event.RoutingKeys.USERS_EVENT_BULK_ADD;
-import static at.shiftcontrol.lib.event.RoutingKeys.USERS_EVENT_BULK_REMOVE;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.events.parts.ShiftPlanPart;
+import at.control.shiftcontrol.shift.lib.event.events.parts.VolunteerPart;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.USERS_EVENT_BULK_ADD;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.USERS_EVENT_BULK_REMOVE;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

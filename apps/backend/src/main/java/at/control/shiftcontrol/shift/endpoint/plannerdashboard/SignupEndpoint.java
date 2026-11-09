@@ -13,18 +13,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentAssignDto;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentFilterDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentPlannerInfoDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
-import at.shiftcontrol.shiftservice.service.ShiftPlanService;
-import at.shiftcontrol.shiftservice.service.ShiftService;
-import at.shiftcontrol.shiftservice.service.positionslot.PlannerPositionSlotService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentAssignDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentFilterDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentPlannerInfoDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.service.ShiftPlanService;
+import at.control.shiftcontrol.shift.service.ShiftService;
+import at.control.shiftcontrol.shift.service.positionslot.PlannerPositionSlotService;
 
 @Slf4j
 @RestController

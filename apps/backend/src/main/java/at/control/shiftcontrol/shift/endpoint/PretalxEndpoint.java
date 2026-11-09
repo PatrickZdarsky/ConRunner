@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dto.PretalxApiKeyDetailsDto;
-import at.shiftcontrol.shiftservice.dto.PretalxApiKeyDto;
-import at.shiftcontrol.shiftservice.sync.pretalx.PretalxApiKeyService;
-import at.shiftcontrol.shiftservice.sync.pretalx.PretalxSyncService;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dto.PretalxApiKeyDetailsDto;
+import at.control.shiftcontrol.shift.dto.PretalxApiKeyDto;
+import at.control.shiftcontrol.shift.sync.pretalx.PretalxApiKeyService;
+import at.control.shiftcontrol.shift.sync.pretalx.PretalxSyncService;
 
 @Slf4j
 @RestController

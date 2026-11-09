@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.ShiftPlanInvite;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.shiftservice.dao.ShiftPlanInviteDao;
-import at.shiftcontrol.shiftservice.repo.ShiftPlanInviteRepository;
+import at.control.shiftcontrol.shift.entity.ShiftPlanInvite;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.dao.ShiftPlanInviteDao;
+import at.control.shiftcontrol.shift.repo.ShiftPlanInviteRepository;
 
 @RequiredArgsConstructor
 @Component

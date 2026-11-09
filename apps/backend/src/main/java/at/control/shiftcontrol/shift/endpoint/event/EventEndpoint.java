@@ -26,19 +26,19 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
-import at.shiftcontrol.shiftservice.dto.event.EventImportResultDto;
-import at.shiftcontrol.shiftservice.dto.event.EventModificationDto;
-import at.shiftcontrol.shiftservice.dto.event.EventShiftPlansOverviewDto;
-import at.shiftcontrol.shiftservice.dto.event.EventsDashboardOverviewDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanContactInfoDto;
-import at.shiftcontrol.shiftservice.service.DashboardService;
-import at.shiftcontrol.shiftservice.service.event.EventCloneService;
-import at.shiftcontrol.shiftservice.service.event.EventExportService;
-import at.shiftcontrol.shiftservice.service.event.EventImportService;
-import at.shiftcontrol.shiftservice.service.event.EventService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventImportResultDto;
+import at.control.shiftcontrol.shift.dto.event.EventModificationDto;
+import at.control.shiftcontrol.shift.dto.event.EventShiftPlansOverviewDto;
+import at.control.shiftcontrol.shift.dto.event.EventsDashboardOverviewDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanContactInfoDto;
+import at.control.shiftcontrol.shift.service.DashboardService;
+import at.control.shiftcontrol.shift.service.event.EventCloneService;
+import at.control.shiftcontrol.shift.service.event.EventExportService;
+import at.control.shiftcontrol.shift.service.event.EventImportService;
+import at.control.shiftcontrol.shift.service.event.EventService;
 
 @Slf4j
 @RestController

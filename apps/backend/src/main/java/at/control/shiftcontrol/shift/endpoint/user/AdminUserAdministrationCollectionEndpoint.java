@@ -16,11 +16,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.dto.PaginationDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventBulkDto;
-import at.shiftcontrol.shiftservice.dto.user.UserEventDto;
-import at.shiftcontrol.shiftservice.dto.user.UserSearchDto;
-import at.shiftcontrol.shiftservice.service.UserAdministrationService;
+import at.control.shiftcontrol.shift.dto.PaginationDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventBulkDto;
+import at.control.shiftcontrol.shift.dto.user.UserEventDto;
+import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
+import at.control.shiftcontrol.shift.service.UserAdministrationService;
 
 @Tag(
     name = "user-event-endpoint"

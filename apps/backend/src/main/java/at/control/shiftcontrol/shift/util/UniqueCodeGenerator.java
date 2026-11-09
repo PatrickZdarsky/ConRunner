@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
 
 @Component
 @Slf4j

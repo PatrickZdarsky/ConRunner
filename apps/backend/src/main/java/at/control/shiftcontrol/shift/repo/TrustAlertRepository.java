@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import at.shiftcontrol.lib.entity.TrustAlert;
+import at.control.shiftcontrol.shift.entity.TrustAlert;
 
 public interface TrustAlertRepository extends JpaRepository<TrustAlert, Long> {
     @Query("""

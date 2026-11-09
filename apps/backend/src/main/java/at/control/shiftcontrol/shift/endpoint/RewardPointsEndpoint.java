@@ -2,17 +2,17 @@ package at.control.shiftcontrol.shift.endpoint;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.EventPointsDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsExportDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsShareTokenDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.TotalPointsDto;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsExportService;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsLedgerService;
-import at.shiftcontrol.shiftservice.service.rewardpoints.RewardPointsService;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsExportDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.TotalPointsDto;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsExportService;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsLedgerService;
+import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dto.plannerdashboard;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentContextDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

@@ -16,20 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.lib.event.events.ActivityEvent;
-import at.shiftcontrol.lib.event.events.EventEvent;
-import at.shiftcontrol.lib.event.events.LocationEvent;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.lib.event.events.ActivityEvent;
+import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
+import at.control.shiftcontrol.shift.lib.event.events.LocationEvent;
 import at.shiftcontrol.pretalxclient.model.Room;
 import at.shiftcontrol.pretalxclient.model.Submission;
 import at.shiftcontrol.pretalxclient.model.TalkSlot;
-import at.shiftcontrol.shiftservice.dao.ActivityDao;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dao.LocationDao;
-import at.shiftcontrol.shiftservice.dto.event.EventSearchDto;
-import at.shiftcontrol.shiftservice.dto.location.LocationSearchDto;
+import at.control.shiftcontrol.shift.dao.ActivityDao;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dao.LocationDao;
+import at.control.shiftcontrol.shift.dto.event.EventSearchDto;
+import at.control.shiftcontrol.shift.dto.location.LocationSearchDto;
 
 @Slf4j
 @Service

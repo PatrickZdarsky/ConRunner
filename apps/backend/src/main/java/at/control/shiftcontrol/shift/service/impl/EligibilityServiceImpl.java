@@ -9,22 +9,22 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.ConflictException;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.type.PositionSignupState;
-import at.shiftcontrol.lib.type.TradeStatus;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.auth.Authorities;
-import at.shiftcontrol.shiftservice.dao.AssignmentDao;
-import at.shiftcontrol.shiftservice.dao.PositionSlotDao;
-import at.shiftcontrol.shiftservice.dao.TimeConstraintDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotJoinErrorDto;
-import at.shiftcontrol.shiftservice.service.EligibilityService;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.ConflictException;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
+import at.control.shiftcontrol.shift.lib.type.TradeStatus;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.auth.Authorities;
+import at.control.shiftcontrol.shift.dao.AssignmentDao;
+import at.control.shiftcontrol.shift.dao.PositionSlotDao;
+import at.control.shiftcontrol.shift.dao.TimeConstraintDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotJoinErrorDto;
+import at.control.shiftcontrol.shift.service.EligibilityService;
 
 @Service
 @RequiredArgsConstructor

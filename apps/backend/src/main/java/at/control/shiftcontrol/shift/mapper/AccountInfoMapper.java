@@ -2,8 +2,8 @@ package at.control.shiftcontrol.shift.mapper;
 
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.AccountInfoDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class AccountInfoMapper {

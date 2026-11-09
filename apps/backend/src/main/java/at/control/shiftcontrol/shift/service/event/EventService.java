@@ -3,12 +3,12 @@ package at.control.shiftcontrol.shift.service.event;
 import java.util.Collection;
 import java.util.List;
 
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
-import at.shiftcontrol.shiftservice.dto.event.EventModificationDto;
-import at.shiftcontrol.shiftservice.dto.event.EventSearchDto;
-import at.shiftcontrol.shiftservice.dto.event.EventShiftPlansOverviewDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanContactInfoDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventModificationDto;
+import at.control.shiftcontrol.shift.dto.event.EventSearchDto;
+import at.control.shiftcontrol.shift.dto.event.EventShiftPlansOverviewDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanContactInfoDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
 
 public interface EventService {
     EventDto getEvent(long eventId);

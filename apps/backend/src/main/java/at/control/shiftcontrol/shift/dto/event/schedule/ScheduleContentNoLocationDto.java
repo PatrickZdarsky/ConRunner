@@ -2,8 +2,8 @@ package at.control.shiftcontrol.shift.dto.event.schedule;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.activity.ActivityDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftColumnDto;
+import at.control.shiftcontrol.shift.dto.activity.ActivityDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftColumnDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

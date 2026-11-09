@@ -9,13 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.RewardPointsTransaction;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.lib.exception.UnsupportedOperationException;
-import at.shiftcontrol.shiftservice.dao.RewardPointsTransactionDao;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.EventPointsDto;
-import at.shiftcontrol.shiftservice.mapper.RewardPointsMapper;
-import at.shiftcontrol.shiftservice.repo.RewardPointTransactionRepository;
+import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.shift.lib.exception.UnsupportedOperationException;
+import at.control.shiftcontrol.shift.dao.RewardPointsTransactionDao;
+import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
+import at.control.shiftcontrol.shift.mapper.RewardPointsMapper;
+import at.control.shiftcontrol.shift.repo.RewardPointTransactionRepository;
 
 @RequiredArgsConstructor
 @Component

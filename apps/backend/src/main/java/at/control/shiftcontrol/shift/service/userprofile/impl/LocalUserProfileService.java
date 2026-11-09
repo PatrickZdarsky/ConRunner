@@ -4,21 +4,21 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.ForbiddenException;
-import at.shiftcontrol.lib.type.NotificationType;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
-import at.shiftcontrol.shiftservice.dto.userprofile.UserProfileDto;
-import at.shiftcontrol.shiftservice.mapper.UserProfileMapper;
-import at.shiftcontrol.shiftservice.service.userprofile.NotificationService;
-import at.shiftcontrol.shiftservice.service.userprofile.UserProfileService;
-import at.shiftcontrol.shiftservice.service.userprofile.VolunteerCalendarService;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
-import at.shiftcontrol.shiftservice.userdirectory.current.CurrentUserProfileSyncService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
+import at.control.shiftcontrol.shift.mapper.UserProfileMapper;
+import at.control.shiftcontrol.shift.service.userprofile.NotificationService;
+import at.control.shiftcontrol.shift.service.userprofile.UserProfileService;
+import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarService;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.userdirectory.current.CurrentUserProfileSyncService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

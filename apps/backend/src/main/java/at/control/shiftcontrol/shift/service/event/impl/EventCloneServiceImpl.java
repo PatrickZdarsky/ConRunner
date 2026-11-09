@@ -11,21 +11,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Role;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.events.EventEvent;
-import at.shiftcontrol.lib.exception.IllegalStateException;
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
-import at.shiftcontrol.shiftservice.mapper.EventMapper;
-import at.shiftcontrol.shiftservice.service.event.EventCloneService;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Role;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
+import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
+import at.control.shiftcontrol.shift.mapper.EventMapper;
+import at.control.shiftcontrol.shift.service.event.EventCloneService;
 
 @Service
 @RequiredArgsConstructor

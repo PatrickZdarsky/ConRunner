@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
 
 @AllArgsConstructor
 @Data

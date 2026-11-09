@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import at.shiftcontrol.lib.entity.Role;
+import at.control.shiftcontrol.shift.entity.Role;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {

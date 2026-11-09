@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.shiftservice.dto.location.LocationSearchDto;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.dto.location.LocationSearchDto;
 
 public interface LocationDao extends BasicDao<Location, Long> {
     Collection<Location> findAllByEventId(Long eventId);

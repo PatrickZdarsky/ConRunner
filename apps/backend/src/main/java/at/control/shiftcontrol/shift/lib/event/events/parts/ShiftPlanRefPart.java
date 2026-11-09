@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
 
 @AllArgsConstructor
 @NoArgsConstructor

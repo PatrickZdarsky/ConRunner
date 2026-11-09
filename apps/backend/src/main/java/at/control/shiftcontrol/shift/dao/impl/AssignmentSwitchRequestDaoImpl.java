@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.AssignmentPair;
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
-import at.shiftcontrol.lib.type.TradeStatus;
-import at.shiftcontrol.shiftservice.dao.AssignmentSwitchRequestDao;
-import at.shiftcontrol.shiftservice.repo.AssignmentSwitchRequestRepository;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.AssignmentPair;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.lib.type.TradeStatus;
+import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;
+import at.control.shiftcontrol.shift.repo.AssignmentSwitchRequestRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;

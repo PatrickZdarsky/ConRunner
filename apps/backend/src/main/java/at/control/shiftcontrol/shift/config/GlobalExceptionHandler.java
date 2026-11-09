@@ -17,17 +17,17 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.lib.exception.ConflictException;
-import at.shiftcontrol.lib.exception.FileExportException;
-import at.shiftcontrol.lib.exception.ForbiddenException;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.exception.NotificationSettingAlreadyExistsException;
-import at.shiftcontrol.lib.exception.PartiallyNotFoundException;
-import at.shiftcontrol.lib.exception.PretalxApiKeyInvalidException;
-import at.shiftcontrol.lib.exception.StateViolationException;
-import at.shiftcontrol.lib.exception.UnauthorizedException;
-import at.shiftcontrol.lib.exception.ValidationException;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.shift.lib.exception.ConflictException;
+import at.control.shiftcontrol.shift.lib.exception.FileExportException;
+import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.exception.NotificationSettingAlreadyExistsException;
+import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
+import at.control.shiftcontrol.shift.lib.exception.PretalxApiKeyInvalidException;
+import at.control.shiftcontrol.shift.lib.exception.StateViolationException;
+import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
+import at.control.shiftcontrol.shift.lib.exception.ValidationException;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;

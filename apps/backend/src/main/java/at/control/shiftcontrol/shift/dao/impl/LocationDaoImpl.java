@@ -11,10 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.shiftservice.dao.LocationDao;
-import at.shiftcontrol.shiftservice.dto.location.LocationSearchDto;
-import at.shiftcontrol.shiftservice.repo.LocationRepository;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.dao.LocationDao;
+import at.control.shiftcontrol.shift.dto.location.LocationSearchDto;
+import at.control.shiftcontrol.shift.repo.LocationRepository;
 
 @RequiredArgsConstructor
 @Component

@@ -8,17 +8,17 @@ import org.springframework.stereotype.Service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Location;
-import at.shiftcontrol.lib.event.events.LocationEvent;
-import at.shiftcontrol.lib.exception.BadRequestException;
-import at.shiftcontrol.shiftservice.annotation.AdminOnly;
-import at.shiftcontrol.shiftservice.dao.EventDao;
-import at.shiftcontrol.shiftservice.dao.LocationDao;
-import at.shiftcontrol.shiftservice.dto.location.LocationDto;
-import at.shiftcontrol.shiftservice.dto.location.LocationModificationDto;
-import at.shiftcontrol.shiftservice.mapper.LocationMapper;
-import at.shiftcontrol.shiftservice.service.LocationService;
-import at.shiftcontrol.shiftservice.util.SecurityHelper;
+import at.control.shiftcontrol.shift.entity.Location;
+import at.control.shiftcontrol.shift.lib.event.events.LocationEvent;
+import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.identity.AdminOnly;
+import at.control.shiftcontrol.shift.dao.EventDao;
+import at.control.shiftcontrol.shift.dao.LocationDao;
+import at.control.shiftcontrol.shift.dto.location.LocationDto;
+import at.control.shiftcontrol.shift.dto.location.LocationModificationDto;
+import at.control.shiftcontrol.shift.mapper.LocationMapper;
+import at.control.shiftcontrol.shift.service.LocationService;
+import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor

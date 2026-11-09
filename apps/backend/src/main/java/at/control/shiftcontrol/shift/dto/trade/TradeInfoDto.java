@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dto.trade;
 
 import java.time.Instant;
 
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentContextDto;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -11,8 +11,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.TradeStatus;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.lib.type.TradeStatus;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 
 @Data
 @NoArgsConstructor

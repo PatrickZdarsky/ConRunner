@@ -2,10 +2,10 @@ package at.control.shiftcontrol.shift.service.rewardpoints;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.rewardpoints.BookingResultDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.EventPointsDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsTransactionDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.TotalPointsDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.BookingResultDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsTransactionDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.TotalPointsDto;
 
 public interface RewardPointsLedgerService {
     /* ========= WRITE (append-only) ========= */

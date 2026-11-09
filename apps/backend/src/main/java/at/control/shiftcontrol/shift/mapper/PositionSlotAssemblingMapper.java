@@ -8,23 +8,23 @@ import org.springframework.stereotype.Service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.type.AssignmentStatus;
-import at.shiftcontrol.lib.type.PositionSignupState;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dao.AssignmentDao;
-import at.shiftcontrol.shiftservice.dao.AssignmentSwitchRequestDao;
-import at.shiftcontrol.shiftservice.dao.PositionSlotDao;
-import at.shiftcontrol.shiftservice.dao.userprofile.VolunteerDao;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
-import at.shiftcontrol.shiftservice.dto.rewardpoints.RewardPointsDto;
-import at.shiftcontrol.shiftservice.dto.trade.TradeCandidatesDto;
-import at.shiftcontrol.shiftservice.service.EligibilityService;
-import at.shiftcontrol.shiftservice.userdirectory.UserLookupService;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
+import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dao.AssignmentDao;
+import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;
+import at.control.shiftcontrol.shift.dao.PositionSlotDao;
+import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsDto;
+import at.control.shiftcontrol.shift.dto.trade.TradeCandidatesDto;
+import at.control.shiftcontrol.shift.service.EligibilityService;
+import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 
 @RequiredArgsConstructor
 @Service

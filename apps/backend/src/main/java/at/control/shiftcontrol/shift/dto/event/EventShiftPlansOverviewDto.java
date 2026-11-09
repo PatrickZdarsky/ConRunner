@@ -2,10 +2,10 @@ package at.control.shiftcontrol.shift.dto.event;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.OverallStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.OwnStatisticsDto;
-import at.shiftcontrol.shiftservice.dto.role.RoleDto;
-import at.shiftcontrol.shiftservice.dto.shiftplan.ShiftPlanDto;
+import at.control.shiftcontrol.shift.dto.OverallStatisticsDto;
+import at.control.shiftcontrol.shift.dto.OwnStatisticsDto;
+import at.control.shiftcontrol.shift.dto.role.RoleDto;
+import at.control.shiftcontrol.shift.dto.shiftplan.ShiftPlanDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

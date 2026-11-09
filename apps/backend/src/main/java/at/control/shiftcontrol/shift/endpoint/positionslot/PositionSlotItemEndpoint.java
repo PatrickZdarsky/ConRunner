@@ -20,16 +20,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.auth.ApplicationUserProvider;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotJoinErrorDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotModificationDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotPreferenceDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotPreferenceUpdateDto;
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotRequestDto;
-import at.shiftcontrol.shiftservice.service.positionslot.PositionSlotService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.auth.ApplicationUserProvider;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotJoinErrorDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotModificationDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceUpdateDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotRequestDto;
+import at.control.shiftcontrol.shift.service.positionslot.PositionSlotService;
 
 @Tag(
     name = "position-slot-endpoint"

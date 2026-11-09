@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.lib.type.TrustAlertType;
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.lib.type.TrustAlertType;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 
 @Data
 @NoArgsConstructor

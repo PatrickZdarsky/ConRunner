@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import at.shiftcontrol.lib.type.UserAccountStatus;
-import at.shiftcontrol.lib.type.UserProfileSource;
+import at.control.shiftcontrol.shift.lib.type.UserAccountStatus;
+import at.control.shiftcontrol.shift.lib.type.UserProfileSource;
 
 @Getter
 @Setter

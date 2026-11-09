@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import at.shiftcontrol.lib.entity.Activity;
-import at.shiftcontrol.lib.entity.Event;
-import at.shiftcontrol.lib.entity.SocialMediaLink;
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
-import at.shiftcontrol.shiftservice.dto.event.EventModificationDto;
-import at.shiftcontrol.shiftservice.dto.event.SocialMediaLinkDto;
-import at.shiftcontrol.shiftservice.dto.event.schedule.ActivityScheduleDto;
+import at.control.shiftcontrol.shift.entity.Activity;
+import at.control.shiftcontrol.shift.entity.Event;
+import at.control.shiftcontrol.shift.entity.SocialMediaLink;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventModificationDto;
+import at.control.shiftcontrol.shift.dto.event.SocialMediaLinkDto;
+import at.control.shiftcontrol.shift.dto.event.schedule.ActivityScheduleDto;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)

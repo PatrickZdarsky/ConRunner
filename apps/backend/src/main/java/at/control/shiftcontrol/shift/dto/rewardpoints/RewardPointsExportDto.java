@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dto.rewardpoints;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.event.EventDto;
+import at.control.shiftcontrol.shift.dto.event.EventDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

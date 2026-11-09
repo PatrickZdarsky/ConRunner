@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.dto.trade;
 import java.time.Instant;
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 
 import lombok.NonNull;
 

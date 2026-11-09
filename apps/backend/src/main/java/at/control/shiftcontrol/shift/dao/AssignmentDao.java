@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
 
 import lombok.NonNull;
 

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.shiftservice.dao.ShiftDao;
-import at.shiftcontrol.shiftservice.dao.impl.specification.ShiftSpecifications;
-import at.shiftcontrol.shiftservice.dto.event.schedule.EventScheduleFilterDto;
-import at.shiftcontrol.shiftservice.repo.ShiftRepository;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.dao.ShiftDao;
+import at.control.shiftcontrol.shift.dao.impl.specification.ShiftSpecifications;
+import at.control.shiftcontrol.shift.dto.event.schedule.EventScheduleFilterDto;
+import at.control.shiftcontrol.shift.repo.ShiftRepository;
 
 @RequiredArgsConstructor
 @Component

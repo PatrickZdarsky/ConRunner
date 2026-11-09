@@ -3,8 +3,8 @@ package at.control.shiftcontrol.shift.dao;
 import java.util.Collection;
 import java.util.List;
 
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.shiftservice.dto.event.schedule.EventScheduleFilterDto;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.dto.event.schedule.EventScheduleFilterDto;
 
 public interface ShiftDao extends BasicDao<Shift, Long> {
     List<Shift> searchUserRelatedShiftsInShiftPlan(long shiftPlanId, String userId);

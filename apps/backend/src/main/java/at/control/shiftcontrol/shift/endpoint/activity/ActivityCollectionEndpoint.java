@@ -16,11 +16,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.util.ConvertUtil;
-import at.shiftcontrol.shiftservice.dto.activity.ActivityDto;
-import at.shiftcontrol.shiftservice.dto.activity.ActivityModificationDto;
-import at.shiftcontrol.shiftservice.dto.activity.ActivitySuggestionDto;
-import at.shiftcontrol.shiftservice.service.ActivityService;
+import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
+import at.control.shiftcontrol.shift.dto.activity.ActivityDto;
+import at.control.shiftcontrol.shift.dto.activity.ActivityModificationDto;
+import at.control.shiftcontrol.shift.dto.activity.ActivitySuggestionDto;
+import at.control.shiftcontrol.shift.service.ActivityService;
 
 @Tag(
     name = "activity-endpoint"

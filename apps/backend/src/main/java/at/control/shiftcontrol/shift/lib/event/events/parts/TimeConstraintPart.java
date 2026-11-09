@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import at.shiftcontrol.lib.entity.TimeConstraint;
-import at.shiftcontrol.lib.type.TimeConstraintType;
+import at.control.shiftcontrol.shift.entity.TimeConstraint;
+import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
 
 @AllArgsConstructor
 @Data

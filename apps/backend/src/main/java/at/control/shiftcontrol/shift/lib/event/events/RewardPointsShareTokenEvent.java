@@ -5,11 +5,11 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.RewardPointsShareToken;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.shiftservice.event.events.parts.RewardPointsShareTokenPart;
+import at.control.shiftcontrol.shift.entity.RewardPointsShareToken;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.RewardPointsShareTokenPart;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

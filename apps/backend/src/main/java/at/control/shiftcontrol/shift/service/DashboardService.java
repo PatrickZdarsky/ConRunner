@@ -1,6 +1,6 @@
 package at.control.shiftcontrol.shift.service;
 
-import at.shiftcontrol.shiftservice.dto.event.EventsDashboardOverviewDto;
+import at.control.shiftcontrol.shift.dto.event.EventsDashboardOverviewDto;
 
 import lombok.NonNull;
 

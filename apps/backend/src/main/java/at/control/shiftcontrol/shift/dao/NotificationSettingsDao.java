@@ -2,9 +2,9 @@ package at.control.shiftcontrol.shift.dao;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.NotificationSettings;
-import at.shiftcontrol.lib.type.NotificationChannel;
-import at.shiftcontrol.lib.type.NotificationType;
+import at.control.shiftcontrol.shift.entity.NotificationSettings;
+import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
+import at.control.shiftcontrol.shift.lib.type.NotificationType;
 
 public interface NotificationSettingsDao extends BasicDao<NotificationSettings, Long> {
     Collection<NotificationSettings> findAllByUserId(String userId);

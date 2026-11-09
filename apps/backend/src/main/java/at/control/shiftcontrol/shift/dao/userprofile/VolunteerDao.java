@@ -3,8 +3,8 @@ package at.control.shiftcontrol.shift.dao.userprofile;
 import java.util.Collection;
 import java.util.Optional;
 
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.shiftservice.dao.BasicDao;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.dao.BasicDao;
 
 public interface VolunteerDao extends BasicDao<Volunteer, String> {
     Collection<Volunteer> findAllByShiftPlan(long shiftPlanId);

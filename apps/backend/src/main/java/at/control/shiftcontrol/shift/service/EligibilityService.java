@@ -3,12 +3,12 @@ package at.control.shiftcontrol.shift.service;
 import java.time.Instant;
 import java.util.Collection;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.exception.ConflictException;
-import at.shiftcontrol.lib.exception.NotFoundException;
-import at.shiftcontrol.lib.type.PositionSignupState;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.exception.ConflictException;
+import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
 
 import lombok.NonNull;
 import org.jspecify.annotations.Nullable;

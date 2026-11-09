@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.service.userprofile;
 
 import java.util.Collection;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.NotificationSettingsDto;
+import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 
 public interface NotificationService {
     Collection<NotificationSettingsDto> getNotificationsForUser(String userId);

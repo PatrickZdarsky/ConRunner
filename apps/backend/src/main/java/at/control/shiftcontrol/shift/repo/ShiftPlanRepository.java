@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.repo;
 import java.util.Collection;
 import java.util.Set;
 
-import at.shiftcontrol.lib.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

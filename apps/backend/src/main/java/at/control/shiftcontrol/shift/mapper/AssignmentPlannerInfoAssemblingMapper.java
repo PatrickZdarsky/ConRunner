@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.shiftservice.dto.assignment.AssignmentContextDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentFilterDto;
-import at.shiftcontrol.shiftservice.dto.plannerdashboard.AssignmentPlannerInfoDto;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentFilterDto;
+import at.control.shiftcontrol.shift.dto.plannerdashboard.AssignmentPlannerInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

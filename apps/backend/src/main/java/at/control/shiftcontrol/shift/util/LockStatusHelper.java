@@ -1,12 +1,12 @@
 package at.control.shiftcontrol.shift.util;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.AssignmentSwitchRequest;
-import at.shiftcontrol.lib.entity.PositionSlot;
-import at.shiftcontrol.lib.entity.Shift;
-import at.shiftcontrol.lib.entity.ShiftPlan;
-import at.shiftcontrol.lib.exception.StateViolationException;
-import at.shiftcontrol.lib.type.LockStatus;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
+import at.control.shiftcontrol.shift.entity.PositionSlot;
+import at.control.shiftcontrol.shift.entity.Shift;
+import at.control.shiftcontrol.shift.entity.ShiftPlan;
+import at.control.shiftcontrol.shift.lib.exception.StateViolationException;
+import at.control.shiftcontrol.shift.lib.type.LockStatus;
 
 public class LockStatusHelper {
     //     --------------------- LOCKED ---------------------

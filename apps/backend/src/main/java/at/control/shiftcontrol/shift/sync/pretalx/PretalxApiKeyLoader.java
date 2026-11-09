@@ -16,11 +16,11 @@ import org.springframework.web.client.RestClientResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.entity.PretalxApiKey;
-import at.shiftcontrol.lib.event.events.PretalxApiKeyInvalidEvent;
-import at.shiftcontrol.lib.exception.PretalxApiKeyInvalidException;
+import at.control.shiftcontrol.shift.entity.PretalxApiKey;
+import at.control.shiftcontrol.shift.lib.event.events.PretalxApiKeyInvalidEvent;
+import at.control.shiftcontrol.shift.lib.exception.PretalxApiKeyInvalidException;
 import at.shiftcontrol.pretalxclient.model.EventList;
-import at.shiftcontrol.shiftservice.repo.pretalx.PretalxApiKeyRepository;
+import at.control.shiftcontrol.shift.repo.pretalx.PretalxApiKeyRepository;
 
 @Slf4j
 @Service

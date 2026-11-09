@@ -1,7 +1,7 @@
 package at.control.shiftcontrol.shift.dto.assignment;
 
-import at.shiftcontrol.shiftservice.dto.positionslot.PositionSlotContextDto;
-import at.shiftcontrol.shiftservice.dto.shift.ShiftContextDto;
+import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotContextDto;
+import at.control.shiftcontrol.shift.dto.shift.ShiftContextDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

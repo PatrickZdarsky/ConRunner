@@ -9,9 +9,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-import at.shiftcontrol.lib.auth.ApplicationUser;
+import at.control.shiftcontrol.shift.auth.ApplicationUser;
 import at.shiftcontrol.shiftservice.auth.user.ServiceUser;
-import at.shiftcontrol.shiftservice.userdirectory.current.CurrentUserProfileSyncService;
+import at.control.shiftcontrol.shift.userdirectory.current.CurrentUserProfileSyncService;
 @Deprecated
 @RequiredArgsConstructor
 public class CurrentUserProfileSyncFilter extends OncePerRequestFilter {

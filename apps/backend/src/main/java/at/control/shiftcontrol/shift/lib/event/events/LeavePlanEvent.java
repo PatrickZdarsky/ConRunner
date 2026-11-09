@@ -6,14 +6,14 @@ import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import at.shiftcontrol.lib.entity.Assignment;
-import at.shiftcontrol.lib.entity.Volunteer;
-import at.shiftcontrol.lib.event.BaseEvent;
-import at.shiftcontrol.lib.event.EventType;
-import at.shiftcontrol.lib.event.RoutingKeys;
-import at.shiftcontrol.lib.event.events.parts.AssignmentPart;
-import at.shiftcontrol.lib.event.events.parts.VolunteerPart;
-import static at.shiftcontrol.lib.event.RoutingKeys.SHIFTPLAN_LEAVE;
+import at.control.shiftcontrol.shift.entity.Assignment;
+import at.control.shiftcontrol.shift.entity.Volunteer;
+import at.control.shiftcontrol.shift.lib.event.BaseEvent;
+import at.control.shiftcontrol.shift.lib.event.EventType;
+import at.control.shiftcontrol.shift.lib.event.RoutingKeys;
+import at.control.shiftcontrol.shift.lib.event.events.parts.AssignmentPart;
+import at.control.shiftcontrol.shift.lib.event.events.parts.VolunteerPart;
+import static at.control.shiftcontrol.shift.lib.event.RoutingKeys.SHIFTPLAN_LEAVE;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

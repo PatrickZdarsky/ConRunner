@@ -18,9 +18,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.shiftcontrol.lib.auth.ApplicationUser;
-import at.shiftcontrol.lib.exception.IllegalArgumentException;
-import at.shiftcontrol.shiftservice.auth.config.props.OidcProviderProps;
+import at.control.shiftcontrol.shift.auth.ApplicationUser;
+import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
 import at.shiftcontrol.shiftservice.auth.user.ShiftControlUser;
 @Deprecated
 @Slf4j

@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.dto.event.schedule;
 
 import java.util.Collection;
 
-import at.shiftcontrol.lib.type.ShiftRelevance;
+import at.control.shiftcontrol.shift.lib.type.ShiftRelevance;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

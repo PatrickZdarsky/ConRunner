@@ -5,8 +5,8 @@ import java.util.Collection;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import at.shiftcontrol.shiftservice.dto.userprofile.VolunteerDto;
-import at.shiftcontrol.shiftservice.userdirectory.UserInfo;
+import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
+import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VolunteerAssemblingMapper {
