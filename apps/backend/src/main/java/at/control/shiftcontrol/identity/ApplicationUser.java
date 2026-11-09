@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 
 @Getter
-public abstract class ApplicationUser implements UserDetails {
+public abstract class ApplicationUser implements UserDetails, AuthenticatedActor {
     private final UUID userId;
     private final Collection<? extends GrantedAuthority> authorities;
     private final String username;
