@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -134,23 +135,28 @@ public class EventExportServiceImpl implements EventExportService {
 
         // If there are no shifts, still export a single row with event info
         if (rows.isEmpty()) {
-            var row = new LinkedHashMap<String, Object>();
-            row.put("event_name", eventName);
-            row.put("event_start_time_utc", eventStart);
-            row.put("event_end_time_utc", eventEnd);
-            row.put("name", "");
-            row.put("start_time_utc", "");
-            row.put("end_time_utc", "");
-            row.put("location", "");
-            row.put("related_activity", "");
-            row.put("required_total", 0);
-            row.put("filled_total", 0);
-            row.put("open_total", 0);
-            row.put("notes", "");
+            var row = createRow(eventName, eventStart, eventEnd);
             rows.add(row);
         }
 
         return rows;
+    }
+
+    private static @NonNull LinkedHashMap<String, Object> createRow(String eventName, String eventStart, String eventEnd) {
+        var row = new LinkedHashMap<String, Object>();
+        row.put("event_name", eventName);
+        row.put("event_start_time_utc", eventStart);
+        row.put("event_end_time_utc", eventEnd);
+        row.put("name", "");
+        row.put("start_time_utc", "");
+        row.put("end_time_utc", "");
+        row.put("location", "");
+        row.put("related_activity", "");
+        row.put("required_total", 0);
+        row.put("filled_total", 0);
+        row.put("open_total", 0);
+        row.put("notes", "");
+        return row;
     }
 
     private int resolveRequiredSlots(Shift shift) {
@@ -200,7 +206,7 @@ public class EventExportServiceImpl implements EventExportService {
             return List.of();
         }
 
-        LinkedHashSet<String> headers = new LinkedHashSet<>(rows.get(0).keySet());
+        LinkedHashSet<String> headers = new LinkedHashSet<>(rows.getFirst().keySet());
         for (Map<String, Object> row : rows) {
             headers.addAll(row.keySet());
         }
