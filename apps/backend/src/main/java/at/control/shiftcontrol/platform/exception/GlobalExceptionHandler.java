@@ -1,5 +1,6 @@
-package at.control.shiftcontrol.shift.config;
+package at.control.shiftcontrol.platform.exception;
 
+import java.lang.UnsupportedOperationException;
 import java.lang.invoke.MethodHandles;
 import java.util.stream.Collectors;
 
@@ -17,17 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
-import at.control.shiftcontrol.shift.lib.exception.ConflictException;
-import at.control.shiftcontrol.shift.lib.exception.FileExportException;
-import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
-import at.control.shiftcontrol.shift.lib.exception.NotificationSettingAlreadyExistsException;
-import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
-import at.control.shiftcontrol.shift.lib.exception.PretalxApiKeyInvalidException;
-import at.control.shiftcontrol.shift.lib.exception.StateViolationException;
-import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
-import at.control.shiftcontrol.shift.lib.exception.ValidationException;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;

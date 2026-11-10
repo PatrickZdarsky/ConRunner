@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.shift.lib.exception;
+package at.control.shiftcontrol.platform.exception;
 
 import java.util.ArrayList;
 import java.util.Arrays;

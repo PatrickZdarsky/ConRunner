@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.shift.config;
+package at.control.shiftcontrol.platform.exception;
 
 import lombok.Builder;
 import lombok.Value;

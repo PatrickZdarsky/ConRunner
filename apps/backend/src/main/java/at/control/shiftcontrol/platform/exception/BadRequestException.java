@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.shift.lib.exception;
+package at.control.shiftcontrol.platform.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

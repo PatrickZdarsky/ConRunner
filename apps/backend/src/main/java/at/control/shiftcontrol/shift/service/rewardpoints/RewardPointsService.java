@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.service.rewardpoints;
 import java.util.Collection;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
-import at.control.shiftcontrol.shift.lib.exception.ConflictException;
+import at.control.shiftcontrol.platform.exception.ConflictException;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsExportDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenCreateRequestDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsShareTokenDto;

@@ -20,7 +20,7 @@ import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
-import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.platform.exception.IllegalStateException;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dto.event.EventDto;

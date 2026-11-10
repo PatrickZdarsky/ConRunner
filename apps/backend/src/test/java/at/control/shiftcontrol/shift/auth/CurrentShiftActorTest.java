@@ -2,7 +2,7 @@ package at.control.shiftcontrol.shift.auth;
 
 import at.control.shiftcontrol.identity.ActorType;
 import at.control.shiftcontrol.identity.AuthenticatedActor;
-import at.control.shiftcontrol.shift.lib.exception.UnauthorizedException;
+import at.control.shiftcontrol.platform.exception.UnauthorizedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

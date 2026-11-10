@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
 import at.control.shiftcontrol.shift.lib.event.events.RewardPointTransactionEvent;
-import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.platform.exception.IllegalArgumentException;
 import at.control.shiftcontrol.shift.lib.type.RewardPointTransactionType;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.RewardPointsTransactionDao;

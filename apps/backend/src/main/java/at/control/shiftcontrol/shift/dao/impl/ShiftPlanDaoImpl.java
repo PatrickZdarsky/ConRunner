@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
-import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
+import at.control.shiftcontrol.platform.exception.PartiallyNotFoundException;
 import at.control.shiftcontrol.shift.dao.ShiftPlanDao;
 import at.control.shiftcontrol.shift.repo.ShiftPlanRepository;
 import lombok.RequiredArgsConstructor;

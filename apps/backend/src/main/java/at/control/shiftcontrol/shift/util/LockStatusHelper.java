@@ -5,7 +5,7 @@ import at.control.shiftcontrol.shift.entity.AssignmentSwitchRequest;
 import at.control.shiftcontrol.shift.entity.PositionSlot;
 import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
-import at.control.shiftcontrol.shift.lib.exception.StateViolationException;
+import at.control.shiftcontrol.platform.exception.StateViolationException;
 import at.control.shiftcontrol.shift.lib.type.LockStatus;
 
 public class LockStatusHelper {

@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import at.control.shiftcontrol.shift.entity.Activity;
 import at.control.shiftcontrol.shift.entity.Location;
 import at.control.shiftcontrol.shift.lib.event.events.ActivityEvent;
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.platform.exception.BadRequestException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.dao.ActivityDao;

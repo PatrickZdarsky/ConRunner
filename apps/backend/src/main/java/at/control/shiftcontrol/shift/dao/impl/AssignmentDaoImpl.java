@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.PositionSlot;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.repo.AssignmentRepository;

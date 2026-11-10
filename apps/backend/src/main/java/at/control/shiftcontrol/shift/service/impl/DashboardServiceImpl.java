@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
-import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.ForbiddenException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.dao.AssignmentSwitchRequestDao;

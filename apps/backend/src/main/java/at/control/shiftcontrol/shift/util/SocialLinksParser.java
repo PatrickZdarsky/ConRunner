@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.platform.exception.IllegalArgumentException;
 import at.control.shiftcontrol.shift.lib.type.SocialMediaLinkType;
 import at.control.shiftcontrol.shift.dto.event.SocialMediaLinkDto;
 

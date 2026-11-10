@@ -10,7 +10,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
 import at.control.shiftcontrol.shift.dto.user.UserEventDto;
 import at.control.shiftcontrol.shift.dto.user.UserPlanDto;

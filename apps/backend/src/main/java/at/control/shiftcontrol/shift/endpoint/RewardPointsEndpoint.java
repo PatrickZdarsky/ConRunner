@@ -3,7 +3,7 @@ package at.control.shiftcontrol.shift.endpoint;
 import java.util.Collection;
 
 import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsExportDto;

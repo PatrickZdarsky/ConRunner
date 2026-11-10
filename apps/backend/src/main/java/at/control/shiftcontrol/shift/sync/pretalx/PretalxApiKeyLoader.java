@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import at.control.shiftcontrol.shift.entity.PretalxApiKey;
 import at.control.shiftcontrol.shift.lib.event.events.PretalxApiKeyInvalidEvent;
-import at.control.shiftcontrol.shift.lib.exception.PretalxApiKeyInvalidException;
+import at.control.shiftcontrol.platform.exception.PretalxApiKeyInvalidException;
 import at.shiftcontrol.pretalxclient.model.EventList;
 import at.control.shiftcontrol.shift.repo.pretalx.PretalxApiKeyRepository;
 

@@ -14,8 +14,8 @@ import org.jspecify.annotations.NonNull;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.Shift;
-import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.ForbiddenException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dto.leaderboard.LeaderBoardDto;
 import at.control.shiftcontrol.shift.dto.leaderboard.RankDto;

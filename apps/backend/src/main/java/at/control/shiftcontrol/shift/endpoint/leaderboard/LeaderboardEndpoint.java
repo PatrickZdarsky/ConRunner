@@ -10,8 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.ForbiddenException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dto.leaderboard.LeaderBoardDto;

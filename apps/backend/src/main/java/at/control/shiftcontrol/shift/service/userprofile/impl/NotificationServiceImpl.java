@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.NotificationSettings;
 import at.control.shiftcontrol.shift.lib.event.events.NotificationSettingsEvent;
-import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
+import at.control.shiftcontrol.platform.exception.IllegalStateException;
 import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
 import at.control.shiftcontrol.shift.lib.type.NotificationType;
 import at.control.shiftcontrol.shift.dao.NotificationSettingsDao;

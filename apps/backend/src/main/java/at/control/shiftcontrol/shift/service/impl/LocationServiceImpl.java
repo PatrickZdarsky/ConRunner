@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.Location;
 import at.control.shiftcontrol.shift.lib.event.events.LocationEvent;
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.platform.exception.BadRequestException;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.LocationDao;

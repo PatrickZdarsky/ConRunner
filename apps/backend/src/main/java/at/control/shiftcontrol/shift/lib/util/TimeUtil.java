@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.platform.exception.IllegalArgumentException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TimeUtil {

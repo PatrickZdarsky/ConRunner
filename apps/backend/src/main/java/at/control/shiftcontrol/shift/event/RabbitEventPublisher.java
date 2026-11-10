@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
 
 import at.control.shiftcontrol.shift.lib.event.BaseEvent;
-import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.platform.exception.IllegalArgumentException;
 import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.config.RabbitMqConfig;
 

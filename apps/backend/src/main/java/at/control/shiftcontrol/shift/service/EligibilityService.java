@@ -6,8 +6,8 @@ import java.util.Collection;
 import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.PositionSlot;
 import at.control.shiftcontrol.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.lib.exception.ConflictException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.ConflictException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.type.PositionSignupState;
 
 import lombok.NonNull;

@@ -29,7 +29,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import at.control.shiftcontrol.shift.util.UniqueCodeGenerator;
-import at.control.shiftcontrol.shift.lib.exception.FileExportException;
+import at.control.shiftcontrol.platform.exception.FileExportException;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dao.RewardPointsShareTokenDao;

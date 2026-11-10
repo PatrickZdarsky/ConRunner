@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.PretalxApiKey;
-import at.control.shiftcontrol.shift.lib.exception.ConflictException;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
-import at.control.shiftcontrol.shift.lib.exception.ValidationException;
+import at.control.shiftcontrol.platform.exception.ConflictException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.ValidationException;
 import at.control.shiftcontrol.shift.dto.PretalxApiKeyDetailsDto;
 import at.control.shiftcontrol.shift.dto.PretalxApiKeyDto;
 import at.control.shiftcontrol.shift.repo.pretalx.PretalxApiKeyRepository;

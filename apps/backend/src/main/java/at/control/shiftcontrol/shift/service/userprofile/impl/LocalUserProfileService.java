@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.lib.exception.ForbiddenException;
+import at.control.shiftcontrol.platform.exception.ForbiddenException;
 import at.control.shiftcontrol.shift.lib.type.NotificationType;
 import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;

@@ -9,7 +9,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.jspecify.annotations.NonNull;
 
 import at.control.shiftcontrol.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.platform.exception.BadRequestException;
 import at.control.shiftcontrol.shift.lib.type.NotificationChannel;
 import at.control.shiftcontrol.shift.lib.type.ReceiverAccessLevel;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;

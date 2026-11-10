@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 
 import at.control.shiftcontrol.shift.entity.RewardPointsTransaction;
-import at.control.shiftcontrol.shift.lib.exception.IllegalStateException;
-import at.control.shiftcontrol.shift.lib.exception.UnsupportedOperationException;
+import at.control.shiftcontrol.platform.exception.IllegalStateException;
+import at.control.shiftcontrol.platform.exception.UnsupportedOperationException;
 import at.control.shiftcontrol.shift.dao.RewardPointsTransactionDao;
 import at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsDto;
 import at.control.shiftcontrol.shift.mapper.RewardPointsMapper;

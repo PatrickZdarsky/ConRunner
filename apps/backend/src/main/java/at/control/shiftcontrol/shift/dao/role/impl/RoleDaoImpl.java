@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
 import at.control.shiftcontrol.shift.entity.Role;
-import at.control.shiftcontrol.shift.lib.exception.PartiallyNotFoundException;
+import at.control.shiftcontrol.platform.exception.PartiallyNotFoundException;
 import at.control.shiftcontrol.shift.dao.role.RoleDao;
 import at.control.shiftcontrol.shift.repo.role.RoleRepository;
 

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -13,7 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import at.control.shiftcontrol.shift.entity.PositionSlot;
 import at.control.shiftcontrol.shift.entity.Role;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
-import at.control.shiftcontrol.shift.lib.exception.IllegalArgumentException;
+import at.control.shiftcontrol.platform.exception.IllegalArgumentException;
 import at.control.shiftcontrol.shift.lib.util.TimeUtil;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsSnapshotDto;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsCalculator;

@@ -23,7 +23,7 @@ import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.event.events.UserEvent;
 import at.control.shiftcontrol.shift.lib.event.events.UserEventBulkEvent;
 import at.control.shiftcontrol.shift.lib.event.events.UserPlanBulkEvent;
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.platform.exception.BadRequestException;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.auth.UserAttributeProvider;

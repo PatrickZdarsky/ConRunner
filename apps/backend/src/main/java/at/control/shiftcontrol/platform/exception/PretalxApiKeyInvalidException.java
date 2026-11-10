@@ -1,4 +1,4 @@
-package at.control.shiftcontrol.shift.lib.exception;
+package at.control.shiftcontrol.platform.exception;
 
 public class PretalxApiKeyInvalidException extends RuntimeException {
     public PretalxApiKeyInvalidException(String message) {

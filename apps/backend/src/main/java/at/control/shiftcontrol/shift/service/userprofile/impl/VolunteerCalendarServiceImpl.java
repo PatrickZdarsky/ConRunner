@@ -22,7 +22,7 @@ import at.control.shiftcontrol.shift.entity.Assignment;
 import at.control.shiftcontrol.shift.entity.Location;
 import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
 import at.control.shiftcontrol.shift.dto.userprofile.CalendarShareIdDto;

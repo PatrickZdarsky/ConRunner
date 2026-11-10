@@ -25,7 +25,7 @@ import at.control.shiftcontrol.shift.entity.Location;
 import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import at.control.shiftcontrol.shift.lib.event.events.EventEvent;
-import at.control.shiftcontrol.shift.lib.exception.ValidationException;
+import at.control.shiftcontrol.platform.exception.ValidationException;
 import at.control.shiftcontrol.shift.lib.type.LockStatus;
 import at.control.shiftcontrol.identity.AdminOnly;
 import at.control.shiftcontrol.shift.dao.ActivityDao;

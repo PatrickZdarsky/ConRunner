@@ -9,7 +9,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import at.control.shiftcontrol.shift.entity.ShiftPlanInvite;
-import at.control.shiftcontrol.shift.lib.exception.NotFoundException;
+import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.dao.ShiftPlanInviteDao;
 import at.control.shiftcontrol.shift.repo.ShiftPlanInviteRepository;
 

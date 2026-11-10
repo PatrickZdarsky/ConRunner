@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import at.control.shiftcontrol.shift.dto.PaginationDto;
 import at.control.shiftcontrol.shift.entity.Shift;
 import at.control.shiftcontrol.shift.lib.event.events.ShiftEvent;
-import at.control.shiftcontrol.shift.lib.exception.BadRequestException;
+import at.control.shiftcontrol.platform.exception.BadRequestException;
 import at.control.shiftcontrol.shift.lib.type.AssignmentStatus;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.identity.AdminOnly;
