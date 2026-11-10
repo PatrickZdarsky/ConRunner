@@ -2,6 +2,8 @@ package at.control.shiftcontrol.shift.event;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -16,12 +18,13 @@ import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
 import at.control.shiftcontrol.shift.config.RabbitMqConfig;
 
 @Service
+@ConditionalOnProperty(prefix = "shiftcontrol.events.rabbitmq", name = "enabled", havingValue = "true")
 @Slf4j
 @RequiredArgsConstructor
 public class RabbitEventPublisher {
     private final RabbitTemplate rabbitTemplate;
     private final CurrentShiftActor currentActor;
-    private final Tracer tracer;
+    private final ObjectProvider<Tracer> tracerProvider;
 
     private static final String ROUTING_KEY_PREFIX = "shiftcontrol.";
 
@@ -44,7 +47,9 @@ public class RabbitEventPublisher {
     }
 
     private String getTraceId() {
-        var context = this.tracer.currentTraceContext().context();
+        var tracer = tracerProvider.getIfAvailable();
+        if (tracer == null) return null;
+        var context = tracer.currentTraceContext().context();
         return context != null ? context.traceId() : null;
     }
 

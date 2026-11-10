@@ -1,3 +1,8 @@
 spring:
   application:
     name: shiftcontrol
+
+shiftcontrol:
+  events:
+    rabbitmq:
+      enabled: false

@@ -1,5 +1,16 @@
 # ShiftControl backend
 
+## Legacy RabbitMQ events
+
+Legacy event publishing is disabled by default. To enable it, set
+`shiftcontrol.events.rabbitmq.enabled: true` in application configuration (or set
+`SHIFTCONTROL_EVENTS_RABBITMQ_ENABLED=true`) and configure the broker using Spring Boot's
+`spring.rabbitmq` properties. The publisher sends to the `shiftcontrol` topic exchange.
+An optional Micrometer tracer supplies trace IDs when one is configured.
+
+The legacy events include sensitive credentials and publishing is not durable across broker or
+process failures. Address those limitations before using this integration in production.
+
 This directory contains the single Spring Boot deployable. Domain separation is package-based so
 Spring Modulith can discover and verify it without introducing a Maven module, network protocol, or
 release pipeline for every domain.

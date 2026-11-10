@@ -7,8 +7,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Configuration
+@ConditionalOnProperty(prefix = "shiftcontrol.events.rabbitmq", name = "enabled", havingValue = "true")
 public class RabbitMqConfig {
     public static final String EXCHANGE_NAME = "shiftcontrol";
 

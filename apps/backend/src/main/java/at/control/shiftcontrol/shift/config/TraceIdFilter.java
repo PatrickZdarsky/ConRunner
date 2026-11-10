@@ -3,6 +3,7 @@ package at.control.shiftcontrol.shift.config;
 import java.io.IOException;
 
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import io.micrometer.tracing.Tracer;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 class TraceIdFilter extends OncePerRequestFilter {
-    private final Tracer tracer;
+    private final ObjectProvider<Tracer> tracerProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -27,7 +28,9 @@ class TraceIdFilter extends OncePerRequestFilter {
     }
 
     private String getTraceId() {
-        var context = this.tracer.currentTraceContext().context();
+        var tracer = tracerProvider.getIfAvailable();
+        if (tracer == null) return null;
+        var context = tracer.currentTraceContext().context();
         return context != null ? context.traceId() : null;
     }
 }
