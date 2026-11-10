@@ -87,7 +87,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
 
         try {
             volunteerDao.save(volunteer);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             volunteer.setCalendarShareId(generateShareId());
             volunteerDao.save(volunteer);
         }
