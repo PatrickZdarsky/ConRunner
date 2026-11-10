@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -136,17 +137,25 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     public @NonNull UserEventDto updateEventUser(@NonNull String userId, @NonNull UserEventUpdateDto updateDto) {
         var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         assertPlansChanged(volunteer, updateDto);
-        var affectedPlans = new java.util.ArrayList<ShiftPlan>();
-        if (volunteer.getVolunteeringPlans() != null) affectedPlans.addAll(volunteer.getVolunteeringPlans());
-        if (volunteer.getPlanningPlans() != null) affectedPlans.addAll(volunteer.getPlanningPlans());
+        var originalVolunteeringPlans = Optional.ofNullable(volunteer.getVolunteeringPlans()).orElse(Collections.emptyList());
+        var originalPlanningPlans = Optional.ofNullable(volunteer.getPlanningPlans()).orElse(Collections.emptyList());
 
-        var volunteerToAdd = toAddPlans(updateDto.getVolunteeringPlans(), volunteer.getVolunteeringPlans());
-        var planningToAdd = toAddPlans(updateDto.getPlanningPlans(), volunteer.getPlanningPlans());
+        var volunteerToAdd = toAddPlans(updateDto.getVolunteeringPlans(), originalVolunteeringPlans);
+        var planningToAdd = toAddPlans(updateDto.getPlanningPlans(), originalPlanningPlans);
+        var volunteerToRemove = toRemovePlans(updateDto.getVolunteeringPlans(), originalVolunteeringPlans);
+        var planningToRemove = toRemovePlans(updateDto.getPlanningPlans(), originalPlanningPlans);
+
+        removePlans(volunteer, volunteerToRemove, planningToRemove);
         addPlans(volunteer, volunteerToAdd, planningToAdd);
 
-        var volunteerToRemove = toRemovePlans(updateDto.getVolunteeringPlans(), volunteer.getVolunteeringPlans());
-        var planningToRemove = toRemovePlans(updateDto.getPlanningPlans(), volunteer.getPlanningPlans());
-        removePlans(volunteer, volunteerToRemove, planningToRemove);
+        var affectedPlanIds = Stream.of(
+                volunteerToAdd,
+                volunteerToRemove,
+                planningToAdd,
+                planningToRemove
+            )
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
 
         var user = userService.getUser(volunteer.getId());
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
@@ -154,8 +163,8 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             updateDto.getPlanningPlans().stream(), updateDto.getVolunteeringPlans().stream())
             .map(ConvertUtil::idToLong)
             .collect(Collectors.toSet()));
-        affectedPlans.addAll(allPlans);
-        notifyUser(volunteer, affectedPlans, NotificationTypes.MEMBERSHIP_CHANGED);
+
+        notifyUser(volunteer, shiftPlanDao.getByIds(affectedPlanIds), NotificationTypes.MEMBERSHIP_CHANGED);
         publisher.publishEvent(UserEvent.eventUpdate(volunteer, allPlans));
         return UserAssemblingMapper.toUserEventDto(volunteer, user);
     }

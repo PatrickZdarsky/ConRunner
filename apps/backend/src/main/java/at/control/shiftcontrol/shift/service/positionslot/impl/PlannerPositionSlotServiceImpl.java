@@ -180,7 +180,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             try {
                 assignment = assignmentDao.getAssignmentForPositionSlotAndUser(
                     positionSlot.getId(), nextVolunteer.getId().toString());
-            } catch (Exception e) {
+            } catch (Exception _) {
                 // ignore
             }
             if (assignment == null) {

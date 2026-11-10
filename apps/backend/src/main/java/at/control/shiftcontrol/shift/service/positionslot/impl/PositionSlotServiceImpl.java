@@ -333,7 +333,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
             .filter(slot -> slot.getName().equalsIgnoreCase(name)
                 && (excludePositionSlotId == null || slot.getId() != excludePositionSlotId))
             .findAny()
-            .ifPresent(slot -> {
+            .ifPresent(_ -> {
                 throw new ValidationException("A position slot with the name '%s' already exists in shift '%s'".formatted(name, shift.getName()));
             });
     }

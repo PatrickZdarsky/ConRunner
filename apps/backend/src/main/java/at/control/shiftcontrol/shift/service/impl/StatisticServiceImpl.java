@@ -152,25 +152,17 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     private double calculateTotalHoursInShifts(List<Shift> userShifts) {
-        double totalMinutes = 0;
+        long totalMinutes = 0;
         for (var shift : userShifts) {
             var duration = TimeUtil.calculateDurationInMinutes(shift.getStartTime(), shift.getEndTime());
             totalMinutes += duration;
         }
-        return totalMinutes / 60;
+        return (double) totalMinutes / 60;
     }
 
     private int calculateVolunteerCountInShiftPlan(ShiftPlan shiftPlan) {
-//         var volunteerSet = new HashSet<String>();
-//         for (var shift : shiftPlan.getShifts()) {
-//             for (var slot : shift.getSlots()) {
-//                 for (var assignment : slot.getAssignments()) {
-//                     if (assignment.getAssignedVolunteer() != null) {
-//                         volunteerSet.add(assignment.getAssignedVolunteer().getId());
-//                     }
-//                 }
-//             }
-//         }
+        //Another way this could be done is by going through each shift, slot and assignment and collecting
+        // the volunteers that way
         return shiftPlan.getPlanVolunteers().size();
     }
 

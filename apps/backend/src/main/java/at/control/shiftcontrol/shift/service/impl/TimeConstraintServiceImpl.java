@@ -45,7 +45,6 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
     private final VolunteerDao volunteerDao;
     private final ApplicationEventPublisher publisher;
     private final NotificationRequests notificationRequests;
-    private final SecurityHelper securityHelper;
     private final AssignmentService assignmentService;
 
     private static final long SECONDS_PER_DAY = Duration.ofDays(1).getSeconds();

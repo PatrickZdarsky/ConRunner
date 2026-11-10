@@ -258,7 +258,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
             .collect(Collectors.toMap(
                 t -> AssignmentPair.of(t.getOfferingAssignment().getId(), t.getRequestedAssignment().getId()),
                 t -> t,
-                (a, b) -> a
+                (a, _) -> a
             ));
 
         // either insert new trade or update existing trade to OPEN
@@ -290,7 +290,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                 throw new IllegalStateException("more than one inverse trade is open" + inverse);
             }
             if (!inverse.isEmpty()) {
-                return List.of(self.acceptTrade(inverse.get(0).getId(), currentUserId));
+                return List.of(self.acceptTrade(inverse.getFirst().getId(), currentUserId));
             }
         }
 

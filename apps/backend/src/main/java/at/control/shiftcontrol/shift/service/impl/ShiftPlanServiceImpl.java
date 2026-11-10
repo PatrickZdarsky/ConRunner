@@ -230,7 +230,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         // Should not happen but just in case we retry once
         try {
             shiftPlanInviteDao.save(invite);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // fallback once, because code uniqueness might collide under concurrency
             invite.setCode(callGenerateUniqueCode());
             shiftPlanInviteDao.save(invite);
@@ -290,7 +290,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         String userId;
         try {
             userId = currentActor.get().requireUserId().toString();
-        } catch (UnauthorizedException e) {
+        } catch (UnauthorizedException _) {
             // user not logged in, proceed without user context
             userId = "";
         }
