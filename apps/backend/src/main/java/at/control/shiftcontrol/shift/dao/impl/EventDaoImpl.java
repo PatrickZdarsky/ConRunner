@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -72,8 +73,8 @@ public class EventDaoImpl implements EventDao {
     }
 
     @Override
-    public Collection<Event> getAllOpenEventsForUser(String userId) {
-        return eventRepository.getAllOpenEventsForUser(java.util.UUID.fromString(userId), Instant.now());
+    public Collection<Event> getAllOpenEventsForUser(UUID userId) {
+        return eventRepository.getAllOpenEventsForUser(userId, Instant.now());
     }
 
     @Override
@@ -87,8 +88,8 @@ public class EventDaoImpl implements EventDao {
     }
 
     @Override
-    public Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, String userId) {
-        return eventRepository.getPlannersForEventAndUser(eventId, java.util.UUID.fromString(userId));
+    public Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, UUID userId) {
+        return eventRepository.getPlannersForEventAndUser(eventId, userId);
     }
 
     @Override

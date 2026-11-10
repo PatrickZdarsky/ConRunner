@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.userprofile.impl;
 
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
@@ -25,16 +26,16 @@ public class LocalUserProfileService implements UserProfileService {
     private final VolunteerCalendarService volunteerCalendarService;
 
     @Override
-    public UserProfileDto getUserProfile(String userId) {
+    public UserProfileDto getUserProfile(UUID userId) {
         var actor = currentActor.get();
-        if (!userId.equals(actor.requireUserId().toString()) && securityHelper.isNotUserAdmin()) {
+        if (!userId.equals(actor.requireUserId()) && securityHelper.isNotUserAdmin()) {
             throw new ForbiddenException("Access denied: cannot access other user's profile");
         }
 
-        User user = userService.getUser(java.util.UUID.fromString(userId));
+        User user = userService.getUser(userId);
 
-        Volunteer volunteer = volunteerDao.findById(java.util.UUID.fromString(userId)).orElse(null);
-        String calendarShareId = userId.equals(actor.requireUserId().toString())
+        Volunteer volunteer = volunteerDao.findById(userId).orElse(null);
+        String calendarShareId = userId.equals(actor.requireUserId())
             ? volunteerCalendarService.getOrCreateCalendarShareId(userId).orElse(null)
             : null;
 

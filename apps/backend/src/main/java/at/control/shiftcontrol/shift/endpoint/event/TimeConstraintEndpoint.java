@@ -35,7 +35,7 @@ public class TimeConstraintEndpoint {
         description = "Get time constraints of the current user"
     )
     public Collection<TimeConstraintDto> getTimeConstraints(@PathVariable String eventId) {
-        return timeConstraintService.getTimeConstraints(currentActor.get().requireUserId().toString(), ConvertUtil.idToLong(eventId));
+        return timeConstraintService.getTimeConstraints(currentActor.get().requireUserId(), ConvertUtil.idToLong(eventId));
     }
 
     @PostMapping()
@@ -46,7 +46,7 @@ public class TimeConstraintEndpoint {
     public TimeConstraintDto createTimeConstraint(@PathVariable String eventId, @RequestBody TimeConstraintCreateDto createDto) {
         return timeConstraintService.createTimeConstraint(
             createDto,
-            currentActor.get().requireUserId().toString(),
+            currentActor.get().requireUserId(),
             ConvertUtil.idToLong(eventId)
         );
     }
@@ -58,7 +58,7 @@ public class TimeConstraintEndpoint {
     )
     public void deleteTimeConstraint(@PathVariable String eventId, @PathVariable String timeConstraintId) {
         // Check that the time constraint belongs to the current user (throws NotFoundException if not)
-        timeConstraintService.getTimeConstraints(currentActor.get().requireUserId().toString(), ConvertUtil.idToLong(eventId));
+        timeConstraintService.getTimeConstraints(currentActor.get().requireUserId(), ConvertUtil.idToLong(eventId));
         timeConstraintService.delete(ConvertUtil.idToLong(timeConstraintId));
     }
 }

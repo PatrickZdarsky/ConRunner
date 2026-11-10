@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Optional;
@@ -31,8 +32,8 @@ public class AssignmentDaoImpl implements AssignmentDao {
         return assignmentRepository.findById(id);
     }
 
-    public Optional<Assignment> findBySlotAndUser(long positionSlotId, String assignedUserId) {
-        return assignmentRepository.findBySlotAndUser(positionSlotId, java.util.UUID.fromString(assignedUserId));
+    public Optional<Assignment> findBySlotAndUser(long positionSlotId, UUID assignedUserId) {
+        return assignmentRepository.findBySlotAndUser(positionSlotId, assignedUserId);
     }
 
     @Override
@@ -61,17 +62,17 @@ public class AssignmentDaoImpl implements AssignmentDao {
     }
 
     @Override
-    public Collection<Assignment> findAuctionsByShiftPlanIdExcludingUser(long shiftPlanId, String userId) {
-        return assignmentRepository.findAuctionsByShiftPlanIdExcludingUser(shiftPlanId, java.util.UUID.fromString(userId), AssignmentStatus.ACTIVE_AUCTION_STATES);
+    public Collection<Assignment> findAuctionsByShiftPlanIdExcludingUser(long shiftPlanId, UUID userId) {
+        return assignmentRepository.findAuctionsByShiftPlanIdExcludingUser(shiftPlanId, userId, AssignmentStatus.ACTIVE_AUCTION_STATES);
     }
 
     @Override
-    public Collection<Assignment> getConflictingAssignments(String volunteerId, Instant startTime, Instant endTime) {
-        return assignmentRepository.getConflictingAssignments(java.util.UUID.fromString(volunteerId), startTime, endTime);
+    public Collection<Assignment> getConflictingAssignments(UUID volunteerId, Instant startTime, Instant endTime) {
+        return assignmentRepository.getConflictingAssignments(volunteerId, startTime, endTime);
     }
 
     @Override
-    public Collection<Assignment> getConflictingAssignments(String volunteerId, PositionSlot slot) {
+    public Collection<Assignment> getConflictingAssignments(UUID volunteerId, PositionSlot slot) {
         return getConflictingAssignments(volunteerId, slot.getShift().getStartTime(), slot.getShift().getEndTime());
     }
 
@@ -81,44 +82,44 @@ public class AssignmentDaoImpl implements AssignmentDao {
     }
 
     @Override
-    public Collection<Assignment> getConflictingAssignmentsExcludingShift(String volunteerId, Instant startTime, Instant endTime, long shiftId) {
-        return assignmentRepository.getConflictingAssignmentsExcludingShift(java.util.UUID.fromString(volunteerId), startTime, endTime, shiftId);
+    public Collection<Assignment> getConflictingAssignmentsExcludingShift(UUID volunteerId, Instant startTime, Instant endTime, long shiftId) {
+        return assignmentRepository.getConflictingAssignmentsExcludingShift(volunteerId, startTime, endTime, shiftId);
     }
 
     @Override
-    public Collection<Assignment> getConflictingAssignmentsExcludingSlot(String volunteerId, Instant startTime, Instant endTime, long slotId) {
-        return assignmentRepository.getConflictingAssignmentsExcludingSlot(java.util.UUID.fromString(volunteerId), startTime, endTime, slotId);
+    public Collection<Assignment> getConflictingAssignmentsExcludingSlot(UUID volunteerId, Instant startTime, Instant endTime, long slotId) {
+        return assignmentRepository.getConflictingAssignmentsExcludingSlot(volunteerId, startTime, endTime, slotId);
     }
 
     @Override
-    public Collection<Assignment> getConflictingAssignmentsExcludingSlot(String volunteerId, PositionSlot slot) {
+    public Collection<Assignment> getConflictingAssignmentsExcludingSlot(UUID volunteerId, PositionSlot slot) {
         return getConflictingAssignmentsExcludingSlot(volunteerId, slot.getShift().getStartTime(), slot.getShift().getEndTime(), slot.getId());
     }
 
     @Override
-    public @org.jspecify.annotations.NonNull Assignment getAssignmentForPositionSlotAndUser(long positionSlotId, String userId) {
-        return assignmentRepository.findAssignmentForPositionSlotAndUser(positionSlotId, java.util.UUID.fromString(userId))
+    public @org.jspecify.annotations.NonNull Assignment getAssignmentForPositionSlotAndUser(long positionSlotId, UUID userId) {
+        return assignmentRepository.findAssignmentForPositionSlotAndUser(positionSlotId, userId)
             .orElseThrow(() -> new NotFoundException("Not assigned to position slot."));
     }
 
     @Override
-    public Optional<Assignment> findAssignmentForPositionSlotAndUser(long positionSlotId, String userId) {
-        return assignmentRepository.findAssignmentForPositionSlotAndUser(positionSlotId, java.util.UUID.fromString(userId));
+    public Optional<Assignment> findAssignmentForPositionSlotAndUser(long positionSlotId, UUID userId) {
+        return assignmentRepository.findAssignmentForPositionSlotAndUser(positionSlotId, userId);
     }
 
     @Override
-    public Collection<Assignment> getAssignmentForPositionSlotAndUsers(long positionSlotId, Collection<String> userIds) {
-        return assignmentRepository.findAssignmentForPositionSlotAndUsers(positionSlotId, userIds.stream().map(java.util.UUID::fromString).toList());
+    public Collection<Assignment> getAssignmentForPositionSlotAndUsers(long positionSlotId, Collection<UUID> userIds) {
+        return assignmentRepository.findAssignmentForPositionSlotAndUsers(positionSlotId, userIds);
     }
 
     @Override
-    public Collection<Assignment> findAssignmentsForShiftPlanAndUser(long shiftPlanId, String userId) {
-        return assignmentRepository.findAssignmentsForShiftPlanAndUser(shiftPlanId, java.util.UUID.fromString(userId));
+    public Collection<Assignment> findAssignmentsForShiftPlanAndUser(long shiftPlanId, UUID userId) {
+        return assignmentRepository.findAssignmentsForShiftPlanAndUser(shiftPlanId, userId);
     }
 
     @Override
-    public Collection<Assignment> findActiveAssignmentsForShiftPlanAndUser(long shiftPlanId, String userId) {
-        return assignmentRepository.findActiveAssignmentsForShiftPlanAndUser(shiftPlanId, java.util.UUID.fromString(userId), AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
+    public Collection<Assignment> findActiveAssignmentsForShiftPlanAndUser(long shiftPlanId, UUID userId) {
+        return assignmentRepository.findActiveAssignmentsForShiftPlanAndUser(shiftPlanId, userId, AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
     }
 
     @Override

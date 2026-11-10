@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     private final UserService userService;
 
     @Override
-    public @NonNull LeaderBoardDto getLeaderBoard(long eventId, @NonNull String currentUserId) throws NotFoundException, ForbiddenException {
+    public @NonNull LeaderBoardDto getLeaderBoard(long eventId, @NonNull UUID currentUserId) throws NotFoundException, ForbiddenException {
         var event = eventDao.findById(eventId).orElseThrow(NotFoundException::new);
         securityHelper.assertUserIsAllowedToAccessEvent(event);
 
@@ -44,29 +45,29 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             .flatMap(slot -> ensureList(slot.getAssignments()).stream())
             .toList();
 
-        Map<String, Long> minutesByVolunteer = new HashMap<>();
+        Map<UUID, Long> minutesByVolunteer = new HashMap<>();
 
         for (Assignment a : allAssignments) {
             Shift shift = a.getPositionSlot().getShift();
 
             long minutes = Duration.between(shift.getStartTime(), shift.getEndTime()).toMinutes();
-            String volunteerId = a.getAssignedVolunteer().getId().toString();
+            UUID volunteerId = a.getAssignedVolunteer().getId();
             minutesByVolunteer.merge(volunteerId, minutes, Long::sum);
         }
 
-        List<String> topVolunteerIds = minutesByVolunteer.entrySet().stream()
+        List<UUID> topVolunteerIds = minutesByVolunteer.entrySet().stream()
             .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
             .map(Map.Entry::getKey)
             .toList();
 
         var userIdsToResolve = new LinkedHashSet<>(topVolunteerIds);
         userIdsToResolve.add(currentUserId);
-        Map<java.util.UUID, User> usersById = userService.getUsers(userIdsToResolve.stream().map(java.util.UUID::fromString).toList()).stream()
+        Map<java.util.UUID, User> usersById = userService.getUsers(userIdsToResolve).stream()
             .collect(java.util.stream.Collectors.toMap(User::getId, user -> user));
 
         RankDto ownRank = null;
         if (minutesByVolunteer.containsKey(currentUserId)) {
-            var user = usersById.get(java.util.UUID.fromString(currentUserId));
+            var user = usersById.get(currentUserId);
             ownRank = RankDto.builder()
                 .rank(topVolunteerIds.indexOf(currentUserId) + 1)
                 .hours(minutesByVolunteer.get(currentUserId) / 60)
@@ -79,7 +80,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         int position = 0;
         int displayRank = 0;
 
-        for (String volunteerId : topVolunteerIds) {
+        for (UUID volunteerId : topVolunteerIds) {
             position++;
             long minutes = minutesByVolunteer.get(volunteerId);
 
@@ -88,7 +89,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 prevMinutes = minutes;
             }
 
-            var user = usersById.get(java.util.UUID.fromString(volunteerId));
+            var user = usersById.get(volunteerId);
             long hours = minutes / 60;
 
             var dto = RankDto.builder()

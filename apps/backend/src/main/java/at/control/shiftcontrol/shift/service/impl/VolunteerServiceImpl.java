@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.util.HashSet;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,9 @@ import at.control.shiftcontrol.shift.service.VolunteerService;
 public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerDao volunteerDao;
 
-    private @NonNull Volunteer createVolunteer(@NonNull String userId) {
+    private @NonNull Volunteer createVolunteer(@NonNull UUID userId) {
         var newVolunteer = Volunteer.builder()
-            .id(java.util.UUID.fromString(userId))
+            .id(userId)
             .planningPlans(new HashSet<>())
             .volunteeringPlans(new HashSet<>())
             .lockedPlans(new HashSet<>())
@@ -25,14 +26,14 @@ public class VolunteerServiceImpl implements VolunteerService {
             .build();
         try {
             return volunteerDao.save(newVolunteer);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // another concurrent request created the same volunteer in the meantime
-            return volunteerDao.getById(java.util.UUID.fromString(userId));
+            return volunteerDao.getById(userId);
         }
     }
 
     @Override
-    public @NonNull Volunteer getOrCreate(@NonNull String userId) {
-        return volunteerDao.findById(java.util.UUID.fromString(userId)).orElseGet(() -> createVolunteer(userId));
+    public @NonNull Volunteer getOrCreate(@NonNull UUID userId) {
+        return volunteerDao.findById(userId).orElseGet(() -> createVolunteer(userId));
     }
 }

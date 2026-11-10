@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,8 +40,8 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
     }
 
     @Override
-    public Optional<AssignmentSwitchRequest> findBySlotsAndUsers(long offeredSlotId, String offeringUserId, long requestedSlotId, String requestedUserId) {
-        return assignmentSwitchRequestRepository.findBySlotsAndUsers(offeredSlotId, java.util.UUID.fromString(offeringUserId), requestedSlotId, java.util.UUID.fromString(requestedUserId));
+    public Optional<AssignmentSwitchRequest> findBySlotsAndUsers(long offeredSlotId, UUID offeringUserId, long requestedSlotId, UUID requestedUserId) {
+        return assignmentSwitchRequestRepository.findBySlotsAndUsers(offeredSlotId, offeringUserId, requestedSlotId, requestedUserId);
     }
 
     @Override
@@ -59,8 +60,8 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
     }
 
     @Override
-    public void cancelTradesForPositionSlot(Long positionSlotId, String assignedUser) {
-        assignmentSwitchRequestRepository.cancelTradesForAssignment(positionSlotId, java.util.UUID.fromString(assignedUser), TradeStatus.CANCELED);
+    public void cancelTradesForPositionSlot(Long positionSlotId, UUID assignedUser) {
+        assignmentSwitchRequestRepository.cancelTradesForAssignment(positionSlotId, assignedUser, TradeStatus.CANCELED);
     }
 
     @Override
@@ -70,18 +71,18 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
     }
 
     @Override
-    public Collection<AssignmentSwitchRequest> findOpenTradesForRequestedPositionAndOfferingUser(long positionSlotId, String userId) {
-        return assignmentSwitchRequestRepository.findOpenTradesForRequestedPositionAndOfferingUser(positionSlotId, java.util.UUID.fromString(userId), TradeStatus.OPEN);
+    public Collection<AssignmentSwitchRequest> findOpenTradesForRequestedPositionAndOfferingUser(long positionSlotId, UUID userId) {
+        return assignmentSwitchRequestRepository.findOpenTradesForRequestedPositionAndOfferingUser(positionSlotId, userId, TradeStatus.OPEN);
     }
 
     @Override
-    public Collection<AssignmentSwitchRequest> findTradesForShiftPlanAndUser(long shiftPlanId, String userId) {
-        return assignmentSwitchRequestRepository.findTradesForShiftPlanAndUser(shiftPlanId, java.util.UUID.fromString(userId));
+    public Collection<AssignmentSwitchRequest> findTradesForShiftPlanAndUser(long shiftPlanId, UUID userId) {
+        return assignmentSwitchRequestRepository.findTradesForShiftPlanAndUser(shiftPlanId, userId);
     }
 
     @Override
-    public void cancelTradesForOfferedPositionAndRequestedUser(long positionSlotId, String userId) {
-        assignmentSwitchRequestRepository.cancelTradesForOfferedPositionAndRequestedUser(positionSlotId, java.util.UUID.fromString(userId), TradeStatus.CANCELED);
+    public void cancelTradesForOfferedPositionAndRequestedUser(long positionSlotId, UUID userId) {
+        assignmentSwitchRequestRepository.cancelTradesForOfferedPositionAndRequestedUser(positionSlotId, userId, TradeStatus.CANCELED);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
     }
 
     @Override
-    public Collection<AssignmentSwitchRequest> findOpenTradesForOfferingPositionAndRequestedOwner(long positionSlotId, String userId) {
-        return assignmentSwitchRequestRepository.findOpenTradesForOfferingPositionAndRequestedOwner(positionSlotId, java.util.UUID.fromString(userId), TradeStatus.OPEN);
+    public Collection<AssignmentSwitchRequest> findOpenTradesForOfferingPositionAndRequestedOwner(long positionSlotId, UUID userId) {
+        return assignmentSwitchRequestRepository.findOpenTradesForOfferingPositionAndRequestedOwner(positionSlotId, userId, TradeStatus.OPEN);
     }
 }

@@ -17,7 +17,7 @@ import at.control.shiftcontrol.shift.lib.type.TrustAlertType;
 public class TrustAlertDto {
     // this DTO is used to send Alerts from TrustService to ShiftService
     @NotNull
-    private String userId;
+    private java.util.UUID userId;
 
     @NotNull
     private TrustAlertType alertType;

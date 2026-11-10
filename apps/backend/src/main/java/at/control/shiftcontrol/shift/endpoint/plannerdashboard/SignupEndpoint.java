@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.endpoint.plannerdashboard;
 
 import java.util.Collection;
+import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,7 +64,7 @@ public class SignupEndpoint {
         operationId = "acceptRequest",
         description = "Accept  the slot request"
     )
-    public void acceptRequest(@PathVariable String shiftPlanId, @PathVariable String positionSlotId, String userid) {
+    public void acceptRequest(@PathVariable String shiftPlanId, @PathVariable String positionSlotId, @RequestParam UUID userid) {
         positionSlotService.acceptRequest(ConvertUtil.idToLong(shiftPlanId), ConvertUtil.idToLong(positionSlotId), userid);
     }
 
@@ -72,7 +73,7 @@ public class SignupEndpoint {
         operationId = "declineRequest",
         description = "Decline the slot request"
     )
-    public void declineRequest(@PathVariable String shiftPlanId, @PathVariable String positionSlotId, String userid) {
+    public void declineRequest(@PathVariable String shiftPlanId, @PathVariable String positionSlotId, @RequestParam UUID userid) {
         positionSlotService.declineRequest(ConvertUtil.idToLong(shiftPlanId), ConvertUtil.idToLong(positionSlotId), userid);
     }
 

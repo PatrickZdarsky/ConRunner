@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.util.Collection;
@@ -109,9 +110,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public @org.jspecify.annotations.NonNull VolunteerDto createUserRoleAssignment(String userId, @org.jspecify.annotations.NonNull UserRoleAssignmentAssignDto assignDto) {
+    public @org.jspecify.annotations.NonNull VolunteerDto createUserRoleAssignment(UUID userId, @org.jspecify.annotations.NonNull UserRoleAssignmentAssignDto assignDto) {
         Role role = roleDao.getById(Long.valueOf(assignDto.getRoleId()));
-        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        Volunteer volunteer = volunteerDao.getById(userId);
         if (!role.isSelfAssignable()) {
             securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
         }
@@ -133,9 +134,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public void deleteUserRoleAssignment(String userId, long roleId) {
+    public void deleteUserRoleAssignment(UUID userId, long roleId) {
         Role role = roleDao.getById(roleId);
-        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        Volunteer volunteer = volunteerDao.getById(userId);
         if (!role.isSelfAssignable()) {
             securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
         }

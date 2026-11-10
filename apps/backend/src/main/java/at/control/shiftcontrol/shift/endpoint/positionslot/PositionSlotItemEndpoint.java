@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.endpoint.positionslot;
 
+import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,7 +58,7 @@ public class PositionSlotItemEndpoint {
         description = "Get the assignment for a specific position slot in a shift for the current user"
     )
     public AssignmentDto getPositionSlotUserAssignment(@PathVariable String positionSlotId) {
-        return positionSlotService.getUserAssignment(ConvertUtil.idToLong(positionSlotId), currentActor.get().requireUserId().toString());
+        return positionSlotService.getUserAssignment(ConvertUtil.idToLong(positionSlotId), currentActor.get().requireUserId());
     }
 
     @PutMapping
@@ -102,7 +103,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto joinPositionSlot(@PathVariable String positionSlotId, @RequestBody @Valid PositionSlotRequestDto requestDto) {
         return positionSlotService.join(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString(),
+            currentActor.get().requireUserId(),
             requestDto
         );
     }
@@ -121,7 +122,7 @@ public class PositionSlotItemEndpoint {
     public void leavePositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leave(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
     @PostMapping("/join-request")
@@ -141,7 +142,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto joinRequestPositionSlot(@PathVariable String positionSlotId) {
         return positionSlotService.joinRequest(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString()
+            currentActor.get().requireUserId()
         );
     }
 
@@ -159,7 +160,7 @@ public class PositionSlotItemEndpoint {
     public void leaveRequestPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leaveRequest(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
 
@@ -177,7 +178,7 @@ public class PositionSlotItemEndpoint {
     public void joinRequestWithdrawPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.joinRequestWithdraw(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString()
+            currentActor.get().requireUserId()
         );
     }
 
@@ -195,7 +196,7 @@ public class PositionSlotItemEndpoint {
     public void leaveRequestWithdrawPositionSlot(@PathVariable String positionSlotId) {
         positionSlotService.leaveRequestWithdraw(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
     @PutMapping("/preference")
@@ -208,7 +209,7 @@ public class PositionSlotItemEndpoint {
         @RequestBody @Valid PositionSlotPreferenceUpdateDto preferenceUpdateDto
     ) {
         positionSlotService.setPreference(
-            currentActor.get().requireUserId().toString(),
+            currentActor.get().requireUserId(),
             ConvertUtil.idToLong(positionSlotId),
             preferenceUpdateDto.getPreferenceValue()
         );
@@ -223,7 +224,7 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto auctionAssignment(@PathVariable String positionSlotId) {
         return positionSlotService.createAuction(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
     @PutMapping("/claim-auction/{offeringUserId}")
@@ -233,12 +234,12 @@ public class PositionSlotItemEndpoint {
     )
     public AssignmentDto claimAssignment(
         @PathVariable String positionSlotId,
-        @PathVariable String offeringUserId,
+        @PathVariable UUID offeringUserId,
         @RequestBody @Valid PositionSlotRequestDto requestDto
     ) {
         return positionSlotService.claimAuction(
             ConvertUtil.idToLong(positionSlotId), offeringUserId,
-            currentActor.get().requireUserId().toString(),
+            currentActor.get().requireUserId(),
             requestDto);
     }
 
@@ -250,6 +251,6 @@ public class PositionSlotItemEndpoint {
     public AssignmentDto cancelAuction(@PathVariable String positionSlotId) {
         return positionSlotService.cancelAuction(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 }

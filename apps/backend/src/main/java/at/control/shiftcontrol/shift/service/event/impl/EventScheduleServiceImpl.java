@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.event.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +70,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             .map(entry -> buildScheduleLayoutDto(entry.getKey(), entry.getValue()))
             .toList();
 
-        var userId = currentActor.get().requireUserId().toString();
+        var userId = currentActor.get().requireUserId();
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
                 userId,
                 filterDto).stream()
@@ -82,7 +83,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         shiftsByLocation.values().forEach(allShifts::addAll);
         allShifts.addAll(shiftsWithoutLocation);
 
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
 
         var stats = statisticService.getShiftPlanScheduleStatistics(allShifts, volunteer);
         return EventScheduleLayoutDto.builder()
@@ -161,9 +162,9 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         return shiftsByLocation;
     }
 
-    private String validateEventAccessAndGetUserId(Event event) {
+    private UUID validateEventAccessAndGetUserId(Event event) {
         securityHelper.assertUserIsAllowedToAccessEvent(event);
-        return currentActor.get().requireUserId().toString();
+        return currentActor.get().requireUserId();
     }
 
     private boolean isSignupPossible(PositionSlot slot, Volunteer volunteer) {
@@ -209,14 +210,14 @@ public class EventScheduleServiceImpl implements EventScheduleService {
 
         // get shifts without location
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
-                currentActor.get().requireUserId().toString(),
+                currentActor.get().requireUserId(),
                 searchDto).stream()
             .filter(shift -> shift.getLocation() == null)
             .filter(securityHelper::isUserInPlan)
             .toList();
 
         var filteredShiftsWithoutLocation = getShiftsBasedOnViewModes(eventId,
-            currentActor.get().requireUserId().toString(),
+            currentActor.get().requireUserId(),
             searchDto,
             shiftsWithoutLocation);
 
@@ -230,7 +231,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
 
     private List<Shift> getShiftsBasedOnViewModes(
         long eventId,
-        String userId,
+        UUID userId,
         EventScheduleFilterDto filterDto,
         List<Shift> filteredShiftsWithoutViewMode) {
         if (filterDto != null
@@ -243,7 +244,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             }
             if (filterDto.getShiftRelevances().contains(ShiftRelevance.SIGNUP_POSSIBLE)) {
                 signUpPossibleShifts = new ArrayList<>(filteredShiftsWithoutViewMode);
-                var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+                var volunteer = volunteerDao.getById(userId);
                 signUpPossibleShifts = signUpPossibleShifts.stream()
                     .filter(shift -> shift.getSlots().stream().anyMatch(slot ->
                         isSignupPossible(slot, volunteer)

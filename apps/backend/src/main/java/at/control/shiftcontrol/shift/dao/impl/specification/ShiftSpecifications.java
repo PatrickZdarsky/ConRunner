@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl.specification;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
@@ -26,7 +27,7 @@ public final class ShiftSpecifications {
             criteriaBuilder.equal(root.get("shiftPlan").get("event").get("id"), eventId);
     }
 
-    public static Specification<Shift> assignedToUser(String userId) {
+    public static Specification<Shift> assignedToUser(UUID userId) {
         return (root, query, criteriaBuilder) -> {
             query.distinct(true); // important because of joins to collections
 
@@ -35,7 +36,7 @@ public final class ShiftSpecifications {
             var assignments = slots.join("assignments", JoinType.INNER);
             var volunteer = assignments.join("assignedVolunteer", JoinType.INNER);
 
-            return criteriaBuilder.equal(volunteer.get("id"), java.util.UUID.fromString(userId));
+            return criteriaBuilder.equal(volunteer.get("id"), userId);
         };
     }
 

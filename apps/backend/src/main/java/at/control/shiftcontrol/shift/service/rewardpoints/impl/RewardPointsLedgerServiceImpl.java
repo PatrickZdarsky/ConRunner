@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.rewardpoints.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
     }
 
     private BookingResultDto insert(
-        String userId,
+        UUID userId,
         long eventId,
         Long shiftPlanId,
         Long positionSlotId,
@@ -93,7 +94,7 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
         validateInputs(userId, eventId, points, sourceKey, type);
 
         RewardPointsTransaction tx = RewardPointsTransaction.builder()
-            .volunteerId(userId)
+            .volunteerId(userId.toString())
             .eventId(eventId)
             .shiftPlanId(shiftPlanId) // optional
             .positionSlotId(positionSlotId) // optional
@@ -116,8 +117,8 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
         }
     }
 
-    private void validateInputs(String userId, long eventId, int points, String sourceKey, RewardPointTransactionType type) {
-        volunteerDao.getById(java.util.UUID.fromString(userId));
+    private void validateInputs(UUID userId, long eventId, int points, String sourceKey, RewardPointTransactionType type) {
+        volunteerDao.getById(userId);
         eventDao.getById(eventId);
         if (sourceKey == null || sourceKey.isBlank()) {
             throw new IllegalArgumentException("sourceKey must not be blank");
@@ -130,8 +131,8 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
 
     @Override
     @Transactional(readOnly = true)
-    public TotalPointsDto getTotalPoints(String userId) {
-        var totalPoints = dao.sumPointsByVolunteer(userId);
+    public TotalPointsDto getTotalPoints(UUID userId) {
+        var totalPoints = dao.sumPointsByVolunteer(userId.toString());
 
         return TotalPointsDto.builder()
             .totalPoints((int) totalPoints)
@@ -140,8 +141,8 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
 
     @Override
     @Transactional(readOnly = true)
-    public EventPointsDto getPointsForEvent(String userId, long eventId) {
-        var evenPoints = dao.sumPointsByVolunteerAndEvent(userId, eventId);
+    public EventPointsDto getPointsForEvent(UUID userId, long eventId) {
+        var evenPoints = dao.sumPointsByVolunteerAndEvent(userId.toString(), eventId);
 
         return EventPointsDto.builder()
             .eventId(String.valueOf(eventId))
@@ -151,7 +152,7 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<EventPointsDto> getPointsGroupedByEvent(String userId) {
-        return dao.sumPointsForUserGroupedByEvent(userId);
+    public Collection<EventPointsDto> getPointsGroupedByEvent(UUID userId) {
+        return dao.sumPointsForUserGroupedByEvent(userId.toString());
     }
 }

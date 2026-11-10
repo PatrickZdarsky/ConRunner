@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class ShiftDaoImpl implements ShiftDao {
 
 
     @Override
-    public List<Shift> searchUserRelatedShiftsInShiftPlan(long shiftPlanId, String userId) {
+    public List<Shift> searchUserRelatedShiftsInShiftPlan(long shiftPlanId, UUID userId) {
         var spec = ShiftSpecifications.inShiftPlan(shiftPlanId)
             .and(ShiftSpecifications.assignedToUser(userId));
 
@@ -66,7 +67,7 @@ public class ShiftDaoImpl implements ShiftDao {
     }
 
     @Override
-    public List<Shift> searchUserRelatedShiftsInEvent(long eventId, String userId) {
+    public List<Shift> searchUserRelatedShiftsInEvent(long eventId, UUID userId) {
         var spec = ShiftSpecifications.inEvent(eventId)
             .and(ShiftSpecifications.assignedToUser(userId));
 
@@ -74,7 +75,7 @@ public class ShiftDaoImpl implements ShiftDao {
     }
 
     @Override
-    public List<Shift> searchShiftsInEvent(long eventId, String userId, EventScheduleFilterDto filterDto) {
+    public List<Shift> searchShiftsInEvent(long eventId, UUID userId, EventScheduleFilterDto filterDto) {
         Specification<Shift> spec = ShiftSpecifications.inEvent(eventId)
             .and(ShiftSpecifications.matchesSearchDto(filterDto)); // your other filters
 

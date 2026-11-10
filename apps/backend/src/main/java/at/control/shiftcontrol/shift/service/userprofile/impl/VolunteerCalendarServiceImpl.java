@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.userprofile.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -46,8 +47,8 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
 
     @Override
     @Transactional
-    public Optional<String> getOrCreateCalendarShareId(String userId) {
-        return volunteerDao.findById(java.util.UUID.fromString(userId))
+    public Optional<String> getOrCreateCalendarShareId(UUID userId) {
+        return volunteerDao.findById(userId)
             .map(volunteer -> {
                 if (volunteer.getCalendarShareId() != null && !volunteer.getCalendarShareId().isBlank()) {
                     return volunteer.getCalendarShareId();
@@ -59,8 +60,8 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
 
     @Override
     @Transactional
-    public CalendarShareIdDto regenerateCalendarShareId(String userId) {
-        Volunteer volunteer = volunteerDao.findById(java.util.UUID.fromString(userId))
+    public CalendarShareIdDto regenerateCalendarShareId(UUID userId) {
+        Volunteer volunteer = volunteerDao.findById(userId)
             .orElseThrow(() -> new NotFoundException("Volunteer not found"));
 
         String calendarShareId = assignAndPersistShareId(volunteer);
@@ -79,7 +80,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
             CALENDAR_ASSIGNMENT_STATUSES
         );
 
-        return buildCalendar(assignments, volunteer.getId().toString());
+        return buildCalendar(assignments, volunteer.getId());
     }
 
     private String assignAndPersistShareId(Volunteer volunteer) {
@@ -104,7 +105,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
         );
     }
 
-    private String buildCalendar(Collection<Assignment> assignments, String volunteerId) {
+    private String buildCalendar(Collection<Assignment> assignments, UUID volunteerId) {
         Instant now = Instant.now();
         StringBuilder builder = new StringBuilder();
 
@@ -137,7 +138,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
         return builder.toString();
     }
 
-    private Collection<CalendarShiftEntry> aggregateAssignments(Collection<Assignment> assignments, String volunteerId) {
+    private Collection<CalendarShiftEntry> aggregateAssignments(Collection<Assignment> assignments, UUID volunteerId) {
         LinkedHashMap<Long, CalendarShiftAccumulator> shifts = new LinkedHashMap<>();
 
         for (Assignment assignment : assignments) {
@@ -184,10 +185,10 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
 
     private static final class CalendarShiftAccumulator {
         private final Shift shift;
-        private final String volunteerId;
+        private final UUID volunteerId;
         private final List<String> slotNames = new ArrayList<>();
 
-        private CalendarShiftAccumulator(Shift shift, String volunteerId) {
+        private CalendarShiftAccumulator(Shift shift, UUID volunteerId) {
             this.shift = shift;
             this.volunteerId = volunteerId;
         }

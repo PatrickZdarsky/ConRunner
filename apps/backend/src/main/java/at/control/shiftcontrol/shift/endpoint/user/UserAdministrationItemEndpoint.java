@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.endpoint.user;
 
+import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,7 +35,7 @@ public class UserAdministrationItemEndpoint {
         operationId = "getUserOfPlan",
         description = "Get User"
     )
-    public UserPlanDto getUserOfPlan(@PathVariable String shiftPlanId, @PathVariable String userId) {
+    public UserPlanDto getUserOfPlan(@PathVariable String shiftPlanId, @PathVariable UUID userId) {
         return service.getPlanUser(ConvertUtil.idToLong(shiftPlanId), userId);
     }
 
@@ -45,7 +46,7 @@ public class UserAdministrationItemEndpoint {
     )
     public UserPlanDto updateUserRoles(
         @PathVariable String shiftPlanId,
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid UserPlanUpdateDto updateDto) {
         return service.updatePlanUser(ConvertUtil.idToLong(shiftPlanId), userId, updateDto);
     }

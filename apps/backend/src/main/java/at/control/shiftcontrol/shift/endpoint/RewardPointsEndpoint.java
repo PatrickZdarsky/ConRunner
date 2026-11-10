@@ -47,7 +47,7 @@ public class RewardPointsEndpoint {
     )
     public TotalPointsDto getCurrentUserTotalRewardPoints() throws NotFoundException {
         var actor = currentActor.get();
-        return rewardPointsLedgerService.getTotalPoints(actor.requireUserId().toString());
+        return rewardPointsLedgerService.getTotalPoints(actor.requireUserId());
     }
 
     @GetMapping("/events")
@@ -57,7 +57,7 @@ public class RewardPointsEndpoint {
     )
     public Collection<EventPointsDto> getCurrentUserEventRewardPoints() throws NotFoundException {
         var actor = currentActor.get();
-        return rewardPointsLedgerService.getPointsGroupedByEvent(actor.requireUserId().toString());
+        return rewardPointsLedgerService.getPointsGroupedByEvent(actor.requireUserId());
     }
 
     @GetMapping("/events/{eventId}")
@@ -67,7 +67,7 @@ public class RewardPointsEndpoint {
     )
     public EventPointsDto getCurrentUserRewardPointsForEvent(@PathVariable long eventId) throws NotFoundException {
         var actor = currentActor.get();
-        return rewardPointsLedgerService.getPointsForEvent(actor.requireUserId().toString(), eventId);
+        return rewardPointsLedgerService.getPointsForEvent(actor.requireUserId(), eventId);
     }
 
     @GetMapping("/export")

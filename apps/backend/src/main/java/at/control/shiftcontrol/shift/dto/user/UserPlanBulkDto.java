@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.dto.user;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,5 +18,5 @@ public class UserPlanBulkDto {
     private Collection<String> roles;
 
     @NotNull
-    private Collection<String> volunteers;
+    private Collection<UUID> volunteers;
 }

@@ -48,7 +48,7 @@ public class PositionSlotTradeEndpoint {
     public Collection<TradeCandidatesDto> getPositionSlotsToOffer(@PathVariable String positionSlotId) {
         return assignmentSwitchRequestService.getPositionSlotsToOffer(
             ConvertUtil.idToLong(positionSlotId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
     @PostMapping
@@ -59,7 +59,7 @@ public class PositionSlotTradeEndpoint {
     public Collection<TradeDto> createTrade(@RequestBody @Valid TradeCreateDto tradeCreateDto) {
         return assignmentSwitchRequestService.createTrade(
             tradeCreateDto,
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 
     @PutMapping("/{tradeId}/accept")
@@ -68,7 +68,7 @@ public class PositionSlotTradeEndpoint {
         description = "Accept a trade request for a specific position slot in a shift"
     )
     public TradeDto acceptTrade(@PathVariable String tradeId) {
-        return assignmentSwitchRequestService.acceptTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
+        return assignmentSwitchRequestService.acceptTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId());
     }
 
     @PutMapping("/{tradeId}/decline")
@@ -77,7 +77,7 @@ public class PositionSlotTradeEndpoint {
         description = "Decline a trade request for a specific position slot in a shift"
     )
     public TradeDto declineTrade(@PathVariable String tradeId) {
-        return assignmentSwitchRequestService.declineTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
+        return assignmentSwitchRequestService.declineTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId());
     }
 
     @PutMapping("/{tradeId}/cancel")
@@ -86,6 +86,6 @@ public class PositionSlotTradeEndpoint {
         description = "Cancel a request for a specific position slot in a shift"
     )
     public void cancelTrade(@PathVariable String tradeId) {
-        assignmentSwitchRequestService.cancelTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId().toString());
+        assignmentSwitchRequestService.cancelTrade(ConvertUtil.idToLong(tradeId), currentActor.get().requireUserId());
     }
 }

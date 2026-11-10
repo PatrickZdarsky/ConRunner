@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.mapper;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -43,16 +44,16 @@ public class PositionSlotAssemblingMapper {
     public PositionSlotDto assemble(@NonNull PositionSlot positionSlot) {
         var actor = currentActor.get();
         var volunteer = volunteerDao.getById(actor.requireUserId());
-        var preferenceValue = positionSlotDao.getPreference(volunteer.getId().toString(), positionSlot.getId());
+        var preferenceValue = positionSlotDao.getPreference(volunteer.getId(), positionSlot.getId());
         var rewardPointsDto = rewardPointsAssemblingMapper.toDto(positionSlot);
 
         // Offerer: requested slot (requestedAssignment is in this slot)
         var requestedTradesAsOfferer = assignmentSwitchRequestDao.findOpenTradesForRequestedPositionAndOfferingUser(
-            positionSlot.getId(), volunteer.getId().toString()
+            positionSlot.getId(), volunteer.getId()
         );
 
         // Owner: requested slot (requestedAssignment belongs to me)
-        var incomingRequestsForUserInThisSlot = filterIncomingTradesForUser(positionSlot.getAssignments(), volunteer.getId().toString());
+        var incomingRequestsForUserInThisSlot = filterIncomingTradesForUser(positionSlot.getAssignments(), volunteer.getId());
 
         var requestedTradesForUser = Stream.concat(
                 requestedTradesAsOfferer == null ? Stream.empty() : requestedTradesAsOfferer.stream(),
@@ -63,11 +64,11 @@ public class PositionSlotAssemblingMapper {
             .toList();
 
         // Offerer: offered slot (offeringAssignment belongs to me)
-        var offeredTradesAsOfferer = filterOfferedTradesForUser(positionSlot.getAssignments(), volunteer.getId().toString());
+        var offeredTradesAsOfferer = filterOfferedTradesForUser(positionSlot.getAssignments(), volunteer.getId());
 
         // Owner: offered slot (offeringAssignment is in this slot)
         var offeredTradesAsRequestedUser = assignmentSwitchRequestDao
-            .findOpenTradesForOfferingPositionAndRequestedOwner(positionSlot.getId(), volunteer.getId().toString());
+            .findOpenTradesForOfferingPositionAndRequestedOwner(positionSlot.getId(), volunteer.getId());
 
         var offeredTradesForUser = Stream.concat(
                 offeredTradesAsOfferer.stream(),
@@ -97,22 +98,22 @@ public class PositionSlotAssemblingMapper {
         return positionSlots.stream().map(this::assemble).toList();
     }
 
-    private Collection<AssignmentSwitchRequest> filterIncomingTradesForUser(Collection<Assignment> assignments, String userId) {
+    private Collection<AssignmentSwitchRequest> filterIncomingTradesForUser(Collection<Assignment> assignments, UUID userId) {
         if (assignments == null || assignments.isEmpty()) {
             return Collections.emptyList();
         }
         return assignments.stream()
-            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().toString().equals(userId))
+            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().equals(userId))
             .flatMap(a -> a.getIncomingSwitchRequests() == null ? Stream.empty() : a.getIncomingSwitchRequests().stream())
             .toList();
     }
 
-    private Collection<AssignmentSwitchRequest> filterOfferedTradesForUser(Collection<Assignment> assignments, String userId) {
+    private Collection<AssignmentSwitchRequest> filterOfferedTradesForUser(Collection<Assignment> assignments, UUID userId) {
         if (assignments == null || assignments.isEmpty()) {
             return Collections.emptyList();
         }
         return assignments.stream()
-            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().toString().equals(userId))
+            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().equals(userId))
             .flatMap(a -> a.getOutgoingSwitchRequests() == null ? Stream.empty() : a.getOutgoingSwitchRequests().stream())
             .toList();
     }

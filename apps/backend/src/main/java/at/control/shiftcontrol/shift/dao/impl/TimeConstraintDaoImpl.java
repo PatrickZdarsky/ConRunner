@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -44,13 +45,13 @@ public class TimeConstraintDaoImpl implements TimeConstraintDao {
     }
 
     @Override
-    public Collection<TimeConstraint> searchByVolunteerAndEvent(String volunteerId, long eventId) {
-        return timeConstraintRepository.searchByVolunteerAndEvent(java.util.UUID.fromString(volunteerId), eventId);
+    public Collection<TimeConstraint> searchByVolunteerAndEvent(UUID volunteerId, long eventId) {
+        return timeConstraintRepository.searchByVolunteerAndEvent(volunteerId, eventId);
     }
 
     @Override
-    public Collection<TimeConstraint> searchByVolunteerAndEventAndType(String volunteerId, long eventId, TimeConstraintType type) {
-        return timeConstraintRepository.searchByVolunteerAndEventAndType(java.util.UUID.fromString(volunteerId), eventId, type);
+    public Collection<TimeConstraint> searchByVolunteerAndEventAndType(UUID volunteerId, long eventId, TimeConstraintType type) {
+        return timeConstraintRepository.searchByVolunteerAndEventAndType(volunteerId, eventId, type);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class TimeConstraintDaoImpl implements TimeConstraintDao {
     }
 
     @Override
-    public Collection<TimeConstraint> findByPositionSlotIdAndVolunteerId(long positionSlotId, String volunteerId) {
-        return timeConstraintRepository.findByPositionSlotIdAndVolunteerId(positionSlotId, java.util.UUID.fromString(volunteerId));
+    public Collection<TimeConstraint> findByPositionSlotIdAndVolunteerId(long positionSlotId, UUID volunteerId) {
+        return timeConstraintRepository.findByPositionSlotIdAndVolunteerId(positionSlotId, volunteerId);
     }
 }

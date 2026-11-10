@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.positionslot;
 
+import java.util.UUID;
 import java.util.Collection;
 
 import jakarta.validation.Valid;
@@ -13,9 +14,9 @@ import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 public interface PlannerPositionSlotService {
     Collection<AssignmentPlannerInfoDto> getSlots(long shiftPlanId, @Valid AssignmentFilterDto filterDto);
 
-    void acceptRequest(long shiftPlanId, long positionSlotId, String userId);
+    void acceptRequest(long shiftPlanId, long positionSlotId, UUID userId);
 
-    void declineRequest(long shiftPlanId, long positionSlotId, String userId);
+    void declineRequest(long shiftPlanId, long positionSlotId, UUID userId);
 
     Collection<VolunteerDto> getAssignableUsers(String positionSlotId);
 

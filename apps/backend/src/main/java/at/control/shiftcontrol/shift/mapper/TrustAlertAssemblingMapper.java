@@ -59,7 +59,7 @@ public class TrustAlertAssemblingMapper {
 
     public TrustAlert toEntity(TrustAlertDto alert) {
         return TrustAlert.builder()
-            .volunteer(volunteerDao.getById(java.util.UUID.fromString(alert.getUserId())))
+            .volunteer(volunteerDao.getById(alert.getUserId()))
             .alertType(alert.getAlertType())
             .createdAt(alert.getCreatedAt())
             .build();

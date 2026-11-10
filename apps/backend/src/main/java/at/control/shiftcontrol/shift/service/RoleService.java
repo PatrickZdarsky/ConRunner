@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service;
 
+import java.util.UUID;
 import java.util.Collection;
 
 import at.control.shiftcontrol.shift.dto.role.RoleDto;
@@ -20,7 +21,7 @@ public interface RoleService {
 
     void deleteRole(long roleId);
 
-    @NonNull VolunteerDto createUserRoleAssignment(String userId, @NonNull UserRoleAssignmentAssignDto assignDto);
+    @NonNull VolunteerDto createUserRoleAssignment(UUID userId, @NonNull UserRoleAssignmentAssignDto assignDto);
 
-    void deleteUserRoleAssignment(String userId, long roleId);
+    void deleteUserRoleAssignment(UUID userId, long roleId);
 }

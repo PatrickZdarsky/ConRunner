@@ -79,9 +79,9 @@ public class EventServiceImpl implements EventService {
         if (securityHelper.isUserAdmin(actor)) {
             return EventMapper.toEventDto(filteredEvents);
         }
-        String userId = actor.requireUserId().toString();
+        UUID userId = actor.requireUserId();
 
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();
         var planningShiftPlans = volunteer.getPlanningPlans();
 
@@ -96,7 +96,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Collection<EventDto> getAllOpenEvents(String currentUser) {
+    public Collection<EventDto> getAllOpenEvents(UUID currentUser) {
         if (securityHelper.isUserAdmin()) {
             return EventMapper.toEventDto(eventDao.getAllOpenEvents());
         }
@@ -104,13 +104,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, String userId) {
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+    public List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, UUID userId) {
+        var volunteer = volunteerDao.getById(userId);
         return ShiftPlanMapper.toShiftPlanDto(getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer));
     }
 
     @Override
-    public Collection<ShiftPlanContactInfoDto> getPlannerContactInfo(long eventId, String userId) {
+    public Collection<ShiftPlanContactInfoDto> getPlannerContactInfo(long eventId, UUID userId) {
         // check access
         var event = eventDao.getById(eventId);
         securityHelper.assertUserIsAllowedToAccessEvent(event);
@@ -166,9 +166,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, String userId) {
+    public EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, UUID userId) {
         var event = eventDao.getById(eventId);
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
 
         var eventOverviewDto = EventMapper.toEventDto(event);
         var userRelevantShiftPlans = getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer);
@@ -192,7 +192,7 @@ public class EventServiceImpl implements EventService {
         return EventShiftPlansOverviewDto.builder()
             .eventOverview(eventOverviewDto)
             .shiftPlans(ShiftPlanMapper.toShiftPlanDto(userRelevantShiftPlans))
-            .rewardPoints((int) rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(userId, eventId))
+            .rewardPoints((int) rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(userId.toString(), eventId))
             .ownEventStatistics(statisticService.getOwnStatisticsOfShiftPlans(userRelevantShiftPlans, userId))
             .overallEventStatistics(statisticService.getOverallEventStatistics(event))
             .roles(roles)
@@ -246,7 +246,7 @@ public class EventServiceImpl implements EventService {
         if (StringUtils.isNotBlank(url)) {
             try {
                 URI.create(url).toURL();
-            } catch (MalformedURLException e) {
+            } catch (MalformedURLException _) {
                 throw new ValidationException("Reward points redeem URL is not a valid URL");
             }
         }

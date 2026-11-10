@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service;
 
+import java.util.UUID;
 import java.util.List;
 
 import at.control.shiftcontrol.shift.entity.Event;
@@ -19,7 +20,7 @@ public interface StatisticService {
 
     @NonNull OverallStatisticsDto getOverallEventStatistics(@NonNull Event event);
 
-    @NonNull OwnStatisticsDto getOwnStatisticsOfShiftPlans(@NonNull List<ShiftPlan> shiftPlans, @NonNull String userId);
+    @NonNull OwnStatisticsDto getOwnStatisticsOfShiftPlans(@NonNull List<ShiftPlan> shiftPlans, @NonNull UUID userId);
 
     @NonNull ScheduleStatisticsDto getShiftPlanScheduleStatistics(@NonNull List<Shift> shifts, @NonNull Volunteer volunteer);
 }

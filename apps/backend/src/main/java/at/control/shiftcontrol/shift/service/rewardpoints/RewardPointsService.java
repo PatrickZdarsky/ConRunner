@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.rewardpoints;
 
+import java.util.UUID;
 import java.util.Collection;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
@@ -21,7 +22,7 @@ public interface RewardPointsService {
     void onAssignmentReassignedTrade(Assignment offeringAssignment, Assignment requestedAssignment)
         throws ConflictException;
 
-    void manualAdjust(String volunteerId, long eventId, int points, String reason);
+    void manualAdjust(UUID volunteerId, long eventId, int points, String reason);
 
     Collection<RewardPointsShareTokenDto> getAllRewardPointsShareTokens();
 

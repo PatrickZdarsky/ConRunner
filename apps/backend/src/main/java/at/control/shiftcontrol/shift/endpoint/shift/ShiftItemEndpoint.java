@@ -39,7 +39,7 @@ public class ShiftItemEndpoint {
         description = "Get details for a specific shift of a shift plan"
     )
     public ShiftDetailsDto getShiftDetails(@PathVariable String shiftId) {
-        return shiftService.getShiftDetails(ConvertUtil.idToLong(shiftId), currentActor.get().requireUserId().toString());
+        return shiftService.getShiftDetails(ConvertUtil.idToLong(shiftId), currentActor.get().requireUserId());
     }
 
     @PutMapping()

@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -54,8 +55,8 @@ public class ShiftPlanDaoImpl implements ShiftPlanDao {
     }
 
     @Override
-    public Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(String userId, String eventId) {
-        return shiftPlanRepository.findAllUserRelatedShiftPlansInEvent(java.util.UUID.fromString(userId), eventId);
+    public Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(UUID userId, String eventId) {
+        return shiftPlanRepository.findAllUserRelatedShiftPlansInEvent(userId, eventId);
     }
 
     @Override

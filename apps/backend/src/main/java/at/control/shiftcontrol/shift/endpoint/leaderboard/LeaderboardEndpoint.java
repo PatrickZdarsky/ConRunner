@@ -32,6 +32,6 @@ public class LeaderboardEndpoint {
     )
     public LeaderBoardDto getLeaderboard(@PathVariable String eventId) throws NotFoundException, ForbiddenException {
         var actor = currentActor.get();
-        return leaderboardService.getLeaderBoard(ConvertUtil.idToLong(eventId), actor.requireUserId().toString());
+        return leaderboardService.getLeaderBoard(ConvertUtil.idToLong(eventId), actor.requireUserId());
     }
 }

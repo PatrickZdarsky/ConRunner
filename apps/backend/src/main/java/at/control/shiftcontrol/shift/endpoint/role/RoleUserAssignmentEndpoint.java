@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.endpoint.role;
 
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +37,7 @@ public class RoleUserAssignmentEndpoint {
         description = "Create a role assignment for a user in an event"
     )
     public VolunteerDto createUserRoleAssignment(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid UserRoleAssignmentAssignDto roleAssignmentAssign
     ) {
         return roleService.createUserRoleAssignment(userId, roleAssignmentAssign);
@@ -49,7 +50,7 @@ public class RoleUserAssignmentEndpoint {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserRoleAssignment(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @PathVariable String roleId
     ) {
         roleService.deleteUserRoleAssignment(userId, ConvertUtil.idToLong(roleId));

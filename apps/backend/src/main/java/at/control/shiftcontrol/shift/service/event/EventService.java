@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.event;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,13 +16,13 @@ public interface EventService {
 
     List<EventDto> search(EventSearchDto searchDto);
 
-    Collection<EventDto> getAllOpenEvents(String currentUser);
+    Collection<EventDto> getAllOpenEvents(UUID currentUser);
 
-    List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, String userId);
+    List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, UUID userId);
 
-    Collection<ShiftPlanContactInfoDto> getPlannerContactInfo(long eventId, String userId);
+    Collection<ShiftPlanContactInfoDto> getPlannerContactInfo(long eventId, UUID userId);
 
-    EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, String userId);
+    EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, UUID userId);
 
     EventDto createEvent(EventModificationDto modificationDto);
 

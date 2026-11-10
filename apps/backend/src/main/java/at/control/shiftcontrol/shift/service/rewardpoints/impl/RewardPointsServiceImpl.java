@@ -257,7 +257,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
     @Override
     @AdminOnly
-    public void manualAdjust(String volunteerId, long eventId, int points, String reason) {
+    public void manualAdjust(UUID volunteerId, long eventId, int points, String reason) {
         if (points == 0) {
             return; // no-op
         }

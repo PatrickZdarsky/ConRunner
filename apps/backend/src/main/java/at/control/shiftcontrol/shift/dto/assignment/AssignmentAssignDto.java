@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.dto.assignment;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -19,5 +20,5 @@ public class AssignmentAssignDto {
 
     @NotNull
     @Valid
-    private Collection<String> volunteerIds;
+    private Collection<UUID> volunteerIds;
 }

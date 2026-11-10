@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +14,13 @@ public interface EventDao extends BasicDao<Event, Long> {
 
     Collection<Event> getAllOpenEvents();
 
-    Collection<Event> getAllOpenEventsForUser(String userId);
+    Collection<Event> getAllOpenEventsForUser(UUID userId);
 
     Collection<Event> findAll();
 
     boolean existsByNameIgnoreCase(String name);
 
-    Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, String userId);
+    Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, UUID userId);
 
     Optional<Event> findByName(String name);
 }

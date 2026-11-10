@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.time.Duration;
@@ -50,13 +51,13 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
     private static final long SECONDS_PER_DAY = Duration.ofDays(1).getSeconds();
 
     @Override
-    public @org.jspecify.annotations.NonNull Collection<TimeConstraintDto> getTimeConstraints(@NonNull String userId, long eventId) {
+    public @org.jspecify.annotations.NonNull Collection<TimeConstraintDto> getTimeConstraints(@NonNull UUID userId, long eventId) {
         return TimeConstraintMapper.toDto(timeConstraintDao.searchByVolunteerAndEvent(userId, eventId));
     }
 
     @Override
     @Transactional
-    public @org.jspecify.annotations.NonNull TimeConstraintDto createTimeConstraint(@NonNull TimeConstraintCreateDto createDto, @NonNull String userId, long eventId) {
+    public @org.jspecify.annotations.NonNull TimeConstraintDto createTimeConstraint(@NonNull TimeConstraintCreateDto createDto, @NonNull UUID userId, long eventId) {
         //VALIDATION: Validate date range
         Instant from = createDto.getFrom();
         Instant to = createDto.getTo();
@@ -64,7 +65,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
 
         // get event and volunteer
         var event = eventDao.getById(eventId);
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
 
         //VALIDATION: Check that volunteer is part of the event via any of their shift plans
         var userPlans = volunteer.getVolunteeringPlans();
@@ -113,7 +114,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
         var from = emergencyConstraint.getStartTime();
         var to = emergencyConstraint.getEndTime();
 
-        var conflictingAssignments = assignmentDao.getConflictingAssignments(volunteerId.toString(), from, to);
+        var conflictingAssignments = assignmentDao.getConflictingAssignments(volunteerId, from, to);
         for (var assignment : conflictingAssignments) {
             if (assignment.getPositionSlot().getShift().getShiftPlan().getLockStatus() == LockStatus.SELF_SIGNUP) {
                 log.info("Unassigning assignment id={} due to conflicting EMERGENCY time constraint id={}",
@@ -181,7 +182,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
         }
     }
 
-    private void checkForAssignmentOverlaps(@NonNull String userId, Instant from, Instant to) {
+    private void checkForAssignmentOverlaps(@NonNull UUID userId, Instant from, Instant to) {
         var existingAssignments = assignmentDao.getConflictingAssignments(userId, from, to);
         if (!existingAssignments.isEmpty()) {
             log.error("New time constraint from {} to {} overlaps with existing assignments ids={}",

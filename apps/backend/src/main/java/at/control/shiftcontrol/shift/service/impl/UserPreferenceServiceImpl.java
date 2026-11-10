@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotPreferenceDto;
 import at.control.shiftcontrol.shift.service.UserPreferenceService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserPreferenceServiceImpl implements UserPreferenceService {
     @Override
-    public @NonNull PositionSlotPreferenceDto getUserPreference(@NonNull String userId, long shiftId) {
+    public @NonNull PositionSlotPreferenceDto getUserPreference(@NonNull UUID userId, long shiftId) {
         //TODO implement method
         //This is part of the planned shiftplan autofill, where users could set preference values for shifts
         return null;

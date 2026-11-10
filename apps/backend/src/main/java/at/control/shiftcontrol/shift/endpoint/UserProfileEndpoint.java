@@ -31,7 +31,7 @@ public class UserProfileEndpoint {
         description = "Get profile data of the current user"
     )
     public UserProfileDto getCurrentUserProfile() {
-        return userProfileService.getUserProfile(currentActor.get().requireUserId().toString());
+        return userProfileService.getUserProfile(currentActor.get().requireUserId());
     }
 
     @PostMapping("/profile/calendar-share-id/regenerate")
@@ -40,6 +40,6 @@ public class UserProfileEndpoint {
         description = "Regenerate the calendar share id of the current user"
     )
     public CalendarShareIdDto regenerateCalendarShareId() {
-        return volunteerCalendarService.regenerateCalendarShareId(currentActor.get().requireUserId().toString());
+        return volunteerCalendarService.regenerateCalendarShareId(currentActor.get().requireUserId());
     }
 }

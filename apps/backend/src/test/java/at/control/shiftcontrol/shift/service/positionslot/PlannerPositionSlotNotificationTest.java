@@ -42,7 +42,7 @@ class PlannerPositionSlotNotificationTest {
         var shift = mock(Shift.class);
         var plan = mock(ShiftPlan.class);
         var event = mock(Event.class);
-        when(assignments.getAssignmentForPositionSlotAndUser(5, userId.toString())).thenReturn(assignment);
+        when(assignments.getAssignmentForPositionSlotAndUser(5, userId)).thenReturn(assignment);
         when(assignment.getPositionSlot()).thenReturn(slot);
         when(assignment.getStatus()).thenReturn(AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
         when(eligibility.hasCapacity(slot)).thenReturn(true);
@@ -50,7 +50,7 @@ class PlannerPositionSlotNotificationTest {
         when(shift.getShiftPlan()).thenReturn(plan);
         when(plan.getEvent()).thenReturn(event);
         when(event.getId()).thenReturn(42L);
-        service.acceptRequest(3, 5, userId.toString());
+        service.acceptRequest(3, 5, userId);
         var request = ArgumentCaptor.forClass(NotificationRequest.class);
         verify(notifications).request(request.capture());
         assertThat(request.getValue().recipientId()).isEqualTo(userId);

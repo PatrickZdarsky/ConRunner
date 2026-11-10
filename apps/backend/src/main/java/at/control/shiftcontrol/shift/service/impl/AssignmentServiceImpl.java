@@ -46,7 +46,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public @NonNull Assignment claimAuction(@NonNull Assignment auction, @NonNull Volunteer newVolunteer, @NonNull PositionSlotRequestDto requestDto) {
-        String oldVolunteerId = auction.getAssignedVolunteer().getId().toString();
+        var oldVolunteerId = auction.getAssignedVolunteer().getId();
         Assignment oldAuction = AssignmentAssemblingMapper.shallowCopy(auction);
         // execute auction
         auction = reassign(auction, newVolunteer);
@@ -54,10 +54,10 @@ public class AssignmentServiceImpl implements AssignmentService {
         // update reward points
         rewardPointsService.onAssignmentReassignedAuction(oldAuction, auction, requestDto.getAcceptedRewardPointsConfigHash());
 
-        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(oldVolunteerId),
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), oldVolunteerId,
             NotificationTypes.AUCTION_CLAIMED, String.valueOf(auction.getPositionSlot().getShift().getShiftPlan().getEvent().getId())));
 
-        publisher.publishEvent(ClaimedAuctionEvent.auctionClaimed(auction, oldAuction, oldVolunteerId));
+        publisher.publishEvent(ClaimedAuctionEvent.auctionClaimed(auction, oldAuction, oldVolunteerId.toString()));
         return auction;
     }
 
@@ -142,7 +142,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             requestDto.getAcceptedRewardPointsConfigHash());
 
         // close trades where this slot was offered to current user
-        assignmentSwitchRequestDao.cancelTradesForOfferedPositionAndRequestedUser(positionSlot.getId(), volunteer.getId().toString());
+        assignmentSwitchRequestDao.cancelTradesForOfferedPositionAndRequestedUser(positionSlot.getId(), volunteer.getId());
         assignment = assignmentDao.save(assignment);
 
 
@@ -202,6 +202,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public @NonNull Collection<Assignment> getAllAssignmentsForUser(@NonNull ShiftPlan plan, @NonNull Volunteer volunteer) {
-        return assignmentDao.findAssignmentsForShiftPlanAndUser(plan.getId(), volunteer.getId().toString());
+        return assignmentDao.findAssignmentsForShiftPlanAndUser(plan.getId(), volunteer.getId());
     }
 }

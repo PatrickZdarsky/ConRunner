@@ -36,7 +36,7 @@ class VolunteerUuidTest {
     void assignmentLookupPassesUuidToTheRepository() {
         var repository = mock(AssignmentRepository.class);
         var id = UUID.randomUUID();
-        new AssignmentDaoImpl(repository).findBySlotAndUser(42L, id.toString());
+        new AssignmentDaoImpl(repository).findBySlotAndUser(42L, id);
         verify(repository).findBySlotAndUser(42L, id);
     }
 }

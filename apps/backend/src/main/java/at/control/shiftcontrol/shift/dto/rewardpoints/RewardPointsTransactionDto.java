@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RewardPointsTransactionDto {
     @NotNull
-    String userId;
+    java.util.UUID userId;
     @NotNull
     long eventId;
     Long shiftPlanId;

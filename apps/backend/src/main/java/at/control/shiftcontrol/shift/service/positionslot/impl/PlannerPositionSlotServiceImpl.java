@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.positionslot.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
 
     @Override
     @Transactional
-    public void acceptRequest(long shiftPlanId, long positionSlotId, String userId) {
+    public void acceptRequest(long shiftPlanId, long positionSlotId, UUID userId) {
         Assignment assignment = assignmentDao.getAssignmentForPositionSlotAndUser(positionSlotId, userId);
         securityHelper.assertUserIsPlanner(assignment.getPositionSlot());
 
@@ -78,7 +79,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             case AUCTION_REQUEST_FOR_UNASSIGN -> {
                 assignmentService.unassignInternal(assignment);
                 notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_LEAVE_ACCEPTED);
-                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestAccepted(assignment.getPositionSlot(), userId));
+                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestAccepted(assignment.getPositionSlot(), userId.toString()));
             }
             case REQUEST_FOR_ASSIGNMENT -> {
                 if (!eligibilityService.hasCapacity(assignment.getPositionSlot())) {
@@ -86,7 +87,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
                 }
                 assignmentService.accept(assignment);
                 notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_JOIN_ACCEPTED);
-                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestAccepted(assignment.getPositionSlot(), userId));
+                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestAccepted(assignment.getPositionSlot(), userId.toString()));
             }
             default -> throw new IllegalStateException("Unexpected value: " + assignment.getStatus());
         }
@@ -94,7 +95,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
 
     @Override
     @Transactional
-    public void declineRequest(long shiftPlanId, long positionSlotId, String userId) {
+    public void declineRequest(long shiftPlanId, long positionSlotId, UUID userId) {
         Assignment assignment = assignmentDao.getAssignmentForPositionSlotAndUser(positionSlotId, userId);
         securityHelper.assertUserIsPlanner(assignment.getPositionSlot());
 
@@ -103,19 +104,19 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             case AUCTION_REQUEST_FOR_UNASSIGN -> {
                 acceptAssignment(assignment);
                 notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_LEAVE_DECLINED);
-                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestDeclined(assignment.getPositionSlot(), userId));
+                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestDeclined(assignment.getPositionSlot(), userId.toString()));
             }
             case REQUEST_FOR_ASSIGNMENT -> {
                 assignmentDao.delete(assignment);
                 notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_JOIN_DECLINED);
-                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDeclined(assignment.getPositionSlot(), userId));
+                publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDeclined(assignment.getPositionSlot(), userId.toString()));
             }
             default -> throw new IllegalStateException("Unexpected value: " + assignment.getStatus());
         }
     }
 
-    private void notifyVolunteer(PositionSlot slot, String userId, String type) {
-        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(userId),
+    private void notifyVolunteer(PositionSlot slot, UUID userId, String type) {
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), userId,
             type, String.valueOf(slot.getShift().getShiftPlan().getEvent().getId())));
     }
 
@@ -144,7 +145,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
         boolean eligible = eligibilityService.isEligibleAndNotSignedUp(positionSlot, volunteer);
         // check for conflicts
         Collection<Assignment> conflicts = eligibilityService.getConflictingAssignmentsExcludingShift(
-            volunteer.getId().toString(), positionSlot, positionSlot.getShift().getId());
+            volunteer.getId(), positionSlot, positionSlot.getShift().getId());
 
         return eligible && conflicts.isEmpty();
     }
@@ -163,7 +164,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
         // get all requested volunteers with access to slot
         Collection<Volunteer> volunteers = volunteerDao.findAllByShiftPlanAndVolunteerIds(
             positionSlot.getShift().getShiftPlan().getId(),
-            assignmentAssignDto.getVolunteerIds().stream().map(java.util.UUID::fromString).toList());
+            assignmentAssignDto.getVolunteerIds());
 
         // check if not already signed up, eligible and no conflicts
         volunteers = volunteers.stream().filter(v -> isAssignable(positionSlot, v)).toList();
@@ -179,7 +180,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             var nextVolunteer = iterator.next();
             try {
                 assignment = assignmentDao.getAssignmentForPositionSlotAndUser(
-                    positionSlot.getId(), nextVolunteer.getId().toString());
+                    positionSlot.getId(), nextVolunteer.getId());
             } catch (Exception _) {
                 // ignore
             }

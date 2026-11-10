@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.time.Duration;
@@ -286,19 +287,19 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     public @NonNull ShiftPlanInviteDetailsDto getShiftPlanInviteDetails(@NonNull String inviteCode) {
-        String userId;
+        UUID userId;
         try {
-            userId = currentActor.get().requireUserId().toString();
+            userId = currentActor.get().requireUserId();
         } catch (UnauthorizedException _) {
             // user not logged in, proceed without user context
-            userId = "";
+            userId = null;
         }
 
         var invite = shiftPlanInviteDao.getByCode(inviteCode);
         var shiftPlan = shiftPlanDao.getById(invite.getShiftPlan().getId());
 
         // volunteer not necessary to get invite details
-        var volunteer = volunteerDao.findById(java.util.UUID.fromString(userId));
+        var volunteer = userId == null ? java.util.Optional.<Volunteer>empty() : volunteerDao.findById(userId);
 
         boolean alreadyJoined = volunteer.isPresent() && isUserAlreadyInShiftPlan(invite.getType(), shiftPlan, volunteer.get());
         boolean upgradeToPlannerPossible = volunteer.isPresent() && isUserAlreadyInShiftPlan(ShiftPlanInviteType.VOLUNTEER_JOIN, shiftPlan, volunteer.get())
@@ -348,7 +349,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     @Override
     @Transactional
     public void joinShiftPlan(@NonNull @Valid ShiftPlanJoinRequestDto requestDto) {
-        String userId = currentActor.get().requireUserId().toString();
+        UUID userId = currentActor.get().requireUserId();
         String inviteCode = requestDto.getInviteCode().trim();
         ShiftPlanInvite invite = shiftPlanInviteDao.getByCode(inviteCode);
         validateInvite(invite);
@@ -364,7 +365,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         // Increase uses and invalidate cache if joined now
         if (joinedNow) {
-            userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+            userAttributeProvider.invalidateUserCache(userId);
             invite.setUses(invite.getUses() + 1);
         }
         // auto-deactivate if max uses reached
@@ -390,9 +391,9 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         //NOTIFY: publish events
         if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN) {
-            publisher.publishEvent(ShiftPlanVolunteerEvent.joinedAsVolunteer(shiftPlan, userId));
+            publisher.publishEvent(ShiftPlanVolunteerEvent.joinedAsVolunteer(shiftPlan, userId.toString()));
         } else if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
-            publisher.publishEvent(ShiftPlanVolunteerEvent.joinedAsPlanner(shiftPlan, userId));
+            publisher.publishEvent(ShiftPlanVolunteerEvent.joinedAsPlanner(shiftPlan, userId.toString()));
         } else {
             throw new IllegalStateException("Unknown invite type: " + invite.getType());
         }
@@ -475,7 +476,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             throw new BadRequestException("Plan is managed by supervisor, leave is currently not possible.");
         }
 
-        var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, actor.requireUserId().toString());
+        var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, actor.requireUserId());
         if (!existingAssignments.isEmpty()) {
             assignmentDao.deleteAll(existingAssignments);
         }

@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,7 +44,7 @@ public class ShiftServiceImpl implements ShiftService {
     private final ApplicationEventPublisher publisher;
 
     @Override
-    public @org.jspecify.annotations.NonNull ShiftDetailsDto getShiftDetails(long shiftId, @org.jspecify.annotations.NonNull String userId) {
+    public @org.jspecify.annotations.NonNull ShiftDetailsDto getShiftDetails(long shiftId, @org.jspecify.annotations.NonNull UUID userId) {
         var shift = shiftDao.getById(shiftId);
         var plan = shift.getShiftPlan();
         var event = plan.getEvent();

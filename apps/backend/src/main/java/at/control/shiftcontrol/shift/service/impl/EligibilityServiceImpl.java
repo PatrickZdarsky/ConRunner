@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 
@@ -37,18 +38,18 @@ public class EligibilityServiceImpl implements EligibilityService {
     private final CurrentShiftActor currentActor;
 
     @Override
-    public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull String userId) {
+    public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull UUID userId) {
         return getSignupStateForPositionSlot(
             positionSlotDao.getById(positionSlotId),
-            volunteerDao.getById(java.util.UUID.fromString(userId))
+            volunteerDao.getById(userId)
         );
     }
 
     @Override
-    public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull PositionSlot positionSlot, @NonNull String userId) {
+    public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull PositionSlot positionSlot, @NonNull UUID userId) {
         return getSignupStateForPositionSlot(
             positionSlot,
-            volunteerDao.getById(java.util.UUID.fromString(userId))
+            volunteerDao.getById(userId)
         );
     }
 
@@ -69,7 +70,7 @@ public class EligibilityServiceImpl implements EligibilityService {
         }
 
         var conflictingConstraints =
-            timeConstraintDao.findByPositionSlotIdAndVolunteerId(positionSlot.getId(), volunteer.getId().toString());
+            timeConstraintDao.findByPositionSlotIdAndVolunteerId(positionSlot.getId(), volunteer.getId());
         if (!conflictingConstraints.isEmpty()) {
             return PositionSignupState.TIME_CONFLICT_TIME_CONSTRAINT;
         }
@@ -77,10 +78,10 @@ public class EligibilityServiceImpl implements EligibilityService {
         Collection<Assignment> conflictingAssignments;
         if (slotToExclude != null) {
             conflictingAssignments = assignmentDao.getConflictingAssignmentsExcludingSlot(
-                volunteer.getId().toString(), slotToExclude
+                volunteer.getId(), slotToExclude
             );
         } else {
-            conflictingAssignments = assignmentDao.getConflictingAssignments(volunteer.getId().toString(), positionSlot);
+            conflictingAssignments = assignmentDao.getConflictingAssignments(volunteer.getId(), positionSlot);
         }
         if (!conflictingAssignments.isEmpty()) {
             return PositionSignupState.TIME_CONFLICT_ASSIGNMENT;
@@ -92,7 +93,7 @@ public class EligibilityServiceImpl implements EligibilityService {
         }
 
         boolean hasCapacity = hasCapacity(positionSlot);
-        boolean isTradePossible = hasOpenTradeForUser(positionSlot, volunteer.getId().toString());
+        boolean isTradePossible = hasOpenTradeForUser(positionSlot, volunteer.getId());
 
         if (hasCapacity && isTradePossible) {
             return PositionSignupState.SIGNUP_OR_TRADE;
@@ -178,28 +179,28 @@ public class EligibilityServiceImpl implements EligibilityService {
     }
 
     @Override
-    public @NonNull Collection<Assignment> getConflictingAssignments(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime) {
+    public @NonNull Collection<Assignment> getConflictingAssignments(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime) {
         return assignmentDao.getConflictingAssignments(volunteerId, startTime, endTime);
     }
 
     @Override
-    public @NonNull Collection<Assignment> getConflictingAssignments(@NonNull String volunteerId, @NonNull PositionSlot positionSlot) {
+    public @NonNull Collection<Assignment> getConflictingAssignments(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot) {
         return getConflictingAssignments(volunteerId, positionSlot.getShift().getStartTime(), positionSlot.getShift().getEndTime());
     }
 
     @Override
-    public @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftIdToExclude) {
+    public @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftIdToExclude) {
         return assignmentDao.getConflictingAssignmentsExcludingShift(volunteerId, startTime, endTime, shiftIdToExclude);
     }
 
     @Override
-    public @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull PositionSlot positionSlot, long shiftIdToExclude) {
+    public @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot, long shiftIdToExclude) {
         return getConflictingAssignmentsExcludingShift(
             volunteerId, positionSlot.getShift().getStartTime(), positionSlot.getShift().getEndTime(), shiftIdToExclude);
     }
 
     @Override
-    public void validateHasConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftId) {
+    public void validateHasConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftId) {
         var a = assignmentDao.getConflictingAssignmentsExcludingShift(volunteerId, startTime, endTime, shiftId);
         if (a.isEmpty()) {
             return;
@@ -208,7 +209,7 @@ public class EligibilityServiceImpl implements EligibilityService {
     }
 
     @Override
-    public void validateHasConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull PositionSlot positionSlot, long shiftToExclude) {
+    public void validateHasConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot, long shiftToExclude) {
         validateHasConflictingAssignmentsExcludingShift(
             volunteerId, positionSlot.getShift().getStartTime(), positionSlot.getShift().getEndTime(), shiftToExclude);
     }
@@ -243,11 +244,11 @@ public class EligibilityServiceImpl implements EligibilityService {
     }
 
     // trade requests where the requested assignment is assigned to the user
-    private boolean hasOpenTradeForUser(PositionSlot slot, String userId) {
+    private boolean hasOpenTradeForUser(PositionSlot slot, UUID userId) {
         return slot.getAssignments() != null && slot.getAssignments().stream().anyMatch(assignment ->
             assignment.getOutgoingSwitchRequests().stream().anyMatch(req ->
                 req.getStatus() == TradeStatus.OPEN
-                    && req.getRequestedAssignment().getAssignedVolunteer().getId().toString().equals(userId)
+                    && req.getRequestedAssignment().getAssignedVolunteer().getId().equals(userId)
             )
         );
     }

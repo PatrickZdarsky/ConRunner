@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.util.ArrayList;
 
 import at.control.shiftcontrol.shift.entity.Assignment;
@@ -48,7 +49,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
 
     @Override
-    public @NonNull EventsDashboardOverviewDto getDashboardOverviewsOfAllShiftPlans(@NonNull String eventId, @NonNull String userId) {
+    public @NonNull EventsDashboardOverviewDto getDashboardOverviewsOfAllShiftPlans(@NonNull String eventId, @NonNull UUID userId) {
         var userShiftPlans = shiftPlanDao.findAllUserRelatedShiftPlansInEvent(userId, eventId);
 
         var shiftPlanDashboards = userShiftPlans.stream().map(shiftPlan -> {
@@ -72,7 +73,7 @@ public class DashboardServiceImpl implements DashboardService {
         var event = eventDao.getById(shiftPlan.getEvent().getId());
         var userShifts = shiftDao.searchUserRelatedShiftsInShiftPlan(shiftPlanId, userId);
         var auctions = assignmentDao.findAuctionsByShiftPlanId(shiftPlanId);
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
 
         // only show auctions where user is eligible to participate or own auctions
         var eligibleAuctions = auctions.stream().filter(
@@ -82,7 +83,7 @@ public class DashboardServiceImpl implements DashboardService {
             )).toList();
         var ownAuctions = auctions.stream().filter(
             assignment -> assignment.getAssignedVolunteer() != null &&
-                assignment.getAssignedVolunteer().getId().toString().equals(userId)
+                assignment.getAssignedVolunteer().getId().equals(userId)
         ).toList();
 
         // add both eligible and own auctions, avoiding duplicates
@@ -97,21 +98,21 @@ public class DashboardServiceImpl implements DashboardService {
             .eventOverview(EventMapper.toEventDto(event))
             .ownShiftPlanStatistics(statisticService.getOwnStatisticsOfShifts(userShifts)) // directly pass user shifts here to avoid redundant filtering
             .overallShiftPlanStatistics(statisticService.getOverallShiftPlanStatistics(shiftPlan))
-            .rewardPoints((int) rewardPointsTransactionDao.sumPointsByVolunteerAndShiftPlan(userId, shiftPlanId))
+            .rewardPoints((int) rewardPointsTransactionDao.sumPointsByVolunteerAndShiftPlan(userId.toString(), shiftPlanId))
             .shifts(shiftMapper.assemble(userShifts))
             .trades(tradeMapper.toTradeInfoDto(assignmentSwitchRequestDao.findTradesForShiftPlanAndUser(shiftPlanId, userId)))
             .auctions(assignmentAssemblingMapper.toContextDto(combinedAuctions))
             .build();
     }
 
-    private String validateShiftPlanAccessAndGetUserId(long shiftPlanId) {
+    private UUID validateShiftPlanAccessAndGetUserId(long shiftPlanId) {
         var actor = currentActor.get();
         if (!(actor.isVolunteerInPlan(shiftPlanId) || actor.isPlannerInPlan(shiftPlanId))) {
             log.error("User has no access to shift plan with id: {}", shiftPlanId);
             throw new ForbiddenException("User has no access to shift plan.");
         }
 
-        return actor.requireUserId().toString();
+        return actor.requireUserId();
     }
 
     private ShiftPlan getShiftPlanOrThrow(long shiftPlanId) {

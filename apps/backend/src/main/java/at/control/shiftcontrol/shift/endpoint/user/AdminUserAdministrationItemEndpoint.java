@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.endpoint.user;
 
+import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,7 +36,7 @@ public class AdminUserAdministrationItemEndpoint {
         operationId = "getUser",
         description = "Get User"
     )
-    public UserEventDto getUser(@PathVariable String userId) {
+    public UserEventDto getUser(@PathVariable UUID userId) {
         return service.getUser(userId);
     }
 
@@ -45,7 +46,7 @@ public class AdminUserAdministrationItemEndpoint {
         description = "Update user plans"
     )
     public UserEventDto updateUserPlans(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid UserEventUpdateDto updateDto) {
         return service.updateEventUser(userId, updateDto);
     }
@@ -56,7 +57,7 @@ public class AdminUserAdministrationItemEndpoint {
         description = "Lock a user in a given plan"
     )
     public UserEventDto lockUserForPlan(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid LockResetUserDto updateDto) {
         return service.lockUser(userId, ConvertUtil.idToLong(updateDto.getShiftPlanIds()));
     }
@@ -67,7 +68,7 @@ public class AdminUserAdministrationItemEndpoint {
         description = "Unlock a user in a given plan"
     )
     public UserEventDto unLockUserForPlan(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid LockResetUserDto updateDto) {
         return service.unLockUser(userId, ConvertUtil.idToLong(updateDto.getShiftPlanIds()));
     }
@@ -78,7 +79,7 @@ public class AdminUserAdministrationItemEndpoint {
         description = "Reset a user in a given plan"
     )
     public UserEventDto resetUserForPlan(
-        @PathVariable String userId,
+        @PathVariable UUID userId,
         @RequestBody @Valid LockResetUserDto updateDto) {
         return service.resetUser(userId, ConvertUtil.idToLong(updateDto.getShiftPlanIds()));
     }

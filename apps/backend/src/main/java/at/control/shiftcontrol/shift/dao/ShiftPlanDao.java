@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.Set;
 
@@ -10,7 +11,7 @@ public interface ShiftPlanDao extends BasicDao<ShiftPlan, Long> {
 
     Collection<ShiftPlan> findAll();
 
-    Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(String userId, String eventId);
+    Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(UUID userId, String eventId);
 
     Collection<ShiftPlan> getByIds(Set<Long> shiftPlanIds);
 }

@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +75,7 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public @NonNull OwnStatisticsDto getOwnStatisticsOfShiftPlans(@NonNull List<ShiftPlan> shiftPlans, @NonNull String userId) {
+    public @NonNull OwnStatisticsDto getOwnStatisticsOfShiftPlans(@NonNull List<ShiftPlan> shiftPlans, @NonNull UUID userId) {
         var userShiftsSet = new HashSet<Shift>();
         for (var shiftPlan : shiftPlans) {
             var relevantShiftsOfPlan = shiftDao.searchUserRelatedShiftsInShiftPlan(shiftPlan.getId(), userId);
@@ -117,7 +118,7 @@ public class StatisticServiceImpl implements StatisticService {
                 if (assignedCount < slot.getDesiredVolunteerCount()
                     && eligibilityService.isEligibleAndNotSignedUp(slot, volunteer)) {
                     var conflictingAssignments = eligibilityService.getConflictingAssignments(
-                        volunteer.getId().toString(),
+                        volunteer.getId(),
                         slot.getShift().getStartTime(),
                         slot.getShift().getEndTime());
 

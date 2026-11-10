@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.time.Instant;
@@ -80,7 +81,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
     }
 
     @Override
-    public @NonNull Collection<TradeCandidatesDto> getPositionSlotsToOffer(long requestedPositionSlotId, @NonNull String currentUserId) {
+    public @NonNull Collection<TradeCandidatesDto> getPositionSlotsToOffer(long requestedPositionSlotId, @NonNull UUID currentUserId) {
         // get requested PositionSlot
         PositionSlot requestedPositionSlot = positionSlotDao.getById(requestedPositionSlotId);
 
@@ -94,7 +95,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
             return List.of();
         }
         // check if user is already assigned to requested position slot
-        if (assignedVolunteers.stream().anyMatch(v -> currentUserId.equals(v.getId().toString()))) {
+        if (assignedVolunteers.stream().anyMatch(v -> currentUserId.equals(v.getId()))) {
             throw new StateViolationException("You are already assigned to this slot");
         }
 
@@ -123,7 +124,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                 // only offer the position to eligible volunteers with no conflicts (besides the time conflict with the requested slot)
                 Collection<Volunteer> usersToTradeWith = assignedVolunteers.stream()
                     .filter(v -> {
-                        var signupStateOffered = eligibilityService.getSignupStateForPositionSlot(a.getPositionSlot(), v.getId().toString());
+                        var signupStateOffered = eligibilityService.getSignupStateForPositionSlot(a.getPositionSlot(), v.getId());
                         return signupStateOffered != PositionSignupState.SIGNED_UP && signupStateOffered != PositionSignupState.NOT_ELIGIBLE
                             && signupStateOffered != PositionSignupState.TIME_CONFLICT_TIME_CONSTRAINT;
                     })
@@ -161,7 +162,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
     }
 
     private Collection<TradeCandidatesDto> removeExistingTrades(Collection<TradeCandidatesDto> slotsToOffer, long requestedPositionSlotId,
-                                                                String currentUserId) {
+                                                                UUID currentUserId) {
         // check for already existing trades in status OPEN
         Collection<AssignmentSwitchRequest> existingTrades =
             assignmentSwitchRequestDao.findOpenTradesForRequestedPositionAndOfferingUser(requestedPositionSlotId, currentUserId);
@@ -185,7 +186,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                             AssignmentSwitchRequestKey key = AssignmentSwitchRequestKey.of(
                                 AssignmentKey.of(
                                     ConvertUtil.idToLong(candidate.getOwnPosition().getId()),
-                                    currentUserId),
+                                    currentUserId.toString()),
                                 AssignmentKey.of(
                                     requestedPositionSlotId,
                                     volunteer.getId().toString())
@@ -209,9 +210,9 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
 
     @Override
     @Transactional
-    public @NonNull Collection<TradeDto> createTrade(@NonNull TradeCreateDto tradeCreateDto, @NonNull String currentUserId) {
+    public @NonNull Collection<TradeDto> createTrade(@NonNull TradeCreateDto tradeCreateDto, @NonNull UUID currentUserId) {
         // get current user (volunteer)
-        Volunteer currentUser = volunteerDao.getById(java.util.UUID.fromString(currentUserId));
+        Volunteer currentUser = volunteerDao.getById(currentUserId);
 
         // get requested PositionSlot
         PositionSlot requestedPositionSlot = positionSlotDao.getById(ConvertUtil.idToLong(tradeCreateDto.getRequestedPositionSlotId()));
@@ -244,7 +245,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         Collection<AssignmentSwitchRequest> trades = requestedPositionSlot.getAssignments().stream()
             .filter(assignment ->
                 tradeCreateDto.getRequestedVolunteerIds().stream().anyMatch(
-                    volunteerId -> Objects.equals(volunteerId, String.valueOf(assignment.getAssignedVolunteer().getId()))))
+                    volunteerId -> Objects.equals(volunteerId, assignment.getAssignedVolunteer().getId())))
             .map(requestedAssignment -> createAssignmentSwitchRequest(offeredAssignment, requestedAssignment)).toList();
 
         // check for existing trades
@@ -303,8 +304,8 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         return tradeMapper.toDto(trades);
     }
 
-    private Collection<Volunteer> getVolunteersToTradeWith(PositionSlot positionSlot, Collection<String> volunteerIds) {
-        var existingVolunteerIds = volunteerDao.findAllByVolunteerIds(volunteerIds.stream().map(java.util.UUID::fromString).toList())
+    private Collection<Volunteer> getVolunteersToTradeWith(PositionSlot positionSlot, Collection<UUID> volunteerIds) {
+        var existingVolunteerIds = volunteerDao.findAllByVolunteerIds(volunteerIds)
             .stream()
             .map(Volunteer::getId)
             .collect(Collectors.toSet());
@@ -317,7 +318,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
 
     @Override
     @Transactional
-    public @NonNull TradeDto acceptTrade(long id, @NonNull String currentUserId) {
+    public @NonNull TradeDto acceptTrade(long id, @NonNull UUID currentUserId) {
         // get trade
         AssignmentSwitchRequest trade = assignmentSwitchRequestDao.getById(id);
 
@@ -325,7 +326,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         securityHelper.assertVolunteerIsNotLockedInPlan(trade.getRequestedAssignment());
 
         // check if volunteer is owner of requested slot
-        if (!trade.getRequestedAssignment().getAssignedVolunteer().getId().toString().equals(currentUserId)) {
+        if (!trade.getRequestedAssignment().getAssignedVolunteer().getId().equals(currentUserId)) {
             throw new ForbiddenException("Trade cannot be accepted, because you are not part of it");
         }
 
@@ -362,14 +363,14 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
 
     @Override
     @Transactional
-    public @NonNull TradeDto declineTrade(long id, @NonNull String currentUserId) {
+    public @NonNull TradeDto declineTrade(long id, @NonNull UUID currentUserId) {
         // get trade
         AssignmentSwitchRequest trade = assignmentSwitchRequestDao.getById(id);
         securityHelper.assertVolunteerIsNotLockedInPlan(trade.getOfferingAssignment());
         securityHelper.assertVolunteerIsNotLockedInPlan(trade.getRequestedAssignment());
 
         // check if user can decline
-        if (!trade.getRequestedAssignment().getAssignedVolunteer().getId().toString().equals(currentUserId)) {
+        if (!trade.getRequestedAssignment().getAssignedVolunteer().getId().equals(currentUserId)) {
             throw new ForbiddenException("Trade cannot be declined, because you are not part of it");
         }
         if (!trade.getStatus().equals(TradeStatus.OPEN)) {
@@ -387,13 +388,13 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
     }
 
     @Override
-    public @NonNull TradeDto cancelTrade(long id, @NonNull String currentUserId) {
+    public @NonNull TradeDto cancelTrade(long id, @NonNull UUID currentUserId) {
         // get trade
         AssignmentSwitchRequest trade = assignmentSwitchRequestDao.getById(id);
         securityHelper.assertVolunteerIsNotLockedInPlan(trade.getOfferingAssignment());
         securityHelper.assertVolunteerIsNotLockedInPlan(trade.getRequestedAssignment());
         // check if user can cancel
-        if (!trade.getOfferingAssignment().getAssignedVolunteer().getId().toString().equals(currentUserId)) {
+        if (!trade.getOfferingAssignment().getAssignedVolunteer().getId().equals(currentUserId)) {
             throw new ForbiddenException("Trade cannot be canceled, because you are not part of it");
         }
         if (!trade.getStatus().equals(TradeStatus.OPEN)) {

@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service;
 
+import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 
@@ -52,7 +53,7 @@ public interface EligibilityService {
      * @return The signup state of the volunteer for the position slot
      * @throws NotFoundException if the position slot or volunteer could not be found
      */
-    @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull String userId);
+    @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull UUID userId);
 
     /**
      * Determines the signup state of a volunteer for a given position slot.
@@ -64,7 +65,7 @@ public interface EligibilityService {
      * @param userId       The volunteer to check
      * @return The signup state of the volunteer for the position slot
      */
-    @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull PositionSlot positionSlot, @NonNull String userId);
+    @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull PositionSlot positionSlot, @NonNull UUID userId);
 
     /**
      * Checks if the volunteer can join the position slot based on PositionSignUpState.
@@ -132,7 +133,7 @@ public interface EligibilityService {
      * @param endTime     end of the timespan to check
      * @return the overlapping assignments
      */
-    @NonNull Collection<Assignment> getConflictingAssignments(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime);
+    @NonNull Collection<Assignment> getConflictingAssignments(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime);
 
     /**
      * returns all conflicting assignments within a given time for a specific user.
@@ -141,7 +142,7 @@ public interface EligibilityService {
      * @param positionSlot slot of which the time is to check
      * @return the overlapping assignments
      */
-    @NonNull Collection<Assignment> getConflictingAssignments(@NonNull String volunteerId, @NonNull PositionSlot positionSlot);
+    @NonNull Collection<Assignment> getConflictingAssignments(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot);
 
     /**
      * returns all conflicting assignments within a given time for a specific user, ignoring the provided position slot.
@@ -152,7 +153,7 @@ public interface EligibilityService {
      * @param shiftIdToExclude shift that is ignored for the check
      * @return the overlapping assignments
      */
-    @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftIdToExclude);
+    @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long shiftIdToExclude);
 
     /**
      * returns all conflicting assignments with a given position slot for a specific user, ignoring  another position slot.
@@ -162,7 +163,7 @@ public interface EligibilityService {
      * @param shiftIdToExclude shift that is ignored for the check
      * @return the overlapping assignments
      */
-    @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull PositionSlot positionSlot, long shiftIdToExclude);
+    @NonNull Collection<Assignment> getConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot, long shiftIdToExclude);
 
     /**
      * checks if the user has any conflicting assignments within a given time, ignoring the given position slot.
@@ -173,7 +174,7 @@ public interface EligibilityService {
      * @param positionSlot position slot that is ignored for the check
      * @throws ConflictException if overlapping assignments exist
      */
-    void validateHasConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long positionSlot);
+    void validateHasConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull Instant startTime, @NonNull Instant endTime, long positionSlot);
 
     /**
      * checks if the user has any conflicting assignments with a given position slot, ignoring another position slot.
@@ -183,7 +184,7 @@ public interface EligibilityService {
      * @param shiftToExclude shift that is ignored for the check
      * @throws ConflictException if overlapping assignments exist
      */
-    void validateHasConflictingAssignmentsExcludingShift(@NonNull String volunteerId, @NonNull PositionSlot positionSlot, long shiftToExclude);
+    void validateHasConflictingAssignmentsExcludingShift(@NonNull UUID volunteerId, @NonNull PositionSlot positionSlot, long shiftToExclude);
 
     /**
      * checks if a position slot is full.

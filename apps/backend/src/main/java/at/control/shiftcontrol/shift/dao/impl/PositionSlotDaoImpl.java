@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.dao.impl;
 
+import java.util.UUID;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -47,8 +48,8 @@ public class PositionSlotDaoImpl implements PositionSlotDao {
     }
 
     @Override
-    public void setPreference(@NonNull String volunteerId, long positionSlotId, int preference) {
-        var preferenceId = PositionSlotPreferenceId.of(volunteerId, positionSlotId);
+    public void setPreference(@NonNull UUID volunteerId, long positionSlotId, int preference) {
+        var preferenceId = PositionSlotPreferenceId.of(volunteerId.toString(), positionSlotId);
         var positionSlotPreference = positionSlotPreferenceRepository.findById(preferenceId);
         if (positionSlotPreference.isPresent()) {
             var existingPreference = positionSlotPreference.get();
@@ -64,8 +65,8 @@ public class PositionSlotDaoImpl implements PositionSlotDao {
     }
 
     @Override
-    public int getPreference(@NonNull String volunteerId, long positionSlotId) {
-        var preferenceId = PositionSlotPreferenceId.of(volunteerId, positionSlotId);
+    public int getPreference(@NonNull UUID volunteerId, long positionSlotId) {
+        var preferenceId = PositionSlotPreferenceId.of(volunteerId.toString(), positionSlotId);
         var positionSlotPreference = positionSlotPreferenceRepository.findById(preferenceId);
 
         return positionSlotPreference.map(PositionSlotPreference::getPreferenceLevel).orElse(0);

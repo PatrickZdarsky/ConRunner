@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.rewardpoints;
 
+import java.util.UUID;
 import java.util.Collection;
 
 import at.control.shiftcontrol.shift.dto.rewardpoints.BookingResultDto;
@@ -18,9 +19,9 @@ public interface RewardPointsLedgerService {
 
     /* ========= READ (aggregation) ========= */
 
-    TotalPointsDto getTotalPoints(String userId);
+    TotalPointsDto getTotalPoints(UUID userId);
 
-    EventPointsDto getPointsForEvent(String userId, long eventId);
+    EventPointsDto getPointsForEvent(UUID userId, long eventId);
 
-    Collection<EventPointsDto> getPointsGroupedByEvent(String userId);
+    Collection<EventPointsDto> getPointsGroupedByEvent(UUID userId);
 }

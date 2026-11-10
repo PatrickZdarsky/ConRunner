@@ -77,7 +77,7 @@ public class EventEndpoint {
         description = "Find all events that are currently ongoing or upcoming"
     )
     public Collection<EventDto> getAllOpenEvents() {
-        return eventService.getAllOpenEvents(currentActor.get().requireUserId().toString());
+        return eventService.getAllOpenEvents(currentActor.get().requireUserId());
     }
 
     @PostMapping
@@ -122,7 +122,7 @@ public class EventEndpoint {
         description = "Get an overview of all (volunteer related) shift plans of an event including statistics and reward points for the current user"
     )
     public EventShiftPlansOverviewDto getAllShiftPlanOverviewsOfEvent(@PathVariable String eventId) {
-        return eventService.getEventShiftPlansOverview(ConvertUtil.idToLong(eventId), currentActor.get().requireUserId().toString());
+        return eventService.getEventShiftPlansOverview(ConvertUtil.idToLong(eventId), currentActor.get().requireUserId());
     }
 
     @GetMapping("/{eventId}/dashboard")
@@ -131,7 +131,7 @@ public class EventEndpoint {
         description = "Get (volunteer related) dashboard data for all events"
     )
     public EventsDashboardOverviewDto getEventsDashboard(@PathVariable String eventId) {
-        return dashboardService.getDashboardOverviewsOfAllShiftPlans(eventId, currentActor.get().requireUserId().toString());
+        return dashboardService.getDashboardOverviewsOfAllShiftPlans(eventId, currentActor.get().requireUserId());
     }
 
     @GetMapping("/{eventId}/export")
@@ -183,6 +183,6 @@ public class EventEndpoint {
     public Collection<ShiftPlanContactInfoDto> getPlannerContacts(@PathVariable String eventId) {
         return eventService.getPlannerContactInfo(
             ConvertUtil.idToLong(eventId),
-            currentActor.get().requireUserId().toString());
+            currentActor.get().requireUserId());
     }
 }

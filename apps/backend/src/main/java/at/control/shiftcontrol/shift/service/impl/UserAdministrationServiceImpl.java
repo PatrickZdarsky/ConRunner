@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 
 import java.util.Collection;
@@ -117,15 +118,15 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     @AdminOnly
-    public @NonNull UserEventDto getUser(@NonNull String userId) {
-        var volunteer = volunteerDao.findById(java.util.UUID.fromString(userId)).orElse(null);
-        var user = userService.getUser(java.util.UUID.fromString(userId));
+    public @NonNull UserEventDto getUser(@NonNull UUID userId) {
+        var volunteer = volunteerDao.findById(userId).orElse(null);
+        var user = userService.getUser(userId);
         return UserAssemblingMapper.toUserEventDto(volunteer, user);
     }
 
     @Override
-    public @NonNull UserPlanDto getPlanUser(@NonNull Long shiftPlanId, @NonNull String userId) {
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+    public @NonNull UserPlanDto getPlanUser(@NonNull Long shiftPlanId, @NonNull UUID userId) {
+        var volunteer = volunteerDao.getById(userId);
         securityHelper.assertUserIsPlanner(shiftPlanId);
         securityHelper.assertVolunteerIsVolunteer(shiftPlanDao.getById(shiftPlanId), volunteer, false);
         return toUserPlanDto(volunteer, shiftPlanId);
@@ -134,8 +135,8 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Override
     @Transactional
     @AdminOnly
-    public @NonNull UserEventDto updateEventUser(@NonNull String userId, @NonNull UserEventUpdateDto updateDto) {
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+    public @NonNull UserEventDto updateEventUser(@NonNull UUID userId, @NonNull UserEventUpdateDto updateDto) {
+        var volunteer = volunteerDao.getById(userId);
         assertPlansChanged(volunteer, updateDto);
         var originalVolunteeringPlans = Optional.ofNullable(volunteer.getVolunteeringPlans()).orElse(Collections.emptyList());
         var originalPlanningPlans = Optional.ofNullable(volunteer.getPlanningPlans()).orElse(Collections.emptyList());
@@ -158,7 +159,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             .collect(Collectors.toSet());
 
         var user = userService.getUser(volunteer.getId());
-        userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        userAttributeProvider.invalidateUserCache(userId);
         var allPlans = shiftPlanDao.getByIds(Stream.concat(
             updateDto.getPlanningPlans().stream(), updateDto.getVolunteeringPlans().stream())
             .map(ConvertUtil::idToLong)
@@ -171,8 +172,8 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     @Transactional
-    public @NonNull UserPlanDto updatePlanUser(@NonNull Long shiftPlanId, @NonNull String userId, @NonNull UserPlanUpdateDto updateDto) {
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+    public @NonNull UserPlanDto updatePlanUser(@NonNull Long shiftPlanId, @NonNull UUID userId, @NonNull UserPlanUpdateDto updateDto) {
+        var volunteer = volunteerDao.getById(userId);
         securityHelper.assertUserIsPlanner(shiftPlanId);
         securityHelper.assertVolunteerIsVolunteer(shiftPlanDao.getById(shiftPlanId), volunteer, false);
 
@@ -195,7 +196,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         removeRoles(volunteer, rolesToRemove);
 
         var user = userService.getUser(volunteer.getId());
-        userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        userAttributeProvider.invalidateUserCache(userId);
         var updatedPlan = shiftPlanDao.getById(shiftPlanId);
         notifyUser(volunteer, java.util.List.of(updatedPlan), NotificationTypes.ROLES_CHANGED);
         publisher.publishEvent(UserEvent.planUpdate(volunteer, updatedPlan));
@@ -204,9 +205,9 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     @Transactional
-    public @NonNull UserEventDto lockUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanIds) {
+    public @NonNull UserEventDto lockUser(@NonNull UUID userId, @NonNull Collection<Long> shiftPlanIds) {
         shiftPlanIds.forEach(securityHelper::assertUserIsPlanner);
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanIds));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
@@ -216,7 +217,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             }
             volunteer.getLockedPlans().add(plan);
         }
-        userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        userAttributeProvider.invalidateUserCache(userId);
         notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_LOCKED);
         publisher.publishEvent(UserEvent.lock(volunteer, plans));
         return toUserEventDto(volunteer);
@@ -224,16 +225,16 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     @Transactional
-    public @NonNull UserEventDto unLockUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanIds) {
+    public @NonNull UserEventDto unLockUser(@NonNull UUID userId, @NonNull Collection<Long> shiftPlanIds) {
         shiftPlanIds.forEach(securityHelper::assertUserIsPlanner);
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+        var volunteer = volunteerDao.getById(userId);
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanIds));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
             securityHelper.assertVolunteerIsLockedInPlan(plan, volunteer);
             volunteer.getLockedPlans().remove(plan);
         }
-        userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        userAttributeProvider.invalidateUserCache(userId);
         notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_UNLOCKED);
         publisher.publishEvent(UserEvent.unlock(volunteer, plans));
         return toUserEventDto(volunteer);
@@ -241,8 +242,8 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     @Override
     @Transactional
-    public @NonNull UserEventDto resetUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanId) {
-        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
+    public @NonNull UserEventDto resetUser(@NonNull UUID userId, @NonNull Collection<Long> shiftPlanId) {
+        var volunteer = volunteerDao.getById(userId);
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanId));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
@@ -253,7 +254,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             assignmentRepository.flush();
             assignments.forEach(assignmentService::unassignInternal);
         }
-        userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        userAttributeProvider.invalidateUserCache(userId);
         notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_RESET);
         publisher.publishEvent(UserEvent.reset(volunteer, plans));
         return toUserEventDto(volunteer);
@@ -263,7 +264,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull Collection<UserPlanDto> bulkAddRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var roles = roleDao.findAllById(updateDto.getRoles().stream().map(ConvertUtil::idToLong).toList());
         for (Volunteer v : volunteers) {
             for (Role role : roles) {
@@ -282,7 +283,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull Collection<UserPlanDto> bulkRemoveRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var roles = roleDao.findAllById(updateDto.getRoles().stream().map(ConvertUtil::idToLong).toList());
         for (Volunteer v : volunteers) {
             v.getRoles().removeAll(roles);
@@ -297,7 +298,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @AdminOnly
     @Transactional
     public @NonNull Collection<UserEventDto> bulkAddVolunteeringPlans(UserEventBulkDto updateDto) {
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var plans = shiftPlanDao.getByIds(updateDto.getPlans().stream().map(ConvertUtil::idToLong).collect(Collectors.toSet()));
         for (Volunteer v : volunteers) {
             for (ShiftPlan plan : plans) {
@@ -315,7 +316,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @AdminOnly
     @Transactional
     public @NonNull Collection<UserEventDto> bulkRemoveVolunteeringPlans(UserEventBulkDto updateDto) {
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var plans = shiftPlanDao.getByIds(updateDto.getPlans().stream().map(ConvertUtil::idToLong).collect(Collectors.toSet()));
         for (Volunteer v : volunteers) {
             removePlans(v,
@@ -353,7 +354,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         return UserAssemblingMapper.toUserPlanDto(volunteer, lookupUser(volunteer.getId()), shiftPlanId);
     }
 
-    private User lookupUser(java.util.UUID userId) {
+    private User lookupUser(UUID userId) {
         return userService.getUser(userId);
     }
 
