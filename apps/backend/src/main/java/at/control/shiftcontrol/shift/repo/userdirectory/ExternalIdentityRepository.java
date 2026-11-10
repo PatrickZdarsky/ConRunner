@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import at.control.shiftcontrol.shift.entity.ExternalIdentity;
 
+@org.springframework.stereotype.Repository("shiftExternalIdentityRepository")
 public interface ExternalIdentityRepository extends JpaRepository<ExternalIdentity, Long> {
     Optional<ExternalIdentity> findByIssuerAndSubject(String issuer, String subject);
 

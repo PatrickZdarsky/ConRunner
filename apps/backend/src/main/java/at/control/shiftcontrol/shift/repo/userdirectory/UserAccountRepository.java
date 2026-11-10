@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import at.control.shiftcontrol.shift.entity.UserAccount;
 
+@org.springframework.stereotype.Repository("shiftUserAccountRepository")
 public interface UserAccountRepository extends JpaRepository<UserAccount, Long> {
     @Query(value = """
         select userAccount.id

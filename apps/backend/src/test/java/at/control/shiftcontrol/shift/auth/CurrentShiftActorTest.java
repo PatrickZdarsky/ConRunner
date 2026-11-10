@@ -43,7 +43,7 @@ class CurrentShiftActorTest {
     void machineHasNoHumanUserId() {
         var principal = mock(AuthenticatedActor.class);
         when(principal.userId()).thenReturn(Optional.empty());
-        when(principal.type()).thenReturn(ActorType.MACHINE);
+        when(principal.isMachine()).thenReturn(true);
         SecurityContextHolder.getContext().setAuthentication(
             UsernamePasswordAuthenticationToken.authenticated(principal, null, List.of()));
 

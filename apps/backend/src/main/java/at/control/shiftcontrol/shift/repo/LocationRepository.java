@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import at.control.shiftcontrol.shift.entity.Location;
 
-@Repository
+@Repository("shiftLocationRepository")
 public interface LocationRepository extends JpaRepository<Location, Long>, JpaSpecificationExecutor<Location> {
     @Query("SELECT l FROM Location l WHERE l.event.id = :eventId")
     Collection<Location> findAllByEventId(Long eventId);

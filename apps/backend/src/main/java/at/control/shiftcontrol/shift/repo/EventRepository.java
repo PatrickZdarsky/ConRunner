@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import at.control.shiftcontrol.shift.entity.Event;
 import at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow;
 
-@Repository
+@Repository("shiftEventRepository")
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     boolean existsByNameIgnoreCase(String name);
 
