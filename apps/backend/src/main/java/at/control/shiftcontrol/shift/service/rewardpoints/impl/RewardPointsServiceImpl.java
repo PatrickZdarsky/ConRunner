@@ -350,7 +350,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
         // Should not happen but just in case we retry once
         try {
             rewardPointsShareTokenDao.save(token);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // fallback once, because code uniqueness might collide under concurrency
             token.setToken(callGenerateUniqueCode());
             rewardPointsShareTokenDao.save(token);

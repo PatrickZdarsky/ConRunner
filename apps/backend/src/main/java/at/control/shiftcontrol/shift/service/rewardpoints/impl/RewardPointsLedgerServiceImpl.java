@@ -109,7 +109,7 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
 
             publisher.publishEvent(RewardPointTransactionEvent.transactionCreated(saved));
             return new BookingResultDto(true, saved);
-        } catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException _) {
             // publish failed event with uncommitted transaction data
             publisher.publishEvent(RewardPointTransactionEvent.transactionFailed(tx));
             return new BookingResultDto(false, null);

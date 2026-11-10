@@ -167,7 +167,9 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
             .toList();
 
         class VolRow {
-            String volunteerId, name, email;
+            String volunteerId;
+            String name;
+            String email;
             final Map<String, Integer> pointsByEventId = new HashMap<>();
             int totalFinished = 0;
             int totalAll = 0;

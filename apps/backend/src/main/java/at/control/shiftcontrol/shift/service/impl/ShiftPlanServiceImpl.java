@@ -61,7 +61,6 @@ import at.control.shiftcontrol.shift.mapper.ShiftPlanMapper;
 import at.control.shiftcontrol.shift.service.AssignmentService;
 import at.control.shiftcontrol.shift.service.ShiftPlanService;
 import at.control.shiftcontrol.shift.service.VolunteerService;
-import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 import static at.control.shiftcontrol.shift.lib.type.LockStatus.SELF_SIGNUP;
