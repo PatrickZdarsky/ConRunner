@@ -16,6 +16,8 @@ public final class UserAccountMapper {
                 .id(entity.getId())
                 .username(entity.getUsername())
                 .email(entity.getEmail())
+                .emailVerified(entity.isEmailVerified())
+                .active(entity.getStatus() == at.control.shiftcontrol.identity.entity.UserAccountStatus.ACTIVE)
                 .avatarUrl(entity.getAvatarUrl())
                 .applicationRoles(entity.getApplicationRoles() == null
                         ? List.of()

@@ -111,6 +111,8 @@ public class JwtSecurityConfig {
                 .permitAll()
                 .requestMatchers("/api/v1/invites/{inviteCode}")
                 .permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/realtime/ws")
+                .permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                 .permitAll() // Permit all OPTIONS requests (preflight))
                 .anyRequest().authenticated())

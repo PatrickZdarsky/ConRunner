@@ -13,7 +13,8 @@ public class JwtTokenDecoder {
         String email = token.getClaimAsString("email");
         String avatarUrl = firstNonBlank(token.getClaimAsString("avatar_url"), token.getClaimAsString("picture"), token.getClaimAsString("profile"));
 
-        return new DecodedJwtToken(issuer, subject, username, email, avatarUrl);
+        return new DecodedJwtToken(issuer, subject, username, email, avatarUrl,
+            Boolean.TRUE.equals(token.getClaimAsBoolean("email_verified")));
     }
 
     private static String firstNonBlank(String... values) {
@@ -30,6 +31,10 @@ public class JwtTokenDecoder {
                                   String subject,
                                   String username,
                                   String email,
-                                  String avatarUrl) {
+                                  String avatarUrl,
+                                  boolean emailVerified) {
+        public DecodedJwtToken(String issuer, String subject, String username, String email, String avatarUrl) {
+            this(issuer, subject, username, email, avatarUrl, false);
+        }
     }
 }

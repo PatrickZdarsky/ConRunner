@@ -66,7 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(conflictException, body, new HttpHeaders(), CONFLICT, request);
     }
 
-    @ExceptionHandler(value = {PartiallyNotFoundException.class, NotificationSettingAlreadyExistsException.class})
+    @ExceptionHandler(value = {PartiallyNotFoundException.class})
     public ResponseEntity<Object> handleConflicts(Exception ex, WebRequest request) {
         return handleInternal(ex, request, CONFLICT);
     }

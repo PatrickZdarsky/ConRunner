@@ -12,5 +12,7 @@ public interface UserService {
 
     @NonNull Collection<User> getUsers(@NonNull Collection<UUID> userIds);
 
+    @NonNull Collection<User> getPlatformAdmins();
+
     @NonNull Page<User> searchUsers(int page, int size, @NonNull UserSearchRequest searchDto);
 }

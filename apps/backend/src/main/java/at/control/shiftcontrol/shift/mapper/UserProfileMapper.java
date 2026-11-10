@@ -9,7 +9,6 @@ import at.control.shiftcontrol.shift.entity.Event;
 import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
-import at.control.shiftcontrol.shift.dto.userprofile.NotificationSettingsDto;
 import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
 import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
@@ -18,7 +17,6 @@ import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 public class UserProfileMapper {
     public static UserProfileDto toUserProfileDto(
         UserInfo user,
-        Collection<NotificationSettingsDto> notificationSettings,
         Volunteer volunteer,
         String calendarShareId
     ) {
@@ -48,7 +46,6 @@ public class UserProfileMapper {
 
         return UserProfileDto.builder()
             .account(AccountInfoMapper.toDto(user))
-            .notifications(notificationSettings)
             .assignedRoles(roles)
             .volunteeringPlans(volunteeringPlans)
             .planningPlans(planningPlans)

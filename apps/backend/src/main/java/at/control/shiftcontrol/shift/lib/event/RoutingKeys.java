@@ -95,7 +95,6 @@ public final class RoutingKeys {
     public static final String ROLE_ASSIGNED = "role.assigned.{roleId}.{volunteerId}";
     public static final String ROLE_UNASSIGNED = "role.unassigned.{roleId}.{volunteerId}";
 
-    public static final String VOLUNTEER_NOTIFICATION_PREFERENCE_UPDATED = "volunteer.notification.preference.updated.{volunteerId}";
     public static final String REWARDPOINTS_TRANSACTION_CREATED = "rewardpoints.transaction.created.{volunteerId}.{transactionId}";
     public static final String REWARDPOINTS_TRANSACTION_FAILED = "rewardpoints.transaction.failed.{volunteerId}";
     public static final String REWARDPOINTS_SHARETOKEN_CREATED = "rewardpoints.sharetoken.created.{shareTokenId}";

@@ -22,10 +22,6 @@ public class UserProfileDto {
 
     @NotNull
     @Valid
-    private Collection<NotificationSettingsDto> notifications;
-
-    @NotNull
-    @Valid
     private Collection<RoleDto> assignedRoles;
 
     @NotNull

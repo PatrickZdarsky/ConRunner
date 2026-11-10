@@ -22,7 +22,6 @@ public class VolunteerServiceImpl implements VolunteerService {
             .volunteeringPlans(new HashSet<>())
             .lockedPlans(new HashSet<>())
             .roles(new HashSet<>())
-            .notificationSettings(new HashSet<>())
             .build();
         try {
             return volunteerDao.save(newVolunteer);

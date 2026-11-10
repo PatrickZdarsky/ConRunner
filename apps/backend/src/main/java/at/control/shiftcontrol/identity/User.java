@@ -23,6 +23,10 @@ public class User {
     @NotNull
     private String email;
 
+    private boolean emailVerified;
+
+    private boolean active;
+
     @NotNull
     private String avatarUrl;
 

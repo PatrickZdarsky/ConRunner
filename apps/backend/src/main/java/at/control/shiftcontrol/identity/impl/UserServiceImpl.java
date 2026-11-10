@@ -32,6 +32,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public Collection<User> getPlatformAdmins() {
+        return userAccountRepository.findAllPlatformAdminsWithExternalIdentities().stream()
+            .filter(account -> account.getStatus() == at.control.shiftcontrol.identity.entity.UserAccountStatus.ACTIVE)
+            .map(UserAccountMapper::toDto).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public User getUser(@NonNull UUID userId) {
         UserAccountEntity account = userAccountRepository.findById(userId).orElse(null);
         if (account == null) {

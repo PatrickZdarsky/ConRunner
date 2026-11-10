@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
@@ -29,6 +31,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,6 +44,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
     private final EventDao eventDao;
     private final VolunteerDao volunteerDao;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final SecurityHelper securityHelper;
     private final AssignmentService assignmentService;
 
@@ -121,6 +126,13 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
 
                 assignment.setStatus(AssignmentStatus.AUCTION_REQUEST_FOR_UNASSIGN);
                 assignment = assignmentDao.save(assignment);
+
+                var plan = assignment.getPositionSlot().getShift().getShiftPlan();
+                var trigger = java.util.UUID.randomUUID();
+                if (plan.getPlanPlanners() != null) plan.getPlanPlanners().stream()
+                    .map(at.control.shiftcontrol.shift.entity.Volunteer::getId).distinct().forEach(id ->
+                        notificationRequests.request(new NotificationRequest(trigger, java.util.UUID.fromString(id),
+                            NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED, String.valueOf(plan.getEvent().getId()))));
 
                 // publish event
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotRequestLeave(

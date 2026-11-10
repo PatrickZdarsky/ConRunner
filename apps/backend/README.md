@@ -1,5 +1,40 @@
 # ShiftControl backend
 
+## Notification email
+
+Email delivery is disabled by default. Configure `spring.mail.host`, the SMTP port and credentials,
+then set `shiftcontrol.communications.email.enabled=true` and
+`shiftcontrol.communications.email.from` to a sender address and
+`shiftcontrol.communications.email.frontend-base-url` to the HTTPS application URL. Each user must opt in for the
+notification type and have a verified email claim from the identity provider. SMTP timeouts are
+configured in `application.yaml`. Delivery is retried and is at least once: a process failure after
+SMTP accepts a message can result in a duplicate.
+
+Notification history is available at `GET /api/v1/me/notifications` and its
+read state can be changed with `PATCH /api/v1/me/notifications/{id}` using `{"read": true}` or
+`{"read": false}`. `GET /api/v1/me/notification-preferences` lists supported notification types
+with a display label and current in-app and email settings. Clients should use these returned type
+identifiers instead of maintaining their own list. Manage a setting with `GET` or `PUT` on
+`/api/v1/me/notification-preferences/{in-app|email}/{type}`, using `{"enabled": true}` or
+`{"enabled": false}` for PUT. In-app defaults to enabled and email defaults to disabled. Settings
+are captured when the notification request is created; email opt-out and address verification are
+also rechecked before delivery. The former shift profile notification-settings and recipient endpoints
+have been removed; the legacy notification service must not be used as a delivery consumer.
+
+## Notification WebSocket
+
+An authenticated user calls `POST /api/v1/realtime/ticket`, opens a WebSocket to
+`/api/v1/realtime/ws`, then sends the returned `ticket` as its first text message within
+10 seconds. The server replies with `{"type":"ready"}` and emits
+`{"type":"notifications.changed"}` whenever the user's history changes. Fetch notification
+history on connection and whenever that message arrives. Reconnect with a new ticket after a
+disconnect; connections expire when the access token expires or after 15 minutes, whichever comes
+first. Tickets are single-use and expire after at most 60 seconds.
+Same-origin connections are allowed by default; set the comma-separated
+`shiftcontrol.platform.realtime.allowed-origins` for explicitly trusted separate frontend origins.
+Use HTTPS/WSS in deployment. Instances poll a shared database revision, so a connection on any
+instance can receive changes committed by another instance.
+
 ## Legacy RabbitMQ events
 
 Legacy event publishing is disabled by default. To enable it, set

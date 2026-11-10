@@ -53,6 +53,9 @@ public class UserAccountEntity {
     @Column(name = "email", length = 320)
     private String email;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified;
+
     @Size(max = 2048)
     @Column(name = "avatar_url", length = 2048)
     private String avatarUrl;

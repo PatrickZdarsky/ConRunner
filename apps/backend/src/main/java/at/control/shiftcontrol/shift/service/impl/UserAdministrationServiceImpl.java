@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,6 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
@@ -57,6 +61,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     private final SecurityHelper securityHelper;
     private final RoleDao roleDao;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final AssignmentService assignmentService;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
     private final AssignmentRepository assignmentRepository;
@@ -133,6 +138,9 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     public @NonNull UserEventDto updateEventUser(@NonNull String userId, @NonNull UserEventUpdateDto updateDto) {
         var volunteer = volunteerDao.getById(userId);
         assertPlansChanged(volunteer, updateDto);
+        var affectedPlans = new java.util.ArrayList<ShiftPlan>();
+        if (volunteer.getVolunteeringPlans() != null) affectedPlans.addAll(volunteer.getVolunteeringPlans());
+        if (volunteer.getPlanningPlans() != null) affectedPlans.addAll(volunteer.getPlanningPlans());
 
         var volunteerToAdd = toAddPlans(updateDto.getVolunteeringPlans(), volunteer.getVolunteeringPlans());
         var planningToAdd = toAddPlans(updateDto.getPlanningPlans(), volunteer.getPlanningPlans());
@@ -148,6 +156,8 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             updateDto.getPlanningPlans().stream(), updateDto.getVolunteeringPlans().stream())
             .map(ConvertUtil::idToLong)
             .collect(Collectors.toSet()));
+        affectedPlans.addAll(allPlans);
+        notifyUser(volunteer, affectedPlans, NotificationTypes.MEMBERSHIP_CHANGED);
         publisher.publishEvent(UserEvent.eventUpdate(volunteer, allPlans));
         return UserAssemblingMapper.toUserEventDto(volunteer, user);
     }
@@ -179,7 +189,9 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
         var user = userDirectoryService.getUserById(volunteer.getId());
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
-        publisher.publishEvent(UserEvent.planUpdate(volunteer, shiftPlanDao.getById(shiftPlanId)));
+        var updatedPlan = shiftPlanDao.getById(shiftPlanId);
+        notifyUser(volunteer, java.util.List.of(updatedPlan), NotificationTypes.ROLES_CHANGED);
+        publisher.publishEvent(UserEvent.planUpdate(volunteer, updatedPlan));
         return UserAssemblingMapper.toUserPlanDto(volunteer, user, shiftPlanId);
     }
 
@@ -198,6 +210,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             volunteer.getLockedPlans().add(plan);
         }
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_LOCKED);
         publisher.publishEvent(UserEvent.lock(volunteer, plans));
         return toUserEventDto(volunteer);
     }
@@ -214,6 +227,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             volunteer.getLockedPlans().remove(plan);
         }
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_UNLOCKED);
         publisher.publishEvent(UserEvent.unlock(volunteer, plans));
         return toUserEventDto(volunteer);
     }
@@ -233,11 +247,13 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             assignments.forEach(assignmentService::unassignInternal);
         }
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
+        notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_RESET);
         publisher.publishEvent(UserEvent.reset(volunteer, plans));
         return toUserEventDto(volunteer);
     }
 
     @Override
+    @Transactional
     public @NonNull Collection<UserPlanDto> bulkAddRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
         var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
@@ -250,11 +266,13 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             }
         }
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
+        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED));
         publisher.publishEvent(UserPlanBulkEvent.add(volunteers, roles, shiftPlan));
         return getUserPlanDtos(shiftPlanId, volunteers);
     }
 
     @Override
+    @Transactional
     public @NonNull Collection<UserPlanDto> bulkRemoveRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
         var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
@@ -263,6 +281,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             v.getRoles().removeAll(roles);
         }
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
+        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED));
         publisher.publishEvent(UserPlanBulkEvent.remove(volunteers, roles, shiftPlan));
         return getUserPlanDtos(shiftPlanId, volunteers);
     }
@@ -280,6 +299,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
                 }
             }
         }
+        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED));
         publisher.publishEvent(UserEventBulkEvent.add(volunteers, plans));
         return getUserEventDtos(volunteers);
     }
@@ -296,8 +316,15 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
                 Collections.emptySet()
             );
         }
+        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED));
         publisher.publishEvent(UserEventBulkEvent.remove(volunteers, plans));
         return getUserEventDtos(volunteers);
+    }
+
+    private void notifyUser(Volunteer volunteer, Collection<ShiftPlan> plans, String type) {
+        plans.stream().map(plan -> plan.getEvent().getId()).distinct().forEach(eventId ->
+            notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+                type, String.valueOf(eventId))));
     }
 
     private @NonNull Collection<UserPlanDto> getUserPlanDtos(long shiftPlanId, Collection<Volunteer> volunteers) {

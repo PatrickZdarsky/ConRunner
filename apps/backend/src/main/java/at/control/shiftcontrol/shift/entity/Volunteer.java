@@ -1,14 +1,12 @@
 package at.control.shiftcontrol.shift.entity;
 
 import java.util.Collection;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -40,13 +38,6 @@ public class Volunteer {
     )
     private Collection<Role> roles;
 
-    @OneToMany(
-        mappedBy = "user",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true
-    )
-    private Collection<NotificationSettings> notificationSettings;
-
     @ManyToMany
     @JoinTable(
         name = "shift_plan_volunteer_volunteering",
@@ -73,11 +64,10 @@ public class Volunteer {
 
     @Override
     public String toString() {
-        return "Volunteer{id='%s', roles=%s, notificationAssignments=%s, volunteeringPlans=%s, planningPlans=%s, lockedPlans=%s}"
+        return "Volunteer{id='%s', roles=%s, volunteeringPlans=%s, planningPlans=%s, lockedPlans=%s}"
             .formatted(
                 id,
                 roles,
-                notificationSettings,
                 volunteeringPlans.stream().map(ShiftPlan::getId).toList(),
                 planningPlans.stream().map(ShiftPlan::getId).toList(),
                 lockedPlans.stream().map(ShiftPlan::getId).toList()

@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -7,6 +9,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
+import at.control.shiftcontrol.identity.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
@@ -75,6 +80,8 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     private final SecurityHelper securityHelper;
     private final CurrentShiftActor currentActor;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
+    private final UserService identityUsers;
     private final UserAttributeProvider userAttributeProvider;
     private final UserLookupService userDirectoryService;
 
@@ -369,6 +376,18 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         // save updates
         shiftPlanInviteDao.save(invite);
         shiftPlanDao.save(shiftPlan);
+
+        if (joinedNow) {
+            var triggerId = java.util.UUID.randomUUID();
+            var eventId = String.valueOf(shiftPlan.getEvent().getId());
+            if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN && shiftPlan.getPlanPlanners() != null) {
+                shiftPlan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
+                    notificationRequests.request(new NotificationRequest(triggerId, java.util.UUID.fromString(id), NotificationTypes.PLAN_VOLUNTEER_JOINED, eventId)));
+            } else if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
+                identityUsers.getPlatformAdmins().forEach(admin ->
+                    notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, eventId)));
+            }
+        }
 
         //NOTIFY: publish events
         if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN) {

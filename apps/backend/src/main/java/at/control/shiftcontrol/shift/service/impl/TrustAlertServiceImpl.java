@@ -1,7 +1,13 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
+import at.control.shiftcontrol.identity.UserService;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +29,8 @@ public class TrustAlertServiceImpl implements TrustAlertService {
     private final TrustAlertDao trustAlertDao;
     private final TrustAlertAssemblingMapper trustAlertAssemblingMapper;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
+    private final UserService identityUsers;
 
     @Override
     @AdminOnly
@@ -34,9 +42,14 @@ public class TrustAlertServiceImpl implements TrustAlertService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @NonNull TrustAlertDisplayDto save(@NonNull TrustAlertDto alert) {
         TrustAlert entity = trustAlertAssemblingMapper.toEntity(alert);
         entity = trustAlertDao.save(entity);
+
+        var triggerId = java.util.UUID.randomUUID();
+        identityUsers.getPlatformAdmins().forEach(admin -> notificationRequests.request(
+            new NotificationRequest(triggerId, admin.getId(), NotificationTypes.TRUST_ALERT, "global")));
 
         publisher.publishEvent(TrustAlertEvent.alertReceived(entity));
 

@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -11,6 +13,8 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +69,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
     private final PositionSlotAssemblingMapper positionSlotAssemblingMapper;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final TradeMapper tradeMapper;
     private final ShiftDao shiftDao;
 
@@ -291,6 +296,9 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
 
         trades = assignmentSwitchRequestDao.saveAll(trades);
 
+        trades.forEach(trade -> notificationRequests.request(new NotificationRequest(
+            java.util.UUID.randomUUID(), java.util.UUID.fromString(trade.getRequestedAssignment().getAssignedVolunteer().getId()),
+            NotificationTypes.TRADE_REQUESTED, String.valueOf(trade.getRequestedAssignment().getPositionSlot().getShift().getShiftPlan().getEvent().getId()))));
         trades.forEach(trade -> publisher.publishEvent(TradeEvent.tradeCanceled(trade)));
         return tradeMapper.toDto(trades);
     }
@@ -344,12 +352,16 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
             trade.getOfferingAssignment().getAssignedVolunteer()); // other user
 
         // update assignments
+        var offeringUserId = java.util.UUID.fromString(trade.getOfferingAssignment().getAssignedVolunteer().getId());
+        var eventId = String.valueOf(trade.getOfferingAssignment().getPositionSlot().getShift().getShiftPlan().getEvent().getId());
         AssignmentSwitchRequest executedTrade = assignmentService.executeTrade(trade);
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), offeringUserId, NotificationTypes.TRADE_ACCEPTED, eventId));
 
         return tradeMapper.toDto(executedTrade);
     }
 
     @Override
+    @Transactional
     public @NonNull TradeDto declineTrade(long id, @NonNull String currentUserId) {
         // get trade
         AssignmentSwitchRequest trade = assignmentSwitchRequestDao.getById(id);
@@ -367,6 +379,9 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         trade.setStatus(TradeStatus.REJECTED);
 
         trade = assignmentSwitchRequestDao.save(trade);
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
+            java.util.UUID.fromString(trade.getOfferingAssignment().getAssignedVolunteer().getId()), NotificationTypes.TRADE_DECLINED,
+            String.valueOf(trade.getOfferingAssignment().getPositionSlot().getShift().getShiftPlan().getEvent().getId())));
         publisher.publishEvent(TradeEvent.tradeDeclined(trade));
         return tradeMapper.toDto(trade);
     }

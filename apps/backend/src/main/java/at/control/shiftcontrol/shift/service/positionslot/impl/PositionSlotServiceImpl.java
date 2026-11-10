@@ -1,9 +1,13 @@
 package at.control.shiftcontrol.shift.service.positionslot.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +64,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     private final PositionSlotAssemblingMapper positionSlotAssemblingMapper;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
 
     @Override
@@ -103,6 +108,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public AssignmentDto joinRequest(@NonNull Long positionSlotId, @NonNull String currentUserId) {
         // get position slot and volunteer
         PositionSlot positionSlot = positionSlotDao.getById(positionSlotId);
@@ -123,12 +129,15 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         Assignment joinRequest = Assignment.of(positionSlot, volunteer, AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
         joinRequest = assignmentDao.save(joinRequest);
 
+        notifyPlanners(positionSlot, NotificationTypes.ASSIGNMENT_JOIN_REQUESTED);
+
         // publish event
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestCreated(positionSlot, currentUserId));
         return assignmentAssemblingMapper.assemble(joinRequest);
     }
 
     @Override
+    @Transactional
     public void leaveRequest(@NonNull Long positionSlotId, @NonNull String currentUserId) {
         // get assignment
         Optional<Assignment> existingAssignment = assignmentDao.findAssignmentForPositionSlotAndUser(positionSlotId, currentUserId);
@@ -143,6 +152,8 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         // update assignment
         assignment.setStatus(AssignmentStatus.AUCTION_REQUEST_FOR_UNASSIGN);
         assignmentDao.save(assignment);
+
+        notifyPlanners(assignment.getPositionSlot(), NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED);
 
         // publish event
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotRequestLeave(assignment.getPositionSlot(), currentUserId));
@@ -181,6 +192,15 @@ public class PositionSlotServiceImpl implements PositionSlotService {
 
         // publish event
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestWithdrawn(assignment.getPositionSlot(), currentUserId));
+    }
+
+    private void notifyPlanners(PositionSlot slot, String type) {
+        var plan = slot.getShift().getShiftPlan();
+        var triggerId = java.util.UUID.randomUUID();
+        if (plan.getPlanPlanners() == null) return;
+        plan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
+            notificationRequests.request(new NotificationRequest(triggerId, java.util.UUID.fromString(id),
+                type, String.valueOf(plan.getEvent().getId()))));
     }
 
     private void assertJoinPossible(PositionSlot positionSlot, Volunteer volunteer) {

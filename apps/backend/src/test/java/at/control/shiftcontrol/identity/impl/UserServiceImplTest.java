@@ -30,6 +30,15 @@ class UserServiceImplTest {
     private UserServiceImpl service;
 
     @Test
+    void getPlatformAdminsExcludesSuspendedAccounts() {
+        var active = account(UUID.randomUUID(), "active", "active@example.com");
+        var suspended = account(UUID.randomUUID(), "suspended", "suspended@example.com");
+        suspended.setStatus(UserAccountStatus.SUSPENDED);
+        when(userAccountRepository.findAllPlatformAdminsWithExternalIdentities()).thenReturn(List.of(active, suspended));
+        assertEquals(List.of(active.getId()), service.getPlatformAdmins().stream().map(User::getId).toList());
+    }
+
+    @Test
     void getUser_resolvesAnInternalUserIdAndMapsTheAccount() {
         UUID userId = UUID.randomUUID();
         UserAccountEntity account = account(userId, "pat", "pat@example.com");

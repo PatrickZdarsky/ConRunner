@@ -68,6 +68,7 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
             .status(UserAccountStatus.ACTIVE)
             .username(username)
             .email(blankToNull(jwtToken.email()))
+            .emailVerified(blankToNull(jwtToken.email()) != null && jwtToken.emailVerified())
             .avatarUrl(blankToNull(jwtToken.avatarUrl()))
             .createdAt(now)
             .updatedAt(now)
@@ -90,6 +91,11 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
         changed |= setIfPresentAndChanged(
             jwtToken.username(), userAccount.getUsername(), userAccount::setUsername);
         changed |= setIfPresentAndChanged(jwtToken.email(), userAccount.getEmail(), userAccount::setEmail);
+        boolean emailVerified = blankToNull(jwtToken.email()) != null && jwtToken.emailVerified();
+        if (userAccount.isEmailVerified() != emailVerified) {
+            userAccount.setEmailVerified(emailVerified);
+            changed = true;
+        }
         changed |= setIfPresentAndChanged(jwtToken.avatarUrl(), userAccount.getAvatarUrl(), userAccount::setAvatarUrl);
         return changed;
     }

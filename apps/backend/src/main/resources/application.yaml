@@ -1,6 +1,11 @@
 spring:
   application:
     name: shiftcontrol
+  mail:
+    properties:
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
 shiftcontrol:
   events:

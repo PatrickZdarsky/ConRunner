@@ -1,9 +1,14 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.util.Collection;
 import java.util.HashSet;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 
 import lombok.NonNull;
@@ -37,6 +42,7 @@ public class RoleServiceImpl implements RoleService {
     private final VolunteerDao volunteerDao;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final UserLookupService userDirectoryService;
 
     @Override
@@ -102,6 +108,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public @org.jspecify.annotations.NonNull VolunteerDto createUserRoleAssignment(String userId, @org.jspecify.annotations.NonNull UserRoleAssignmentAssignDto assignDto) {
         Role role = roleDao.getById(Long.valueOf(assignDto.getRoleId()));
         Volunteer volunteer = volunteerDao.getById(userId);
@@ -117,11 +124,15 @@ public class RoleServiceImpl implements RoleService {
         volunteer.getRoles().add(role);
         volunteerDao.save(volunteer);
 
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+            NotificationTypes.ROLE_ASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
+
         publisher.publishEvent(RoleVolunteerEvent.roleAssigned(role, volunteer.getId()));
         return VolunteerAssemblingMapper.toDtoFromUser(userDirectoryService.getUserById(volunteer.getId()));
     }
 
     @Override
+    @Transactional
     public void deleteUserRoleAssignment(String userId, long roleId) {
         Role role = roleDao.getById(roleId);
         Volunteer volunteer = volunteerDao.getById(userId);
@@ -135,5 +146,7 @@ public class RoleServiceImpl implements RoleService {
 
         publisher.publishEvent(RoleVolunteerEvent.roleUnassigned(role, volunteer.getId()));
         volunteerDao.save(volunteer);
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+            NotificationTypes.ROLE_UNASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
     }
 }

@@ -1,9 +1,13 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.util.Collection;
 import java.util.List;
 
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +41,10 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentDao assignmentDao;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
 
     @Override
+    @Transactional
     public @NonNull Assignment claimAuction(@NonNull Assignment auction, @NonNull Volunteer newVolunteer, @NonNull PositionSlotRequestDto requestDto) {
         String oldVolunteerId = auction.getAssignedVolunteer().getId();
         Assignment oldAuction = AssignmentAssemblingMapper.shallowCopy(auction);
@@ -47,6 +53,9 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         // update reward points
         rewardPointsService.onAssignmentReassignedAuction(oldAuction, auction, requestDto.getAcceptedRewardPointsConfigHash());
+
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(oldVolunteerId),
+            NotificationTypes.AUCTION_CLAIMED, String.valueOf(auction.getPositionSlot().getShift().getShiftPlan().getEvent().getId())));
 
         publisher.publishEvent(ClaimedAuctionEvent.auctionClaimed(auction, oldAuction, oldVolunteerId));
         return auction;
@@ -181,8 +190,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         Collection<Assignment> requests = assignmentDao.findSignupRequestsByShiftPlanId(shiftPlan.getId());
 
         // publish events
-        requests.forEach(request ->
-            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId())));
+        requests.forEach(request -> {
+            notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
+                java.util.UUID.fromString(request.getAssignedVolunteer().getId()), NotificationTypes.ASSIGNMENT_JOIN_DECLINED,
+                String.valueOf(shiftPlan.getEvent().getId())));
+            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId()));
+        });
 
         assignmentDao.deleteAll(requests);
     }

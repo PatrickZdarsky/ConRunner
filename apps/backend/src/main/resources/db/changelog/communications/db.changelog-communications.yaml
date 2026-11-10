@@ -1,0 +1,225 @@
+databaseChangeLog:
+  - changeSet:
+      id: communications-001-request
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_request
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints: {primaryKey: true, nullable: false}
+              - column:
+                  name: trigger_id
+                  type: UUID
+                  constraints: {nullable: false}
+              - column:
+                  name: recipient_id
+                  type: UUID
+                  constraints: {nullable: false}
+              - column:
+                  name: notification_type
+                  type: VARCHAR(96)
+                  constraints: {nullable: false}
+              - column:
+                  name: template_data
+                  type: TEXT
+                  constraints: {nullable: false}
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints: {nullable: false}
+        - addUniqueConstraint:
+            tableName: communications_request
+            columnNames: trigger_id, recipient_id, notification_type
+            constraintName: uq_communications_request_trigger_recipient_type
+  - changeSet:
+      id: communications-002-request-processing
+      author: shiftcontrol
+      changes:
+        - addColumn:
+            tableName: communications_request
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(16)
+                  defaultValue: PENDING
+                  constraints: {nullable: false}
+              - column:
+                  name: attempts
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints: {nullable: false}
+              - column:
+                  name: available_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints: {nullable: false}
+              - column:
+                  name: lease_id
+                  type: UUID
+              - column:
+                  name: lease_until
+                  type: TIMESTAMP WITH TIME ZONE
+        - createIndex:
+            tableName: communications_request
+            indexName: ix_communications_request_pending
+            columns:
+              - column: {name: status}
+              - column: {name: available_at}
+  - changeSet:
+      id: communications-003-notification-history
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_notification
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints: {primaryKey: true, nullable: false}
+              - column:
+                  name: request_id
+                  type: UUID
+                  constraints: {nullable: false, unique: true, uniqueConstraintName: uq_communications_notification_request}
+              - column:
+                  name: recipient_id
+                  type: UUID
+                  constraints: {nullable: false}
+              - column:
+                  name: notification_type
+                  type: VARCHAR(96)
+                  constraints: {nullable: false}
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints: {nullable: false}
+              - column:
+                  name: body
+                  type: VARCHAR(2048)
+                  constraints: {nullable: false}
+              - column:
+                  name: link_target
+                  type: VARCHAR(2048)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints: {nullable: false}
+              - column:
+                  name: read_at
+                  type: TIMESTAMP WITH TIME ZONE
+        - addForeignKeyConstraint:
+            baseTableName: communications_notification
+            baseColumnNames: request_id
+            referencedTableName: communications_request
+            referencedColumnNames: id
+            constraintName: fk_communications_notification_request
+        - createIndex:
+            tableName: communications_notification
+            indexName: ix_communications_notification_recipient_created
+            columns:
+              - column: {name: recipient_id}
+              - column: {name: created_at, descending: true}
+  - changeSet:
+      id: communications-004-email-preference
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_email_preference
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints: {primaryKey: true, nullable: false}
+              - column:
+                  name: recipient_id
+                  type: UUID
+                  constraints: {nullable: false}
+              - column:
+                  name: notification_type
+                  type: VARCHAR(96)
+                  constraints: {nullable: false}
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  constraints: {nullable: false}
+        - addUniqueConstraint:
+            tableName: communications_email_preference
+            columnNames: recipient_id, notification_type
+            constraintName: uq_communications_email_preference_user_type
+  - changeSet:
+      id: communications-005-email-delivery
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_email_delivery
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: request_id, type: UUID, constraints: {nullable: false, unique: true, uniqueConstraintName: uq_communications_email_delivery_request}}
+              - column: {name: recipient_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: notification_type, type: VARCHAR(96), constraints: {nullable: false}}
+              - column: {name: title, type: VARCHAR(255), constraints: {nullable: false}}
+              - column: {name: body, type: VARCHAR(2048), constraints: {nullable: false}}
+              - column: {name: link_target, type: VARCHAR(2048)}
+              - column: {name: status, type: VARCHAR(16), constraints: {nullable: false}}
+              - column: {name: attempts, type: INTEGER, defaultValueNumeric: 0, constraints: {nullable: false}}
+              - column: {name: available_at, type: TIMESTAMP WITH TIME ZONE, defaultValueComputed: CURRENT_TIMESTAMP, constraints: {nullable: false}}
+              - column: {name: lease_id, type: UUID}
+              - column: {name: lease_until, type: TIMESTAMP WITH TIME ZONE}
+        - addForeignKeyConstraint:
+            baseTableName: communications_email_delivery
+            baseColumnNames: request_id
+            referencedTableName: communications_request
+            referencedColumnNames: id
+            constraintName: fk_communications_email_delivery_request
+        - createIndex:
+            tableName: communications_email_delivery
+            indexName: ix_communications_email_delivery_pending
+            columns:
+              - column: {name: status}
+              - column: {name: available_at}
+  - changeSet:
+      id: communications-006-request-email-choice
+      author: shiftcontrol
+      changes:
+        - addColumn:
+            tableName: communications_request
+            columns:
+              - column:
+                  name: email_requested
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints: {nullable: false}
+  - changeSet:
+      id: communications-008-notification-revision
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_notification_revision
+            columns:
+              - column: {name: recipient_id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: revision, type: BIGINT, constraints: {nullable: false}}
+  - changeSet:
+      id: communications-009-in-app-preference
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_in_app_preference
+            columns:
+              - column: {name: id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: recipient_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: notification_type, type: VARCHAR(96), constraints: {nullable: false}}
+              - column: {name: enabled, type: BOOLEAN, constraints: {nullable: false}}
+        - addUniqueConstraint:
+            tableName: communications_in_app_preference
+            columnNames: recipient_id, notification_type
+            constraintName: uq_communications_in_app_preference_user_type
+        - addColumn:
+            tableName: communications_request
+            columns:
+              - column:
+                  name: in_app_requested
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints: {nullable: false}

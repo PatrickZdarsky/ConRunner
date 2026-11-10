@@ -1,10 +1,14 @@
 package at.control.shiftcontrol.shift.service.positionslot.impl;
 
+import at.control.shiftcontrol.communications.api.NotificationTypes;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.springframework.context.ApplicationEventPublisher;
+import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationRequests;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +51,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
     private final PositionSlotDao positionSlotDao;
     private final VolunteerDao volunteerDao;
     private final ApplicationEventPublisher publisher;
+    private final NotificationRequests notificationRequests;
     private final EligibilityService eligibilityService;
     private final UserLookupService userDirectoryService;
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
@@ -72,6 +77,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             case ACCEPTED, AUCTION -> throw new IllegalArgumentException("Assignment is not acceptable");
             case AUCTION_REQUEST_FOR_UNASSIGN -> {
                 assignmentService.unassignInternal(assignment);
+                notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_LEAVE_ACCEPTED);
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestAccepted(assignment.getPositionSlot(), userId));
             }
             case REQUEST_FOR_ASSIGNMENT -> {
@@ -79,6 +85,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
                     throw new IllegalArgumentException("Slot is already full");
                 }
                 assignmentService.accept(assignment);
+                notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_JOIN_ACCEPTED);
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestAccepted(assignment.getPositionSlot(), userId));
             }
             default -> throw new IllegalStateException("Unexpected value: " + assignment.getStatus());
@@ -95,14 +102,21 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             case ACCEPTED, AUCTION -> throw new IllegalArgumentException("Assignment is not declineable");
             case AUCTION_REQUEST_FOR_UNASSIGN -> {
                 acceptAssignment(assignment);
+                notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_LEAVE_DECLINED);
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestDeclined(assignment.getPositionSlot(), userId));
             }
             case REQUEST_FOR_ASSIGNMENT -> {
                 assignmentDao.delete(assignment);
+                notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_JOIN_DECLINED);
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDeclined(assignment.getPositionSlot(), userId));
             }
             default -> throw new IllegalStateException("Unexpected value: " + assignment.getStatus());
         }
+    }
+
+    private void notifyVolunteer(PositionSlot slot, String userId, String type) {
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(userId),
+            type, String.valueOf(slot.getShift().getShiftPlan().getEvent().getId())));
     }
 
     @Override
