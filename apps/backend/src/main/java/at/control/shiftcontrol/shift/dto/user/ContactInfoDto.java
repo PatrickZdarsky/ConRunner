@@ -6,19 +6,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class ContactInfoDto {
     @NotNull
-    private String userId;
+    private UUID userId;
 
     @NotNull
-    private String firstName;
-
-    @NotNull
-    private String lastName;
+    private String name;
 
     @NotNull
     private String email;

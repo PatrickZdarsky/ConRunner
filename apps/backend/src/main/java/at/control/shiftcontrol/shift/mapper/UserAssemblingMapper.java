@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import at.control.shiftcontrol.identity.User;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -75,12 +76,11 @@ public class UserAssemblingMapper {
             .toList();
     }
 
-    public static ContactInfoDto toContactInfoDto(UserInfo user) {
+    public static ContactInfoDto toContactInfoDto(User user) {
         return ContactInfoDto.builder()
-            .userId(user.id())
-            .firstName(user.firstName())
-            .lastName(user.lastName())
-            .email(user.email())
+            .userId(user.getId())
+            .name(user.getUsername())
+            .email(user.getEmail())
             .build();
     }
 

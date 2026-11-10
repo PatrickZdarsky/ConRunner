@@ -8,7 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import lombok.NonNull;
@@ -43,8 +47,6 @@ import at.control.shiftcontrol.shift.mapper.ShiftPlanMapper;
 import at.control.shiftcontrol.shift.mapper.UserAssemblingMapper;
 import at.control.shiftcontrol.shift.service.StatisticService;
 import at.control.shiftcontrol.shift.service.event.EventService;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 import at.control.shiftcontrol.shift.util.SocialLinksParser;
 
@@ -58,7 +60,7 @@ public class EventServiceImpl implements EventService {
     private final CurrentShiftActor currentActor;
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
 
     @Override
     public EventDto getEvent(long eventId) {
@@ -117,11 +119,12 @@ public class EventServiceImpl implements EventService {
         Collection<PlanVolunteerIdRow> rows = eventDao.getPlannersForEventAndUser(eventId, userId);
 
         // Resolve all planner contacts from Shiftservice's local user directory.
-        Set<String> allPlannerIds =
+        Set<UUID> allPlannerIds =
             rows.stream()
                 .map(PlanVolunteerIdRow::getVolunteerId)
+                .map(UUID::fromString)
                 .collect(Collectors.toSet());
-        var planners = userDirectoryService.getUserByIds(allPlannerIds);
+        var planners = userService.getUsers(allPlannerIds);
 
         // create maps to lookup userIds per plan, planNames and planner-userRepresentations
         Map<Long, List<String>> volunteerIdsByPlan =
@@ -141,10 +144,10 @@ public class EventServiceImpl implements EventService {
                     PlanVolunteerIdRow::getPlanName,
                     (a, b) -> a
                 ));
-        Map<String, ContactInfoDto> contactInfoById =
+        Map<UUID, ContactInfoDto> contactInfoById =
             planners.stream()
                 .collect(Collectors.toMap(
-                    UserInfo::id,
+                    User::getId,
                     UserAssemblingMapper::toContactInfoDto
                 ));
 
