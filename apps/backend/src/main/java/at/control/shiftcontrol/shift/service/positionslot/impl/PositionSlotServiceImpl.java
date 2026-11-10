@@ -79,7 +79,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     public AssignmentDto join(@NonNull Long positionSlotId, @NonNull String currentUserId, @NonNull PositionSlotRequestDto requestDto) {
         // get position slot and volunteer
         PositionSlot positionSlot = positionSlotDao.getById(positionSlotId);
-        Volunteer volunteer = volunteerDao.getById(currentUserId);
+        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(currentUserId));
 
         // check if plan is locked or supervised
         LockStatusHelper.assertIsSelfSignUpWithMessage(positionSlot, "join");
@@ -112,7 +112,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     public AssignmentDto joinRequest(@NonNull Long positionSlotId, @NonNull String currentUserId) {
         // get position slot and volunteer
         PositionSlot positionSlot = positionSlotDao.getById(positionSlotId);
-        Volunteer volunteer = volunteerDao.getById(currentUserId);
+        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(currentUserId));
 
         // check if plan is supervised
         LockStatusHelper.assertIsSupervisedWithMessage(positionSlot, "join request");
@@ -122,7 +122,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
 
         // create assignment
         Optional<Assignment> existingRequest = assignmentDao.findAssignmentForPositionSlotAndUser(
-            positionSlot.getId(), volunteer.getId());
+            positionSlot.getId(), volunteer.getId().toString());
         if (existingRequest.isPresent()) {
             throw new IllegalStateException("You already joined or requested join for this position!");
         }
@@ -199,7 +199,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         var triggerId = java.util.UUID.randomUUID();
         if (plan.getPlanPlanners() == null) return;
         plan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
-            notificationRequests.request(new NotificationRequest(triggerId, java.util.UUID.fromString(id),
+            notificationRequests.request(new NotificationRequest(triggerId, id,
                 type, String.valueOf(plan.getEvent().getId()))));
     }
 
@@ -262,7 +262,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         // check if current user is volunteer in plan
         securityHelper.assertUserIsVolunteer(auction.getPositionSlot(), true);
         // get current user (volunteer)
-        Volunteer currentUser = volunteerDao.getById(currentUserId);
+        Volunteer currentUser = volunteerDao.getById(java.util.UUID.fromString(currentUserId));
         // check for trade not necessary
         // check if user is eligible for the auction position slot
         eligibilityService.validateSignUpStateForAuction(auction.getPositionSlot(), currentUser);
@@ -277,7 +277,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     @Override
     public AssignmentDto cancelAuction(@NonNull Long positionSlotId, @NonNull String userId) {
         Assignment assignment = assignmentDao.getAssignmentForPositionSlotAndUser(positionSlotId, userId);
-        if (!assignment.getAssignedVolunteer().getId().equals(userId)) {
+        if (!assignment.getAssignedVolunteer().getId().toString().equals(userId)) {
             securityHelper.assertUserIsPlanner(assignment.getPositionSlot());
         } else {
             securityHelper.assertUserIsVolunteer(assignment.getPositionSlot(), true);

@@ -30,7 +30,7 @@ public class VolunteerPart {
     @NonNull
     public static VolunteerPart of(@NonNull Volunteer volunteer) {
         return new VolunteerPart(
-            volunteer.getId(),
+            volunteer.getId().toString(),
             volunteer.getPlanningPlans().stream().map(shiftPlan -> String.valueOf(shiftPlan.getId())).toList(),
             volunteer.getLockedPlans().stream().map(shiftPlan -> String.valueOf(shiftPlan.getId())).toList(),
             volunteer.getVolunteeringPlans().stream().map(shiftPlan -> String.valueOf(shiftPlan.getId())).toList(),

@@ -16,18 +16,18 @@ import at.control.shiftcontrol.shift.lib.type.TimeConstraintType;
 import at.control.shiftcontrol.shift.dao.TimeConstraintDao;
 import at.control.shiftcontrol.shift.dto.assignment.AssignmentContextDto;
 import at.control.shiftcontrol.shift.dto.assignment.AssignmentDto;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 
 @RequiredArgsConstructor
 @Service
 public class AssignmentAssemblingMapper {
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
     private final PositionSlotContextAssemblingMapper positionSlotContextAssemblingMapper;
     private final TimeConstraintDao timeConstraintDao;
 
     public AssignmentDto assemble(@NonNull Assignment assignment) {
-        return assemble(assignment, userDirectoryService.getUserById(assignment.getAssignedVolunteer().getId()));
+        return assemble(assignment, userService.getUser(assignment.getAssignedVolunteer().getId()));
     }
 
     public Collection<AssignmentDto> assemble(Collection<Assignment> assignments) {
@@ -35,26 +35,26 @@ public class AssignmentAssemblingMapper {
             return List.of();
         }
 
-        Map<String, UserInfo> usersById = userDirectoryService.getUserByIds(
+        Map<java.util.UUID, User> usersById = userService.getUsers(
             assignments.stream()
                 .map(Assignment::getAssignedVolunteer)
                 .map(volunteer -> volunteer.getId())
                 .distinct()
                 .toList()
-        ).stream().collect(Collectors.toMap(UserInfo::id, Function.identity()));
+        ).stream().collect(Collectors.toMap(User::getId, Function.identity()));
 
         return assignments.stream()
             .map(assignment -> assemble(
                 assignment,
                 usersById.getOrDefault(
                     assignment.getAssignedVolunteer().getId(),
-                    fallbackUserInfo(assignment.getAssignedVolunteer().getId())
+                    fallbackUser(assignment.getAssignedVolunteer().getId())
                 )
             ))
             .toList();
     }
 
-    private AssignmentDto assemble(@NonNull Assignment assignment, UserInfo user) {
+    private AssignmentDto assemble(@NonNull Assignment assignment, User user) {
         var hasEmergencyConstraint = timeConstraintDao.findByAssignmentIdAndType(assignment.getId(), TimeConstraintType.EMERGENCY)
             .isPresent();
 
@@ -93,7 +93,7 @@ public class AssignmentAssemblingMapper {
         return assignments.stream().map(this::toContextDto).toList();
     }
 
-    private UserInfo fallbackUserInfo(String userId) {
-        return new UserInfo(userId, userId, "", "", "", null, false);
+    private User fallbackUser(java.util.UUID userId) {
+        return User.builder().id(userId).username(userId.toString()).email("").build();
     }
 }

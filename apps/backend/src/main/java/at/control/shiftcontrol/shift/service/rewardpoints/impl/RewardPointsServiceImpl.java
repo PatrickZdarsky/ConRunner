@@ -38,8 +38,8 @@ import at.control.shiftcontrol.shift.mapper.RewardPointsMapper;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsCalculator;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsLedgerService;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsService;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
     private final VolunteerDao volunteerDao;
     private final RewardPointsTransactionDao rewardPointsTransactionDao;
 
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
     private final ApplicationEventPublisher publisher;
 
     private final UniqueCodeGenerator uniqueCodeGenerator;
@@ -81,7 +81,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
     private void onAssignmentJoined(@NonNull Assignment assignment) {
         RewardPointsSnapshotDto snapshot = calculator.calculateForAssignment(assignment.getPositionSlot());
 
-        String sourceKey = sourceKeyJoin(assignment.getPositionSlot().getId(), assignment.getAssignedVolunteer().getId());
+        String sourceKey = sourceKeyJoin(assignment.getPositionSlot().getId(), assignment.getAssignedVolunteer().getId().toString());
 
         var result = ledgerService.bookEarn(RewardPointsMapper.toRewardPointsTransactionDto(
             assignment,
@@ -107,7 +107,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
         PositionSlot slot = assignment.getPositionSlot();
         int pointsSnapshot = assignment.getAcceptedRewardPoints();
 
-        String sourceKey = sourceKeyLeave(slot.getId(), assignment.getAssignedVolunteer().getId());
+        String sourceKey = sourceKeyLeave(slot.getId(), assignment.getAssignedVolunteer().getId().toString());
 
         var result = ledgerService.bookReversal(RewardPointsMapper.toRewardPointsTransactionDto(
             assignment,
@@ -136,8 +136,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
         String reversalKey = sourceKeyReassignReversal(
             slot.getId(),
-            oldAssignment.getAssignedVolunteer().getId(),
-            newAssignment.getAssignedVolunteer().getId()
+            oldAssignment.getAssignedVolunteer().getId().toString(),
+            newAssignment.getAssignedVolunteer().getId().toString()
         );
 
         var unassignmentResult = ledgerService.bookReversal(RewardPointsMapper.toRewardPointsTransactionDto(
@@ -158,8 +158,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
         String earnKey = sourceKeyReassignEarn(
             slot.getId(),
-            oldAssignment.getAssignedVolunteer().getId(),
-            newAssignment.getAssignedVolunteer().getId()
+            oldAssignment.getAssignedVolunteer().getId().toString(),
+            newAssignment.getAssignedVolunteer().getId().toString()
         );
 
         var assignmentResult = ledgerService.bookEarn(RewardPointsMapper.toRewardPointsTransactionDto(
@@ -184,8 +184,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
         // create ledger entries for both reversals and earnings for both assignments
         String reversalKeyOffering = sourceKeyReassignReversal(
             offeringAssignment.getPositionSlot().getId(),
-            requestedAssignment.getAssignedVolunteer().getId(),
-            offeringAssignment.getAssignedVolunteer().getId()
+            requestedAssignment.getAssignedVolunteer().getId().toString(),
+            offeringAssignment.getAssignedVolunteer().getId().toString()
         );
 
         // take away old points
@@ -198,8 +198,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
         String earnKeyOffering = sourceKeyReassignEarn(
             offeringAssignment.getPositionSlot().getId(),
-            requestedAssignment.getAssignedVolunteer().getId(),
-            offeringAssignment.getAssignedVolunteer().getId()
+            requestedAssignment.getAssignedVolunteer().getId().toString(),
+            offeringAssignment.getAssignedVolunteer().getId().toString()
         );
 
         // give new points
@@ -213,8 +213,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
         String reversalKeyRequested = sourceKeyReassignReversal(
             requestedAssignment.getPositionSlot().getId(),
-            offeringAssignment.getAssignedVolunteer().getId(),
-            requestedAssignment.getAssignedVolunteer().getId()
+            offeringAssignment.getAssignedVolunteer().getId().toString(),
+            requestedAssignment.getAssignedVolunteer().getId().toString()
         );
 
         // take away old points
@@ -227,8 +227,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
         String earnKeyRequested = sourceKeyReassignEarn(
             requestedAssignment.getPositionSlot().getId(),
-            offeringAssignment.getAssignedVolunteer().getId(),
-            requestedAssignment.getAssignedVolunteer().getId()
+            offeringAssignment.getAssignedVolunteer().getId().toString(),
+            requestedAssignment.getAssignedVolunteer().getId().toString()
         );
 
         ledgerService.bookEarn(RewardPointsMapper.toRewardPointsTransactionDto(
@@ -309,18 +309,17 @@ public class RewardPointsServiceImpl implements RewardPointsService {
             exportDto.setEventFinished(isEventFinished);
 
             var volunteersOfEvent = volunteerDao.findAllByEvent(event.getId());
-            Map<String, UserInfo> usersById = userDirectoryService.getUserByIds(
+            Map<java.util.UUID, User> usersById = userService.getUsers(
                 volunteersOfEvent.stream().map(Volunteer::getId).toList()
-            ).stream().collect(java.util.stream.Collectors.toMap(UserInfo::id, Function.identity()));
+            ).stream().collect(java.util.stream.Collectors.toMap(User::getId, Function.identity()));
             var volunteerPointsDtos = new ArrayList<VolunteerPointsDto>();
             for (var volunteer : volunteersOfEvent) {
                 var volunteerPointsDto = new VolunteerPointsDto();
-                volunteerPointsDto.setVolunteerId(volunteer.getId());
+                volunteerPointsDto.setVolunteerId(volunteer.getId().toString());
                 var directoryUser = usersById.get(volunteer.getId());
-                volunteerPointsDto.setFirstName(directoryUser.firstName());
-                volunteerPointsDto.setLastName(directoryUser.lastName());
-                volunteerPointsDto.setEmail(directoryUser.email());
-                var pointsForEvent = rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(volunteer.getId(), event.getId());
+                volunteerPointsDto.setName(directoryUser.getUsername());
+                volunteerPointsDto.setEmail(directoryUser.getEmail());
+                var pointsForEvent = rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(volunteer.getId().toString(), event.getId());
                 volunteerPointsDto.setRewardPoints((int) pointsForEvent);
 
                 volunteerPointsDtos.add(volunteerPointsDto);

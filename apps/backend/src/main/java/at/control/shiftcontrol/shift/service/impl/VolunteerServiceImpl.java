@@ -17,7 +17,7 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     private @NonNull Volunteer createVolunteer(@NonNull String userId) {
         var newVolunteer = Volunteer.builder()
-            .id(userId)
+            .id(java.util.UUID.fromString(userId))
             .planningPlans(new HashSet<>())
             .volunteeringPlans(new HashSet<>())
             .lockedPlans(new HashSet<>())
@@ -27,12 +27,12 @@ public class VolunteerServiceImpl implements VolunteerService {
             return volunteerDao.save(newVolunteer);
         } catch (DataIntegrityViolationException e) {
             // another concurrent request created the same volunteer in the meantime
-            return volunteerDao.getById(userId);
+            return volunteerDao.getById(java.util.UUID.fromString(userId));
         }
     }
 
     @Override
     public @NonNull Volunteer getOrCreate(@NonNull String userId) {
-        return volunteerDao.findById(userId).orElseGet(() -> createVolunteer(userId));
+        return volunteerDao.findById(java.util.UUID.fromString(userId)).orElseGet(() -> createVolunteer(userId));
     }
 }

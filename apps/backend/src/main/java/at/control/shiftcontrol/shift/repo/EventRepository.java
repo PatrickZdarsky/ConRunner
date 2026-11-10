@@ -32,7 +32,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
                   WHERE u.id = :userId
               )
         """)
-    Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, String userId);
+    Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, java.util.UUID userId);
 
     @Query("""
         SELECT DISTINCT e
@@ -60,7 +60,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
               AND pp.event = e
         )
     """)
-    Collection<Event> getAllOpenEventsForUser(String userId, Instant now);
+    Collection<Event> getAllOpenEventsForUser(java.util.UUID userId, Instant now);
 
     @Query("SELECT e FROM Event e WHERE e.name = :name")
     Optional<Event> findByName(String name);

@@ -55,7 +55,7 @@ public class ShiftPlanDaoImpl implements ShiftPlanDao {
 
     @Override
     public Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(String userId, String eventId) {
-        return shiftPlanRepository.findAllUserRelatedShiftPlansInEvent(userId, eventId);
+        return shiftPlanRepository.findAllUserRelatedShiftPlansInEvent(java.util.UUID.fromString(userId), eventId);
     }
 
     @Override

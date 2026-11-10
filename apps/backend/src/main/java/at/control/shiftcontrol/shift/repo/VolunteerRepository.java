@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.repo;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,8 +12,8 @@ import org.springframework.stereotype.Repository;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 
 @Repository
-public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
-    Optional<Volunteer> findById(String userId);
+public interface VolunteerRepository extends JpaRepository<Volunteer, UUID> {
+    Optional<Volunteer> findById(UUID userId);
 
     Optional<Volunteer> findByCalendarShareId(String calendarShareId);
 
@@ -46,7 +47,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             join v.volunteeringPlans sp
             where v.id = :volunteerId and sp.id = :shiftPlanId
         """)
-    boolean isVolunteerInShiftPlan(@Param("volunteerId") String volunteerId,
+    boolean isVolunteerInShiftPlan(@Param("volunteerId") UUID volunteerId,
                                    @Param("shiftPlanId") long shiftPlanId);
 
     @Query("""
@@ -55,7 +56,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             join v.planningPlans sp
             where v.id = :volunteerId and sp.id = :shiftPlanId
         """)
-    boolean isPlannerInShiftPlan(@Param("volunteerId") String volunteerId,
+    boolean isPlannerInShiftPlan(@Param("volunteerId") UUID volunteerId,
                                  @Param("shiftPlanId") long shiftPlanId);
 
     @Query("""
@@ -64,7 +65,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             join v.roles r
             where v.id = :volunteerId and r.id = :roleId
         """)
-    boolean hasUserRole(@Param("volunteerId") String volunteerId,
+    boolean hasUserRole(@Param("volunteerId") UUID volunteerId,
                         @Param("roleId") long roleId);
 
     @Query("""
@@ -81,7 +82,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             JOIN v.volunteeringPlans p
             WHERE p.id = :shiftPlanId
         """)
-    Collection<String> findAllIdsByShiftPlan(long shiftPlanId);
+    Collection<UUID> findAllIdsByShiftPlan(long shiftPlanId);
 
     @Query("""
             SELECT v
@@ -117,7 +118,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             WHERE p.id = :shiftPlanId
               AND v.id IN :plannerIds
         """)
-    Collection<Volunteer> findAllByShiftPlanAndPlannerIds(long shiftPlanId, Collection<String> plannerIds);
+    Collection<Volunteer> findAllByShiftPlanAndPlannerIds(long shiftPlanId, Collection<UUID> plannerIds);
 
     @Query("""
             SELECT DISTINCT v
@@ -126,7 +127,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             WHERE p.event.id = :eventId
               AND v.id IN :plannerIds
         """)
-    Collection<Volunteer> findAllByEventAndPlannerIds(long eventId, Collection<String> plannerIds);
+    Collection<Volunteer> findAllByEventAndPlannerIds(long eventId, Collection<UUID> plannerIds);
 
     @Query("""
             SELECT DISTINCT v
@@ -135,7 +136,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             WHERE p.id = :shiftPlanId
               AND v.id IN :volunteerIds
         """)
-    Collection<Volunteer> findAllByShiftPlanAndVolunteerIds(long shiftPlanId, Collection<String> volunteerIds);
+    Collection<Volunteer> findAllByShiftPlanAndVolunteerIds(long shiftPlanId, Collection<UUID> volunteerIds);
 
     @Query("""
             SELECT DISTINCT v
@@ -144,7 +145,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             WHERE p.event.id = :eventId
               AND v.id IN :volunteerIds
         """)
-    Collection<Volunteer> findAllByEventAndVolunteerIds(long eventId, Collection<String> volunteerIds);
+    Collection<Volunteer> findAllByEventAndVolunteerIds(long eventId, Collection<UUID> volunteerIds);
 
     @Query("""
             SELECT DISTINCT v
@@ -159,7 +160,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             FROM Volunteer v
             WHERE v.id IN :volunteerIds
         """)
-    Collection<Volunteer> findAllByVolunteerIds(Collection<String> volunteerIds);
+    Collection<Volunteer> findAllByVolunteerIds(Collection<UUID> volunteerIds);
 
     @Query("""
             select (count(sp) > 0)
@@ -167,5 +168,5 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, String> {
             join v.planningPlans sp
             where v.id IN :plannerIds
         """)
-    Collection<Volunteer> findAllByPlannerIds(Collection<String> plannerIds);
+    Collection<Volunteer> findAllByPlannerIds(Collection<UUID> plannerIds);
 }

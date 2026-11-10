@@ -82,7 +82,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         shiftsByLocation.values().forEach(allShifts::addAll);
         allShifts.addAll(shiftsWithoutLocation);
 
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
 
         var stats = statisticService.getShiftPlanScheduleStatistics(allShifts, volunteer);
         return EventScheduleLayoutDto.builder()
@@ -243,7 +243,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             }
             if (filterDto.getShiftRelevances().contains(ShiftRelevance.SIGNUP_POSSIBLE)) {
                 signUpPossibleShifts = new ArrayList<>(filteredShiftsWithoutViewMode);
-                var volunteer = volunteerDao.getById(userId);
+                var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
                 signUpPossibleShifts = signUpPossibleShifts.stream()
                     .filter(shift -> shift.getSlots().stream().anyMatch(slot ->
                         isSignupPossible(slot, volunteer)

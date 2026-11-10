@@ -16,10 +16,7 @@ public class VolunteerPointsDto {
     private String volunteerId;
 
     @NotNull
-    private String firstName;
-
-    @NotNull
-    private String lastName;
+    private String name;
 
     @NotNull
     private String email;

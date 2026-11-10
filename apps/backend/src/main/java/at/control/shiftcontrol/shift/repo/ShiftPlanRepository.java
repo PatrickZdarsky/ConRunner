@@ -22,7 +22,7 @@ public interface ShiftPlanRepository extends JpaRepository<ShiftPlan, Long>, Jpa
         WHERE (planner.id = :userId OR volunteer.id = :userId)
           AND sp.event.id = :eventId
         """)
-    Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(String userId, String eventId);
+    Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(java.util.UUID userId, String eventId);
 
     @Query("""
         SELECT DISTINCT sp

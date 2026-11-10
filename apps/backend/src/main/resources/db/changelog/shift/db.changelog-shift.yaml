@@ -748,3 +748,21 @@ databaseChangeLog:
             tableName: shift_assignment_transition
         - dropTable:
             tableName: shift_plan_mode_transition
+  - changeSet:
+      id: shift-legacy-volunteer
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: volunteer
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: calendar_share_id
+                  type: VARCHAR(64)
+                  constraints:
+                    unique: true

@@ -24,7 +24,7 @@ import at.control.shiftcontrol.shift.dto.positionslot.PositionSlotDto;
 import at.control.shiftcontrol.shift.dto.rewardpoints.RewardPointsDto;
 import at.control.shiftcontrol.shift.dto.trade.TradeCandidatesDto;
 import at.control.shiftcontrol.shift.service.EligibilityService;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.UserService;
 
 @RequiredArgsConstructor
 @Service
@@ -37,22 +37,22 @@ public class PositionSlotAssemblingMapper {
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
     private final RewardPointsAssemblingMapper rewardPointsAssemblingMapper;
     private final TradeMapper tradeMapper;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
 
     public PositionSlotDto assemble(@NonNull PositionSlot positionSlot) {
         var actor = currentActor.get();
-        var volunteer = volunteerDao.getById(actor.requireUserId().toString());
-        var preferenceValue = positionSlotDao.getPreference(volunteer.getId(), positionSlot.getId());
+        var volunteer = volunteerDao.getById(actor.requireUserId());
+        var preferenceValue = positionSlotDao.getPreference(volunteer.getId().toString(), positionSlot.getId());
         var rewardPointsDto = rewardPointsAssemblingMapper.toDto(positionSlot);
 
         // Offerer: requested slot (requestedAssignment is in this slot)
         var requestedTradesAsOfferer = assignmentSwitchRequestDao.findOpenTradesForRequestedPositionAndOfferingUser(
-            positionSlot.getId(), volunteer.getId()
+            positionSlot.getId(), volunteer.getId().toString()
         );
 
         // Owner: requested slot (requestedAssignment belongs to me)
-        var incomingRequestsForUserInThisSlot = filterIncomingTradesForUser(positionSlot.getAssignments(), volunteer.getId());
+        var incomingRequestsForUserInThisSlot = filterIncomingTradesForUser(positionSlot.getAssignments(), volunteer.getId().toString());
 
         var requestedTradesForUser = Stream.concat(
                 requestedTradesAsOfferer == null ? Stream.empty() : requestedTradesAsOfferer.stream(),
@@ -63,11 +63,11 @@ public class PositionSlotAssemblingMapper {
             .toList();
 
         // Offerer: offered slot (offeringAssignment belongs to me)
-        var offeredTradesAsOfferer = filterOfferedTradesForUser(positionSlot.getAssignments(), volunteer.getId());
+        var offeredTradesAsOfferer = filterOfferedTradesForUser(positionSlot.getAssignments(), volunteer.getId().toString());
 
         // Owner: offered slot (offeringAssignment is in this slot)
         var offeredTradesAsRequestedUser = assignmentSwitchRequestDao
-            .findOpenTradesForOfferingPositionAndRequestedOwner(positionSlot.getId(), volunteer.getId());
+            .findOpenTradesForOfferingPositionAndRequestedOwner(positionSlot.getId(), volunteer.getId().toString());
 
         var offeredTradesForUser = Stream.concat(
                 offeredTradesAsOfferer.stream(),
@@ -102,7 +102,7 @@ public class PositionSlotAssemblingMapper {
             return Collections.emptyList();
         }
         return assignments.stream()
-            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().equals(userId))
+            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().toString().equals(userId))
             .flatMap(a -> a.getIncomingSwitchRequests() == null ? Stream.empty() : a.getIncomingSwitchRequests().stream())
             .toList();
     }
@@ -112,7 +112,7 @@ public class PositionSlotAssemblingMapper {
             return Collections.emptyList();
         }
         return assignments.stream()
-            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().equals(userId))
+            .filter(a -> a.getAssignedVolunteer() != null && a.getAssignedVolunteer().getId().toString().equals(userId))
             .flatMap(a -> a.getOutgoingSwitchRequests() == null ? Stream.empty() : a.getOutgoingSwitchRequests().stream())
             .toList();
     }
@@ -153,7 +153,7 @@ public class PositionSlotAssemblingMapper {
 
     public TradeCandidatesDto tradeCandidatesDto(@NonNull PositionSlot positionSlot, Collection<Volunteer> volunteers) {
         var shift = positionSlot.getShift();
-        var users = userDirectoryService.getUserByIds(volunteers.stream().map(Volunteer::getId).toList());
+        var users = userService.getUsers(volunteers.stream().map(Volunteer::getId).toList());
         return new TradeCandidatesDto(
             assemble(positionSlot),
             shift.getName(),

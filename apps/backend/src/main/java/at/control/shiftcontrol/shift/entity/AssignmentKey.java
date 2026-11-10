@@ -23,7 +23,7 @@ public class AssignmentKey {
     public static AssignmentKey of(Assignment assignment) {
         return AssignmentKey.builder()
                 .positionSlotId(assignment.getPositionSlot().getId())
-                .volunteerId(assignment.getAssignedVolunteer().getId())
+                .volunteerId(assignment.getAssignedVolunteer().getId().toString())
                 .build();
     }
 }

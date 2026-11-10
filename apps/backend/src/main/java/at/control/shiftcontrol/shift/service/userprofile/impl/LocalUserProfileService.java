@@ -11,16 +11,14 @@ import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
 import at.control.shiftcontrol.shift.mapper.UserProfileMapper;
 import at.control.shiftcontrol.shift.service.userprofile.UserProfileService;
 import at.control.shiftcontrol.shift.service.userprofile.VolunteerCalendarService;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
-import at.control.shiftcontrol.shift.userdirectory.current.CurrentUserProfileSyncService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
 @RequiredArgsConstructor
 public class LocalUserProfileService implements UserProfileService {
-    private final UserLookupService userDirectoryService;
-    private final CurrentUserProfileSyncService currentUserProfileSyncService;
+    private final UserService userService;
     private final CurrentShiftActor currentActor;
     private final SecurityHelper securityHelper;
     private final VolunteerDao volunteerDao;
@@ -33,14 +31,9 @@ public class LocalUserProfileService implements UserProfileService {
             throw new ForbiddenException("Access denied: cannot access other user's profile");
         }
 
-        UserInfo user;
-        if (userId.equals(actor.requireUserId().toString())) {
-            user = currentUserProfileSyncService.syncCurrentSubjectIfStale();
-        } else {
-            user = userDirectoryService.getUserById(userId);
-        }
+        User user = userService.getUser(java.util.UUID.fromString(userId));
 
-        Volunteer volunteer = volunteerDao.findById(userId).orElse(null);
+        Volunteer volunteer = volunteerDao.findById(java.util.UUID.fromString(userId)).orElse(null);
         String calendarShareId = userId.equals(actor.requireUserId().toString())
             ? volunteerCalendarService.getOrCreateCalendarShareId(userId).orElse(null)
             : null;

@@ -46,7 +46,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public @NonNull Assignment claimAuction(@NonNull Assignment auction, @NonNull Volunteer newVolunteer, @NonNull PositionSlotRequestDto requestDto) {
-        String oldVolunteerId = auction.getAssignedVolunteer().getId();
+        String oldVolunteerId = auction.getAssignedVolunteer().getId().toString();
         Assignment oldAuction = AssignmentAssemblingMapper.shallowCopy(auction);
         // execute auction
         auction = reassign(auction, newVolunteer);
@@ -127,7 +127,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignment = assignmentDao.save(assignment);
 
-        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId()));
+        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId().toString()));
         return assignment;
     }
 
@@ -142,11 +142,11 @@ public class AssignmentServiceImpl implements AssignmentService {
             requestDto.getAcceptedRewardPointsConfigHash());
 
         // close trades where this slot was offered to current user
-        assignmentSwitchRequestDao.cancelTradesForOfferedPositionAndRequestedUser(positionSlot.getId(), volunteer.getId());
+        assignmentSwitchRequestDao.cancelTradesForOfferedPositionAndRequestedUser(positionSlot.getId(), volunteer.getId().toString());
         assignment = assignmentDao.save(assignment);
 
 
-        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), volunteer.getId()));
+        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), volunteer.getId().toString()));
         return assignment;
     }
 
@@ -163,7 +163,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentDao.delete(assignment);
 
         //NOTIFY: publish event
-        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId()));
+        publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId().toString()));
     }
 
     @Override
@@ -178,7 +178,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             );
 
             // publish event
-            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(auction.getPositionSlot(), auction.getAssignedVolunteer().getId()));
+            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(auction.getPositionSlot(), auction.getAssignedVolunteer().getId().toString()));
         });
 
         assignmentDao.deleteAll(auctions);
@@ -192,9 +192,9 @@ public class AssignmentServiceImpl implements AssignmentService {
         // publish events
         requests.forEach(request -> {
             notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
-                java.util.UUID.fromString(request.getAssignedVolunteer().getId()), NotificationTypes.ASSIGNMENT_JOIN_DECLINED,
+                request.getAssignedVolunteer().getId(), NotificationTypes.ASSIGNMENT_JOIN_DECLINED,
                 String.valueOf(shiftPlan.getEvent().getId())));
-            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId()));
+            publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId().toString()));
         });
 
         assignmentDao.deleteAll(requests);
@@ -202,6 +202,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public @NonNull Collection<Assignment> getAllAssignmentsForUser(@NonNull ShiftPlan plan, @NonNull Volunteer volunteer) {
-        return assignmentDao.findAssignmentsForShiftPlanAndUser(plan.getId(), volunteer.getId());
+        return assignmentDao.findAssignmentsForShiftPlanAndUser(plan.getId(), volunteer.getId().toString());
     }
 }

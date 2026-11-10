@@ -41,7 +41,7 @@ import at.control.shiftcontrol.shift.dto.rewardpoints.VolunteerPointsDto;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsCalculator;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsExportService;
 import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsLedgerService;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.UserService;
 
 @Service
 public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl implements RewardPointsExportService {
@@ -50,10 +50,10 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
                                          RewardPointsShareTokenDao rewardPointsShareTokenDao,
                                          EventDao eventDao, VolunteerDao volunteerDao,
                                          RewardPointsTransactionDao rewardPointsTransactionDao,
-                                         UserLookupService userDirectoryService,
+                                         UserService userService,
                                          ApplicationEventPublisher publisher,
                                          UniqueCodeGenerator uniqueCodeGenerator) {
-        super(calculator, ledgerService, rewardPointsShareTokenDao, eventDao, volunteerDao, rewardPointsTransactionDao, userDirectoryService, publisher,
+        super(calculator, ledgerService, rewardPointsShareTokenDao, eventDao, volunteerDao, rewardPointsTransactionDao, userService, publisher,
             uniqueCodeGenerator);
     }
 
@@ -108,7 +108,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         String[] cols = {
             "Event ID", "Event Name", "Finished",
             "Start", "End",
-            "Volunteer ID", "First Name", "Last Name", "Email",
+            "Volunteer ID", "Name", "Email",
             "Points"
         };
         for (int i = 0; i < cols.length; i++) {
@@ -135,8 +135,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
                 createDateCell(row, c++, event.getEndTime(), dateStyle);
 
                 createTextCell(row, c++, vp.getVolunteerId(), textStyle);
-                createTextCell(row, c++, vp.getFirstName(), textStyle);
-                createTextCell(row, c++, vp.getLastName(), textStyle);
+                createTextCell(row, c++, vp.getName(), textStyle);
                 createTextCell(row, c++, vp.getEmail(), textStyle);
 
                 Cell pointsCell = row.createCell(c);
@@ -148,7 +147,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         sheet.createFreezePane(0, 1);
         sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, cols.length - 1));
 
-        int[] widths = {14, 30, 10, 18, 18, 40, 16, 16, 32, 10};
+        int[] widths = {14, 30, 10, 18, 18, 40, 30, 32, 10};
         for (int i = 0; i < widths.length; i++) {
             sheet.setColumnWidth(i, widths[i] * 256);
         }
@@ -168,7 +167,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
             .toList();
 
         class VolRow {
-            String volunteerId, firstName, lastName, email;
+            String volunteerId, name, email;
             final Map<String, Integer> pointsByEventId = new HashMap<>();
             int totalFinished = 0;
             int totalAll = 0;
@@ -183,8 +182,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
                 VolRow vr = vols.computeIfAbsent(vp.getVolunteerId(), id -> {
                     VolRow x = new VolRow();
                     x.volunteerId = id;
-                    x.firstName = vp.getFirstName();
-                    x.lastName = vp.getLastName();
+                    x.name = vp.getName();
                     x.email = vp.getEmail();
                     return x;
                 });
@@ -202,7 +200,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         Row header = sheet.createRow(r++);
         int c = 0;
 
-        String[] fixed = {"Volunteer ID", "First Name", "Last Name", "Email", "Total (Finished)", "Total (All)"};
+        String[] fixed = {"Volunteer ID", "Name", "Email", "Total (Finished)", "Total (All)"};
         for (String col : fixed) {
             Cell cell = header.createCell(c++);
             cell.setCellValue(col);
@@ -216,8 +214,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         }
 
         List<VolRow> sortedVols = vols.values().stream()
-            .sorted(Comparator.comparing((VolRow v) -> v.lastName == null ? "" : v.lastName)
-                .thenComparing(v -> v.firstName == null ? "" : v.firstName))
+            .sorted(Comparator.comparing((VolRow v) -> v.name == null ? "" : v.name))
             .toList();
 
         for (VolRow v : sortedVols) {
@@ -225,8 +222,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
             int cc = 0;
 
             createTextCell(row, cc++, v.volunteerId, textStyle);
-            createTextCell(row, cc++, v.firstName, textStyle);
-            createTextCell(row, cc++, v.lastName, textStyle);
+            createTextCell(row, cc++, v.name, textStyle);
             createTextCell(row, cc++, v.email, textStyle);
 
             Cell finishedTotal = row.createCell(cc++);
@@ -254,11 +250,10 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         sheet.setAutoFilter(new CellRangeAddress(0, 0, 0, fixed.length + events.size() - 1));
 
         sheet.setColumnWidth(0, 40 * 256);
-        sheet.setColumnWidth(1, 16 * 256);
-        sheet.setColumnWidth(2, 16 * 256);
-        sheet.setColumnWidth(3, 32 * 256);
+        sheet.setColumnWidth(1, 30 * 256);
+        sheet.setColumnWidth(2, 32 * 256);
+        sheet.setColumnWidth(3, 16 * 256);
         sheet.setColumnWidth(4, 16 * 256);
-        sheet.setColumnWidth(5, 12 * 256);
         // event columns
         for (int i = 0; i < events.size(); i++) {
             sheet.setColumnWidth(fixed.length + i, 18 * 256);

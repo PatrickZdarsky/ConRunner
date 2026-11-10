@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.dto.userdirectory;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -14,5 +15,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InternalUserLookupRequestDto {
     @NotEmpty
-    private Collection<String> userIds;
+    private Collection<UUID> userIds;
 }

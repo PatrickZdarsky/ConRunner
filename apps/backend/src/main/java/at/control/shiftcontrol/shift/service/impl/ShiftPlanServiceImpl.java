@@ -61,7 +61,7 @@ import at.control.shiftcontrol.shift.mapper.ShiftPlanMapper;
 import at.control.shiftcontrol.shift.service.AssignmentService;
 import at.control.shiftcontrol.shift.service.ShiftPlanService;
 import at.control.shiftcontrol.shift.service.VolunteerService;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 import static at.control.shiftcontrol.shift.lib.type.LockStatus.SELF_SIGNUP;
@@ -83,7 +83,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     private final NotificationRequests notificationRequests;
     private final UserService identityUsers;
     private final UserAttributeProvider userAttributeProvider;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
 
     private final UniqueCodeGenerator uniqueCodeGenerator;
 
@@ -299,7 +299,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         var shiftPlan = shiftPlanDao.getById(invite.getShiftPlan().getId());
 
         // volunteer not necessary to get invite details
-        var volunteer = volunteerDao.findById(userId);
+        var volunteer = volunteerDao.findById(java.util.UUID.fromString(userId));
 
         boolean alreadyJoined = volunteer.isPresent() && isUserAlreadyInShiftPlan(invite.getType(), shiftPlan, volunteer.get());
         boolean upgradeToPlannerPossible = volunteer.isPresent() && isUserAlreadyInShiftPlan(ShiftPlanInviteType.VOLUNTEER_JOIN, shiftPlan, volunteer.get())
@@ -382,7 +382,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             var eventId = String.valueOf(shiftPlan.getEvent().getId());
             if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN && shiftPlan.getPlanPlanners() != null) {
                 shiftPlan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
-                    notificationRequests.request(new NotificationRequest(triggerId, java.util.UUID.fromString(id), NotificationTypes.PLAN_VOLUNTEER_JOINED, eventId)));
+                    notificationRequests.request(new NotificationRequest(triggerId, id, NotificationTypes.PLAN_VOLUNTEER_JOINED, eventId)));
             } else if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
                 identityUsers.getPlatformAdmins().forEach(admin ->
                     notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, eventId)));
@@ -481,7 +481,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             assignmentDao.deleteAll(existingAssignments);
         }
 
-        var volunteer = volunteerDao.getById(actor.requireUserId().toString());
+        var volunteer = volunteerDao.getById(actor.requireUserId());
         volunteer.getVolunteeringPlans().remove(plan);
 
         userAttributeProvider.invalidateUserCache(actor.requireUserId());
@@ -500,7 +500,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         var totalShiftHours = 0.0;
         var totalPositionVolunteerHours = 0.0;
         var currentPositionVolunteerHours = 0.0;
-        var volunteerStatsMap = new HashMap<String, ShiftPlanStatisticsDto.VolunteerShiftStatisticsDto>();
+        var volunteerStatsMap = new HashMap<java.util.UUID, ShiftPlanStatisticsDto.VolunteerShiftStatisticsDto>();
         var openPositions = new ArrayList<ShiftPlanStatisticsDto.PositionInfoDto>();
         for (Shift shift : plan.getShifts()) {
             shiftCount++;
@@ -514,7 +514,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             for (var slot : shift.getSlots()) {
                 for (var assignment : slot.getAssignments()) {
                     var stats = volunteerStatsMap.computeIfAbsent(assignment.getAssignedVolunteer().getId(),
-                        id -> new ShiftPlanStatisticsDto.VolunteerShiftStatisticsDto(id, userDirectoryService.getUserById(id).username()));
+                        id -> new ShiftPlanStatisticsDto.VolunteerShiftStatisticsDto(id.toString(), userService.getUser(id).getUsername()));
 
                     stats.setPositionCount(stats.getPositionCount() + 1);
                     stats.setTotalHours(stats.getTotalHours() + shiftLengthHours);

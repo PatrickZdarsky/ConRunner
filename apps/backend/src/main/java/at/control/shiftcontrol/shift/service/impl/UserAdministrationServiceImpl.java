@@ -47,8 +47,8 @@ import at.control.shiftcontrol.shift.mapper.UserAssemblingMapper;
 import at.control.shiftcontrol.shift.repo.AssignmentRepository;
 import at.control.shiftcontrol.shift.service.AssignmentService;
 import at.control.shiftcontrol.shift.service.UserAdministrationService;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
@@ -56,7 +56,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 public class UserAdministrationServiceImpl implements UserAdministrationService {
     private final VolunteerDao volunteerDao;
     private final ShiftPlanDao shiftPlanDao;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
     private final UserAttributeProvider userAttributeProvider;
     private final SecurityHelper securityHelper;
     private final RoleDao roleDao;
@@ -69,31 +69,31 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Override
     @AdminOnly
     public @NonNull PaginationDto<UserEventDto> getAllUsers(int page, int size, @NonNull UserSearchDto searchDto) {
-        var users = userDirectoryService.searchUsers(page, size, searchDto);
+        var users = userService.searchUsers(page, size, at.control.shiftcontrol.identity.UserSearchRequest.builder().name(searchDto.getName()).build());
         var volunteers = volunteerDao.findAllByVolunteerIds(
-            users.getItems().stream().map(UserInfo::id).toList()
+            users.getContent().stream().map(User::getId).toList()
         );
 
-        return PaginationMapper.toPaginationDto(size, page, users.getTotal(), UserAssemblingMapper.toUserEventDtoForUsers(volunteers, users.getItems()));
+        return PaginationMapper.toPaginationDto(size, page, users.getTotalElements(), UserAssemblingMapper.toUserEventDtoForUsers(volunteers, users.getContent()));
     }
 
     @Override
     public @NonNull PaginationDto<UserPlanDto> getAllPlanUsers(@NonNull Long shiftPlanId, int page, int size, @NonNull UserSearchDto searchDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
         var volunteersInPlanId = volunteerDao.findAllIdsByShiftPlan(shiftPlanId);
-        var usersForPlan = userDirectoryService.getUserByIds(volunteersInPlanId).stream()
-            .sorted(Comparator.comparing(user -> user.lastName() == null ? "" : user.lastName()))
+        var usersForPlan = userService.getUsers(volunteersInPlanId).stream()
+            .sorted(Comparator.comparing(user -> user.getUsername() == null ? "" : user.getUsername()))
             .toList();
         var users = filterUsers(searchDto, usersForPlan);
         var paginatedUsers = paginateUsers(users, page, size);
         var volunteers = volunteerDao.findAllByVolunteerIds(
-            paginatedUsers.stream().map(UserInfo::id).toList()
+            paginatedUsers.stream().map(User::getId).toList()
         );
 
         return PaginationMapper.toPaginationDto(size, page, users.size(), UserAssemblingMapper.toUserPlanDto(volunteers, paginatedUsers, shiftPlanId));
     }
 
-    private List<UserInfo> paginateUsers(List<UserInfo> users, int page, int size) {
+    private List<User> paginateUsers(List<User> users, int page, int size) {
         int fromIndex = page * size;
         if (fromIndex >= users.size()) {
             return List.of();
@@ -103,15 +103,13 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         return users.subList(fromIndex, toIndex);
     }
 
-    private static List<UserInfo> filterUsers(UserSearchDto searchDto, List<UserInfo> users) {
+    private static List<User> filterUsers(UserSearchDto searchDto, List<User> users) {
         if (searchDto.getName() == null || searchDto.getName().isEmpty()) {
             return users;
         }
         var nameLower = searchDto.getName().toLowerCase().trim();
         return users.stream().filter(x ->
-                safeLower(x.username()).contains(nameLower)
-                    || safeLower(x.firstName()).contains(nameLower)
-                    || safeLower(x.lastName()).contains(nameLower)
+                safeLower(x.getUsername()).contains(nameLower)
             )
             .toList();
     }
@@ -119,14 +117,14 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Override
     @AdminOnly
     public @NonNull UserEventDto getUser(@NonNull String userId) {
-        var volunteer = volunteerDao.findById(userId).orElse(null);
-        var user = userDirectoryService.getUserById(userId);
+        var volunteer = volunteerDao.findById(java.util.UUID.fromString(userId)).orElse(null);
+        var user = userService.getUser(java.util.UUID.fromString(userId));
         return UserAssemblingMapper.toUserEventDto(volunteer, user);
     }
 
     @Override
     public @NonNull UserPlanDto getPlanUser(@NonNull Long shiftPlanId, @NonNull String userId) {
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         securityHelper.assertUserIsPlanner(shiftPlanId);
         securityHelper.assertVolunteerIsVolunteer(shiftPlanDao.getById(shiftPlanId), volunteer, false);
         return toUserPlanDto(volunteer, shiftPlanId);
@@ -136,7 +134,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     @AdminOnly
     public @NonNull UserEventDto updateEventUser(@NonNull String userId, @NonNull UserEventUpdateDto updateDto) {
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         assertPlansChanged(volunteer, updateDto);
         var affectedPlans = new java.util.ArrayList<ShiftPlan>();
         if (volunteer.getVolunteeringPlans() != null) affectedPlans.addAll(volunteer.getVolunteeringPlans());
@@ -150,7 +148,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         var planningToRemove = toRemovePlans(updateDto.getPlanningPlans(), volunteer.getPlanningPlans());
         removePlans(volunteer, volunteerToRemove, planningToRemove);
 
-        var user = userDirectoryService.getUserById(volunteer.getId());
+        var user = userService.getUser(volunteer.getId());
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
         var allPlans = shiftPlanDao.getByIds(Stream.concat(
             updateDto.getPlanningPlans().stream(), updateDto.getVolunteeringPlans().stream())
@@ -165,7 +163,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Override
     @Transactional
     public @NonNull UserPlanDto updatePlanUser(@NonNull Long shiftPlanId, @NonNull String userId, @NonNull UserPlanUpdateDto updateDto) {
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         securityHelper.assertUserIsPlanner(shiftPlanId);
         securityHelper.assertVolunteerIsVolunteer(shiftPlanDao.getById(shiftPlanId), volunteer, false);
 
@@ -187,7 +185,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         var rolesToRemove = toRemove(updateDto.getRoles(), currentRoles);
         removeRoles(volunteer, rolesToRemove);
 
-        var user = userDirectoryService.getUserById(volunteer.getId());
+        var user = userService.getUser(volunteer.getId());
         userAttributeProvider.invalidateUserCache(java.util.UUID.fromString(userId));
         var updatedPlan = shiftPlanDao.getById(shiftPlanId);
         notifyUser(volunteer, java.util.List.of(updatedPlan), NotificationTypes.ROLES_CHANGED);
@@ -199,7 +197,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull UserEventDto lockUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanIds) {
         shiftPlanIds.forEach(securityHelper::assertUserIsPlanner);
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanIds));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
@@ -219,7 +217,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull UserEventDto unLockUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanIds) {
         shiftPlanIds.forEach(securityHelper::assertUserIsPlanner);
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanIds));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
@@ -235,7 +233,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Override
     @Transactional
     public @NonNull UserEventDto resetUser(@NonNull String userId, @NonNull Collection<Long> shiftPlanId) {
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         var plans = shiftPlanDao.getByIds(new HashSet<>(shiftPlanId));
         for (ShiftPlan plan : plans) {
             securityHelper.assertUserIsPlanner(plan);
@@ -256,7 +254,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull Collection<UserPlanDto> bulkAddRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
         var roles = roleDao.findAllById(updateDto.getRoles().stream().map(ConvertUtil::idToLong).toList());
         for (Volunteer v : volunteers) {
             for (Role role : roles) {
@@ -275,7 +273,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @Transactional
     public @NonNull Collection<UserPlanDto> bulkRemoveRoles(long shiftPlanId, UserPlanBulkDto updateDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
         var roles = roleDao.findAllById(updateDto.getRoles().stream().map(ConvertUtil::idToLong).toList());
         for (Volunteer v : volunteers) {
             v.getRoles().removeAll(roles);
@@ -290,7 +288,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @AdminOnly
     @Transactional
     public @NonNull Collection<UserEventDto> bulkAddVolunteeringPlans(UserEventBulkDto updateDto) {
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
         var plans = shiftPlanDao.getByIds(updateDto.getPlans().stream().map(ConvertUtil::idToLong).collect(Collectors.toSet()));
         for (Volunteer v : volunteers) {
             for (ShiftPlan plan : plans) {
@@ -308,7 +306,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
     @AdminOnly
     @Transactional
     public @NonNull Collection<UserEventDto> bulkRemoveVolunteeringPlans(UserEventBulkDto updateDto) {
-        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
+        var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers().stream().map(java.util.UUID::fromString).toList());
         var plans = shiftPlanDao.getByIds(updateDto.getPlans().stream().map(ConvertUtil::idToLong).collect(Collectors.toSet()));
         for (Volunteer v : volunteers) {
             removePlans(v,
@@ -323,31 +321,31 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
     private void notifyUser(Volunteer volunteer, Collection<ShiftPlan> plans, String type) {
         plans.stream().map(plan -> plan.getEvent().getId()).distinct().forEach(eventId ->
-            notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+            notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
                 type, String.valueOf(eventId))));
     }
 
     private @NonNull Collection<UserPlanDto> getUserPlanDtos(long shiftPlanId, Collection<Volunteer> volunteers) {
-        var users = userDirectoryService.getUserByIds(volunteers.stream().map(Volunteer::getId).toList());
-        userAttributeProvider.invalidateUserCaches(users.stream().map(UserInfo::id).map(java.util.UUID::fromString).toList());
+        var users = userService.getUsers(volunteers.stream().map(Volunteer::getId).toList());
+        userAttributeProvider.invalidateUserCaches(users.stream().map(User::getId).toList());
         return UserAssemblingMapper.toUserPlanDto(volunteers, users, shiftPlanId);
     }
 
     private @NonNull Collection<UserEventDto> getUserEventDtos(Collection<Volunteer> volunteers) {
-        var users = userDirectoryService.getUserByIds(volunteers.stream().map(Volunteer::getId).toList());
+        var users = userService.getUsers(volunteers.stream().map(Volunteer::getId).toList());
         return UserAssemblingMapper.toUserEventDtoForUsers(volunteers, users);
     }
 
     private @NonNull UserEventDto toUserEventDto(@NonNull Volunteer volunteer) {
-        return UserAssemblingMapper.toUserEventDto(volunteer, getUserInfo(volunteer.getId()));
+        return UserAssemblingMapper.toUserEventDto(volunteer, lookupUser(volunteer.getId()));
     }
 
     private @NonNull UserPlanDto toUserPlanDto(@NonNull Volunteer volunteer, long shiftPlanId) {
-        return UserAssemblingMapper.toUserPlanDto(volunteer, getUserInfo(volunteer.getId()), shiftPlanId);
+        return UserAssemblingMapper.toUserPlanDto(volunteer, lookupUser(volunteer.getId()), shiftPlanId);
     }
 
-    private UserInfo getUserInfo(String userId) {
-        return userDirectoryService.getUserById(userId);
+    private User lookupUser(java.util.UUID userId) {
+        return userService.getUser(userId);
     }
 
     private static String safeLower(String value) {

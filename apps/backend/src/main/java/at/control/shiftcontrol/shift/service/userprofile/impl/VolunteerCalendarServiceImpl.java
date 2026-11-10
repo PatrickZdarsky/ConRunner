@@ -47,7 +47,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
     @Override
     @Transactional
     public Optional<String> getOrCreateCalendarShareId(String userId) {
-        return volunteerDao.findById(userId)
+        return volunteerDao.findById(java.util.UUID.fromString(userId))
             .map(volunteer -> {
                 if (volunteer.getCalendarShareId() != null && !volunteer.getCalendarShareId().isBlank()) {
                     return volunteer.getCalendarShareId();
@@ -60,7 +60,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
     @Override
     @Transactional
     public CalendarShareIdDto regenerateCalendarShareId(String userId) {
-        Volunteer volunteer = volunteerDao.findById(userId)
+        Volunteer volunteer = volunteerDao.findById(java.util.UUID.fromString(userId))
             .orElseThrow(() -> new NotFoundException("Volunteer not found"));
 
         String calendarShareId = assignAndPersistShareId(volunteer);
@@ -79,7 +79,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
             CALENDAR_ASSIGNMENT_STATUSES
         );
 
-        return buildCalendar(assignments, volunteer.getId());
+        return buildCalendar(assignments, volunteer.getId().toString());
     }
 
     private String assignAndPersistShareId(Volunteer volunteer) {

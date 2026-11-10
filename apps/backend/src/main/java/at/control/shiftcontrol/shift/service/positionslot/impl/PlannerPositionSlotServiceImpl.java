@@ -38,7 +38,7 @@ import at.control.shiftcontrol.shift.mapper.VolunteerAssemblingMapper;
 import at.control.shiftcontrol.shift.service.AssignmentService;
 import at.control.shiftcontrol.shift.service.EligibilityService;
 import at.control.shiftcontrol.shift.service.positionslot.PlannerPositionSlotService;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
@@ -53,7 +53,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
     private final ApplicationEventPublisher publisher;
     private final NotificationRequests notificationRequests;
     private final EligibilityService eligibilityService;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
     private final AssignmentAssemblingMapper assignmentAssemblingMapper;
     private final AssignmentPlannerInfoAssemblingMapper assignmentRequestAssemblingMapper;
 
@@ -135,7 +135,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
         // check if not already signed up, eligible and no conflicts
         volunteers = volunteers.stream().filter(v -> isAssignable(positionSlot, v)).toList();
 
-        var users = userDirectoryService.getUserByIds(volunteers.stream().map(Volunteer::getId).toList());
+        var users = userService.getUsers(volunteers.stream().map(Volunteer::getId).toList());
         return VolunteerAssemblingMapper.toDtoFromUser(users);
     }
 
@@ -144,7 +144,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
         boolean eligible = eligibilityService.isEligibleAndNotSignedUp(positionSlot, volunteer);
         // check for conflicts
         Collection<Assignment> conflicts = eligibilityService.getConflictingAssignmentsExcludingShift(
-            volunteer.getId(), positionSlot, positionSlot.getShift().getId());
+            volunteer.getId().toString(), positionSlot, positionSlot.getShift().getId());
 
         return eligible && conflicts.isEmpty();
     }
@@ -163,7 +163,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
         // get all requested volunteers with access to slot
         Collection<Volunteer> volunteers = volunteerDao.findAllByShiftPlanAndVolunteerIds(
             positionSlot.getShift().getShiftPlan().getId(),
-            assignmentAssignDto.getVolunteerIds());
+            assignmentAssignDto.getVolunteerIds().stream().map(java.util.UUID::fromString).toList());
 
         // check if not already signed up, eligible and no conflicts
         volunteers = volunteers.stream().filter(v -> isAssignable(positionSlot, v)).toList();
@@ -179,7 +179,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             var nextVolunteer = iterator.next();
             try {
                 assignment = assignmentDao.getAssignmentForPositionSlotAndUser(
-                    positionSlot.getId(), nextVolunteer.getId());
+                    positionSlot.getId(), nextVolunteer.getId().toString());
             } catch (Exception e) {
                 // ignore
             }

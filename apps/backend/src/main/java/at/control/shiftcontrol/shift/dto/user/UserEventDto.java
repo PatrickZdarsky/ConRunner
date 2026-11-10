@@ -33,9 +33,9 @@ public class UserEventDto {
     @NotNull
     private Collection<String> volunteeringPlans;
 
-    public static Comparator<UserEventDto> lastNameComparator() {
+    public static Comparator<UserEventDto> nameComparator() {
         return Comparator.comparing(
-            (UserEventDto udp ) -> udp.getVolunteer().getLastName(),
+            (UserEventDto udp ) -> udp.getVolunteer().getName(),
             Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
         );
     }

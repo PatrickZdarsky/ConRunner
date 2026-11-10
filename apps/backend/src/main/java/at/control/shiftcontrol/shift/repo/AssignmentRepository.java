@@ -19,7 +19,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
             WHERE a.positionSlot.id = :positionSlotId
             AND a.assignedVolunteer.id = :assignedUser
         """)
-    Optional<Assignment> findBySlotAndUser(long positionSlotId, String assignedUser);
+    Optional<Assignment> findBySlotAndUser(long positionSlotId, java.util.UUID assignedUser);
 
     @Query("""
         SELECT a FROM Assignment a
@@ -40,7 +40,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         AND a.status IN :auctionStates
         AND a.assignedVolunteer.id != :userId
         """)
-    Collection<Assignment> findAuctionsByShiftPlanIdExcludingUser(long spId, String userId, Set<AssignmentStatus> auctionStates);
+    Collection<Assignment> findAuctionsByShiftPlanIdExcludingUser(long spId, java.util.UUID userId, Set<AssignmentStatus> auctionStates);
 
     @Query("""
         SELECT a FROM Assignment a
@@ -48,7 +48,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         AND a.positionSlot.shift.endTime > :startTime
         AND a.positionSlot.shift.startTime < :endTime
         """)
-    Collection<Assignment> getConflictingAssignments(String volunteerId, Instant startTime, Instant endTime);
+    Collection<Assignment> getConflictingAssignments(java.util.UUID volunteerId, Instant startTime, Instant endTime);
 
     @Query("""
         SELECT a FROM Assignment a
@@ -57,7 +57,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         AND a.positionSlot.shift.endTime > :startTime
         AND a.positionSlot.shift.startTime < :endTime
         """)
-    Collection<Assignment> getConflictingAssignmentsExcludingShift(String volunteerId, Instant startTime, Instant endTime, long shiftId);
+    Collection<Assignment> getConflictingAssignmentsExcludingShift(java.util.UUID volunteerId, Instant startTime, Instant endTime, long shiftId);
 
     @Query("""
         SELECT a FROM Assignment a
@@ -66,7 +66,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         AND a.positionSlot.shift.endTime > :startTime
         AND a.positionSlot.shift.startTime < :endTime
         """)
-    Collection<Assignment> getConflictingAssignmentsExcludingSlot(String volunteerId, Instant startTime, Instant endTime, long slotId);
+    Collection<Assignment> getConflictingAssignmentsExcludingSlot(java.util.UUID volunteerId, Instant startTime, Instant endTime, long slotId);
 
     @Query("""
         SELECT a FROM Assignment a
@@ -78,28 +78,28 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         SELECT a FROM Assignment a
         WHERE a.positionSlot.id = :positionSlotId AND a.assignedVolunteer.id = :userId
         """)
-    Optional<Assignment> findAssignmentForPositionSlotAndUser(long positionSlotId, String userId);
+    Optional<Assignment> findAssignmentForPositionSlotAndUser(long positionSlotId, java.util.UUID userId);
 
     @Query("""
         SELECT a FROM Assignment a
         WHERE a.positionSlot.id = :positionSlotId AND a.assignedVolunteer.id IN :userIds
         """)
-    Collection<Assignment> findAssignmentForPositionSlotAndUsers(long positionSlotId, Collection<String> userIds);
+    Collection<Assignment> findAssignmentForPositionSlotAndUsers(long positionSlotId, Collection<java.util.UUID> userIds);
 
 
     @Query("""
         SELECT a FROM Assignment a
         WHERE a.positionSlot.shift.shiftPlan.id = :shiftPlanId
-        AND a.assignedVolunteer.id IN :userIds
+        AND a.assignedVolunteer.id = :userIds
         AND a.status != :status
         """)
-    Collection<Assignment> findActiveAssignmentsForShiftPlanAndUser(long shiftPlanId, String userIds, AssignmentStatus status);
+    Collection<Assignment> findActiveAssignmentsForShiftPlanAndUser(long shiftPlanId, java.util.UUID userIds, AssignmentStatus status);
 
     @Query("""
         SELECT a FROM Assignment a
         WHERE a.positionSlot.shift.shiftPlan.id = :shiftPlanId AND a.assignedVolunteer.id = :userId
         """)
-    Collection<Assignment> findAssignmentsForShiftPlanAndUser(long shiftPlanId, String userId);
+    Collection<Assignment> findAssignmentsForShiftPlanAndUser(long shiftPlanId, java.util.UUID userId);
 
     @Query("""
         SELECT DISTINCT a
@@ -113,5 +113,5 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         AND a.status IN :statuses
         ORDER BY s.startTime, s.id, ps.id
         """)
-    Collection<Assignment> findCalendarAssignmentsByVolunteerId(String volunteerId, Collection<AssignmentStatus> statuses);
+    Collection<Assignment> findCalendarAssignmentsByVolunteerId(java.util.UUID volunteerId, Collection<AssignmentStatus> statuses);
 }

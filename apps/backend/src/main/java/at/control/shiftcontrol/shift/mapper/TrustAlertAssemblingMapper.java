@@ -13,20 +13,20 @@ import at.control.shiftcontrol.shift.entity.TrustAlert;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.dao.userprofile.VolunteerDao;
 import at.control.shiftcontrol.shift.dto.TrustAlertDisplayDto;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 
 @Component
 @RequiredArgsConstructor
 public class TrustAlertAssemblingMapper {
     private final VolunteerDao volunteerDao;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
 
     public TrustAlertDisplayDto toDto(TrustAlert alert) {
-        return toDto(alert, userDirectoryService.getUserById(alert.getVolunteer().getId()));
+        return toDto(alert, userService.getUser(alert.getVolunteer().getId()));
     }
 
-    private TrustAlertDisplayDto toDto(TrustAlert alert, UserInfo user) {
+    private TrustAlertDisplayDto toDto(TrustAlert alert, User user) {
         return TrustAlertDisplayDto.builder()
             .id(String.valueOf(alert.getId()))
             .volunteerDto(VolunteerAssemblingMapper.toDtoFromUser(user))
@@ -41,31 +41,31 @@ public class TrustAlertAssemblingMapper {
             return List.of();
         }
 
-        Map<String, UserInfo> usersById = userDirectoryService.getUserByIds(
+        Map<java.util.UUID, User> usersById = userService.getUsers(
             alerts.stream()
                 .map(TrustAlert::getVolunteer)
                 .map(Volunteer::getId)
                 .distinct()
                 .toList()
-        ).stream().collect(Collectors.toMap(UserInfo::id, Function.identity()));
+        ).stream().collect(Collectors.toMap(User::getId, Function.identity()));
 
         return alerts.stream()
             .map(alert -> toDto(
                 alert,
-                usersById.getOrDefault(alert.getVolunteer().getId(), fallbackUserInfo(alert.getVolunteer().getId()))
+                usersById.getOrDefault(alert.getVolunteer().getId(), fallbackUser(alert.getVolunteer().getId()))
             ))
             .toList();
     }
 
     public TrustAlert toEntity(TrustAlertDto alert) {
         return TrustAlert.builder()
-            .volunteer(volunteerDao.getById(alert.getUserId()))
+            .volunteer(volunteerDao.getById(java.util.UUID.fromString(alert.getUserId())))
             .alertType(alert.getAlertType())
             .createdAt(alert.getCreatedAt())
             .build();
     }
 
-    private UserInfo fallbackUserInfo(String userId) {
-        return new UserInfo(userId, userId, "", "", "", null, false);
+    private User fallbackUser(java.util.UUID userId) {
+        return User.builder().id(userId).username(userId.toString()).email("").build();
     }
 }

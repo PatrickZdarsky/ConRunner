@@ -20,8 +20,8 @@ import at.control.shiftcontrol.shift.dao.EventDao;
 import at.control.shiftcontrol.shift.dto.leaderboard.LeaderBoardDto;
 import at.control.shiftcontrol.shift.dto.leaderboard.RankDto;
 import at.control.shiftcontrol.shift.service.LeaderboardService;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.User;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
@@ -31,7 +31,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     private final EventDao eventDao;
     private final SecurityHelper securityHelper;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
 
     @Override
     public @NonNull LeaderBoardDto getLeaderBoard(long eventId, @NonNull String currentUserId) throws NotFoundException, ForbiddenException {
@@ -50,7 +50,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             Shift shift = a.getPositionSlot().getShift();
 
             long minutes = Duration.between(shift.getStartTime(), shift.getEndTime()).toMinutes();
-            String volunteerId = a.getAssignedVolunteer().getId();
+            String volunteerId = a.getAssignedVolunteer().getId().toString();
             minutesByVolunteer.merge(volunteerId, minutes, Long::sum);
         }
 
@@ -61,17 +61,16 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
         var userIdsToResolve = new LinkedHashSet<>(topVolunteerIds);
         userIdsToResolve.add(currentUserId);
-        Map<String, UserInfo> usersById = userDirectoryService.getUserByIds(userIdsToResolve).stream()
-            .collect(java.util.stream.Collectors.toMap(UserInfo::id, user -> user));
+        Map<java.util.UUID, User> usersById = userService.getUsers(userIdsToResolve.stream().map(java.util.UUID::fromString).toList()).stream()
+            .collect(java.util.stream.Collectors.toMap(User::getId, user -> user));
 
         RankDto ownRank = null;
         if (minutesByVolunteer.containsKey(currentUserId)) {
-            var user = usersById.get(currentUserId);
+            var user = usersById.get(java.util.UUID.fromString(currentUserId));
             ownRank = RankDto.builder()
                 .rank(topVolunteerIds.indexOf(currentUserId) + 1)
                 .hours(minutesByVolunteer.get(currentUserId) / 60)
-                .firstName(user.firstName())
-                .lastName(user.lastName())
+                .name(user.getUsername())
                 .build();
         }
 
@@ -89,14 +88,13 @@ public class LeaderboardServiceImpl implements LeaderboardService {
                 prevMinutes = minutes;
             }
 
-            var user = usersById.get(volunteerId);
+            var user = usersById.get(java.util.UUID.fromString(volunteerId));
             long hours = minutes / 60;
 
             var dto = RankDto.builder()
                 .rank(displayRank)
                 .hours(hours)
-                .firstName(user.firstName())
-                .lastName(user.lastName())
+                .name(user.getUsername())
                 .build();
 
             if (volunteerId.equals(currentUserId)) {

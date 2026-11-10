@@ -81,7 +81,7 @@ public class EventServiceImpl implements EventService {
         }
         String userId = actor.requireUserId().toString();
 
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();
         var planningShiftPlans = volunteer.getPlanningPlans();
 
@@ -105,7 +105,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, String userId) {
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         return ShiftPlanMapper.toShiftPlanDto(getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer));
     }
 
@@ -122,12 +122,11 @@ public class EventServiceImpl implements EventService {
         Set<UUID> allPlannerIds =
             rows.stream()
                 .map(PlanVolunteerIdRow::getVolunteerId)
-                .map(UUID::fromString)
                 .collect(Collectors.toSet());
         var planners = userService.getUsers(allPlannerIds);
 
         // create maps to lookup userIds per plan, planNames and planner-userRepresentations
-        Map<Long, List<String>> volunteerIdsByPlan =
+        Map<Long, List<UUID>> volunteerIdsByPlan =
             rows.stream()
                 .collect(Collectors.groupingBy(
                     PlanVolunteerIdRow::getPlanId,
@@ -169,7 +168,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, String userId) {
         var event = eventDao.getById(eventId);
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
 
         var eventOverviewDto = EventMapper.toEventDto(event);
         var userRelevantShiftPlans = getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer);

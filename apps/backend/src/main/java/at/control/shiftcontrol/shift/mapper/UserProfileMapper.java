@@ -10,13 +10,13 @@ import at.control.shiftcontrol.shift.entity.ShiftPlan;
 import at.control.shiftcontrol.shift.entity.Volunteer;
 import at.control.shiftcontrol.shift.lib.util.ConvertUtil;
 import at.control.shiftcontrol.shift.dto.userprofile.UserProfileDto;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
+import at.control.shiftcontrol.identity.User;
 
 @RequiredArgsConstructor
 @Service
 public class UserProfileMapper {
     public static UserProfileDto toUserProfileDto(
-        UserInfo user,
+        User user,
         Volunteer volunteer,
         String calendarShareId
     ) {

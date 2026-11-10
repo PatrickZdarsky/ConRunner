@@ -18,7 +18,7 @@ public interface TimeConstraintRepository extends JpaRepository<TimeConstraint, 
         WHERE tc.volunteer.id = :volunteerId
           AND tc.event.id = :eventId
         """)
-    Collection<TimeConstraint> searchByVolunteerAndEvent(String volunteerId, long eventId);
+    Collection<TimeConstraint> searchByVolunteerAndEvent(java.util.UUID volunteerId, long eventId);
 
     @Query("""
         SELECT tc
@@ -27,7 +27,7 @@ public interface TimeConstraintRepository extends JpaRepository<TimeConstraint, 
           AND tc.event.id = :eventId
           AND tc.type = :type
         """)
-    Collection<TimeConstraint> searchByVolunteerAndEventAndType(String volunteerId, long eventId, TimeConstraintType type);
+    Collection<TimeConstraint> searchByVolunteerAndEventAndType(java.util.UUID volunteerId, long eventId, TimeConstraintType type);
 
     // Find the assignment and from there through the Positionslot the Shift.
     // Use the startTime and endTime from the Shift to find a TimeConstraint of the given volunteer in the same time range
@@ -58,5 +58,5 @@ public interface TimeConstraintRepository extends JpaRepository<TimeConstraint, 
                 AND tc.startTime <= s.endTime AND tc.endTime >= s.startTime
           )
         """)
-    Collection<TimeConstraint> findByPositionSlotIdAndVolunteerId(long positionSlotId, String volunteerId);
+    Collection<TimeConstraint> findByPositionSlotIdAndVolunteerId(long positionSlotId, java.util.UUID volunteerId);
 }

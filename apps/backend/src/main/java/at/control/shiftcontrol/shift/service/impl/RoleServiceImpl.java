@@ -31,7 +31,7 @@ import at.control.shiftcontrol.shift.dto.userprofile.VolunteerDto;
 import at.control.shiftcontrol.shift.mapper.RoleMapper;
 import at.control.shiftcontrol.shift.mapper.VolunteerAssemblingMapper;
 import at.control.shiftcontrol.shift.service.RoleService;
-import at.control.shiftcontrol.shift.userdirectory.UserLookupService;
+import at.control.shiftcontrol.identity.UserService;
 import at.control.shiftcontrol.shift.util.SecurityHelper;
 
 @Service
@@ -43,7 +43,7 @@ public class RoleServiceImpl implements RoleService {
     private final SecurityHelper securityHelper;
     private final ApplicationEventPublisher publisher;
     private final NotificationRequests notificationRequests;
-    private final UserLookupService userDirectoryService;
+    private final UserService userService;
 
     @Override
     public @org.jspecify.annotations.NonNull Collection<RoleDto> getRoles(long shiftPlanId) {
@@ -111,7 +111,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public @org.jspecify.annotations.NonNull VolunteerDto createUserRoleAssignment(String userId, @org.jspecify.annotations.NonNull UserRoleAssignmentAssignDto assignDto) {
         Role role = roleDao.getById(Long.valueOf(assignDto.getRoleId()));
-        Volunteer volunteer = volunteerDao.getById(userId);
+        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         if (!role.isSelfAssignable()) {
             securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
         }
@@ -124,18 +124,18 @@ public class RoleServiceImpl implements RoleService {
         volunteer.getRoles().add(role);
         volunteerDao.save(volunteer);
 
-        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
             NotificationTypes.ROLE_ASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
 
-        publisher.publishEvent(RoleVolunteerEvent.roleAssigned(role, volunteer.getId()));
-        return VolunteerAssemblingMapper.toDtoFromUser(userDirectoryService.getUserById(volunteer.getId()));
+        publisher.publishEvent(RoleVolunteerEvent.roleAssigned(role, volunteer.getId().toString()));
+        return VolunteerAssemblingMapper.toDtoFromUser(userService.getUser(volunteer.getId()));
     }
 
     @Override
     @Transactional
     public void deleteUserRoleAssignment(String userId, long roleId) {
         Role role = roleDao.getById(roleId);
-        Volunteer volunteer = volunteerDao.getById(userId);
+        Volunteer volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
         if (!role.isSelfAssignable()) {
             securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
         }
@@ -144,9 +144,9 @@ public class RoleServiceImpl implements RoleService {
             throw new NotFoundException("Role is not assigned to this user.");
         }
 
-        publisher.publishEvent(RoleVolunteerEvent.roleUnassigned(role, volunteer.getId()));
+        publisher.publishEvent(RoleVolunteerEvent.roleUnassigned(role, volunteer.getId().toString()));
         volunteerDao.save(volunteer);
-        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), java.util.UUID.fromString(volunteer.getId()),
+        notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
             NotificationTypes.ROLE_UNASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
     }
 }

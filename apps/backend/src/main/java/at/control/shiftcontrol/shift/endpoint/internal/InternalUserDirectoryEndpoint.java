@@ -19,10 +19,14 @@ import lombok.RequiredArgsConstructor;
 import at.control.shiftcontrol.shift.dto.PaginationDto;
 import at.control.shiftcontrol.identity.InternalUserReadOnly;
 import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
-import at.control.shiftcontrol.shift.dto.user.UserSearchDto;
 import at.control.shiftcontrol.shift.dto.userdirectory.InternalUserLookupRequestDto;
 import at.control.shiftcontrol.shift.dto.userprofile.AccountInfoDto;
-import at.control.shiftcontrol.shift.service.userdirectory.InternalUserDirectoryReadService;
+import at.control.shiftcontrol.identity.UserService;
+import at.control.shiftcontrol.identity.UserSearchRequest;
+import java.util.UUID;
+import at.control.shiftcontrol.shift.mapper.AccountInfoMapper;
+import at.control.shiftcontrol.shift.mapper.UserAssemblingMapper;
+import at.control.shiftcontrol.shift.mapper.PaginationMapper;
 
 @Tag(name = "internal-user-directory-endpoint")
 @RestController
@@ -30,24 +34,24 @@ import at.control.shiftcontrol.shift.service.userdirectory.InternalUserDirectory
 @RequiredArgsConstructor
 @InternalUserReadOnly
 public class InternalUserDirectoryEndpoint {
-    private final InternalUserDirectoryReadService service;
+    private final UserService service;
 
     @GetMapping("/{userId}")
     @Operation(
         operationId = "getInternalUser",
-        description = "Resolve a single known user from shiftservice's local user directory"
+        description = "Resolve a single known user from the identity service"
     )
-    public AccountInfoDto getUser(@PathVariable String userId) {
-        return service.getUser(userId);
+    public AccountInfoDto getUser(@PathVariable UUID userId) {
+        return AccountInfoMapper.toDto(service.getUser(userId));
     }
 
     @PostMapping("/batch")
     @Operation(
         operationId = "getInternalUsers",
-        description = "Resolve multiple known users from shiftservice's local user directory"
+        description = "Resolve multiple known users from the identity service"
     )
     public Collection<AccountInfoDto> getUsers(@RequestBody @Valid InternalUserLookupRequestDto request) {
-        return service.getUsers(request.getUserIds());
+        return service.getUsers(request.getUserIds()).stream().map(AccountInfoMapper::toDto).toList();
     }
 
     @PostMapping("/contacts")
@@ -56,7 +60,7 @@ public class InternalUserDirectoryEndpoint {
         description = "Resolve bulk contact data for known users"
     )
     public Collection<ContactInfoDto> getContacts(@RequestBody @Valid InternalUserLookupRequestDto request) {
-        return service.getContacts(request.getUserIds());
+        return service.getUsers(request.getUserIds()).stream().map(UserAssemblingMapper::toContactInfoDto).toList();
     }
 
     @GetMapping
@@ -69,7 +73,8 @@ public class InternalUserDirectoryEndpoint {
         @RequestParam int size,
         @RequestParam(required = false) String name
     ) {
-        var searchDto = UserSearchDto.builder().name(name).build();
-        return service.searchUsers(page, size, searchDto);
+        var searchDto = UserSearchRequest.builder().name(name).build();
+        var result = service.searchUsers(page, size, searchDto);
+        return PaginationMapper.toPaginationDto(size, page, result.getTotalElements(), result.getContent().stream().map(AccountInfoMapper::toDto).toList());
     }
 }

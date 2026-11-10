@@ -20,8 +20,5 @@ public class RankDto {
     private long hours;
 
     @NotNull
-    private String firstName;
-
-    @NotNull
-    private String lastName;
+    private String name;
 }

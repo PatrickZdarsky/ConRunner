@@ -117,7 +117,7 @@ public class StatisticServiceImpl implements StatisticService {
                 if (assignedCount < slot.getDesiredVolunteerCount()
                     && eligibilityService.isEligibleAndNotSignedUp(slot, volunteer)) {
                     var conflictingAssignments = eligibilityService.getConflictingAssignments(
-                        volunteer.getId(),
+                        volunteer.getId().toString(),
                         slot.getShift().getStartTime(),
                         slot.getShift().getEndTime());
 
@@ -177,7 +177,7 @@ public class StatisticServiceImpl implements StatisticService {
     private int calculateVolunteerCountInEvent(Event event) {
         var volunteerSet = new HashSet<String>();
         for (var shiftPlan : event.getShiftPlans()) {
-            volunteerSet.addAll(shiftPlan.getPlanVolunteers().stream().map(Volunteer::getId).toList());
+            volunteerSet.addAll(shiftPlan.getPlanVolunteers().stream().map(v -> v.getId().toString()).toList());
         }
         return volunteerSet.size();
     }

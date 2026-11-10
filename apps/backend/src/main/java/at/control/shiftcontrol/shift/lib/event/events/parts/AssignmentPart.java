@@ -24,7 +24,7 @@ public class AssignmentPart {
     @NonNull
     public static AssignmentPart of(@NonNull Assignment assignment) {
         return AssignmentPart.builder()
-            .volunteerId(assignment.getAssignedVolunteer().getId())
+            .volunteerId(assignment.getAssignedVolunteer().getId().toString())
             .status(assignment.getStatus())
             .positionSlot(PositionSlotPart.of(assignment.getPositionSlot()))
             .build();

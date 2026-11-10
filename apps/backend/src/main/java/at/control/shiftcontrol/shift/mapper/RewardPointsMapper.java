@@ -27,7 +27,7 @@ public class RewardPointsMapper {
     public static RewardPointsTransactionDto toRewardPointsTransactionDto(@NonNull Assignment assignment, int points, String sourceKey,
                                                                           Map<String, Object> metadata) {
         return RewardPointsTransactionDto.builder()
-            .userId(assignment.getAssignedVolunteer().getId())
+            .userId(assignment.getAssignedVolunteer().getId().toString())
             .eventId(assignment.getPositionSlot().getShift().getShiftPlan().getEvent().getId())
             .shiftPlanId(assignment.getPositionSlot().getShift().getShiftPlan().getId())
             .positionSlotId(assignment.getPositionSlot().getId())

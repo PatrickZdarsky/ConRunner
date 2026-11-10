@@ -15,42 +15,41 @@ import at.control.shiftcontrol.platform.exception.NotFoundException;
 import at.control.shiftcontrol.shift.dto.user.ContactInfoDto;
 import at.control.shiftcontrol.shift.dto.user.UserEventDto;
 import at.control.shiftcontrol.shift.dto.user.UserPlanDto;
-import at.control.shiftcontrol.shift.userdirectory.UserInfo;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserAssemblingMapper {
-    public static UserPlanDto toUserPlanDto(Volunteer volunteer, UserInfo user, Long planId) {
+    public static UserPlanDto toUserPlanDto(Volunteer volunteer, User user, Long planId) {
         return UserPlanDto.builder()
             .volunteer(VolunteerAssemblingMapper.toDtoFromUser(user))
-            .email(user.email())
+            .email(user.getEmail())
             .roles(volunteer == null ? null : RoleMapper.toRoleDto(volunteer.getRoles(), planId))
             .isLocked(volunteer == null ? null : volunteer.getLockedPlans().stream().anyMatch(x -> planId.equals(x.getId())))
             .build();
     }
 
-    public static Collection<UserPlanDto> toUserPlanDto(Collection<Volunteer> volunteers, Collection<UserInfo> users, Long planId) {
-        Map<String, UserInfo> usersById = users.stream()
-            .collect(Collectors.toMap(UserInfo::id, Function.identity()));
+    public static Collection<UserPlanDto> toUserPlanDto(Collection<Volunteer> volunteers, Collection<User> users, Long planId) {
+        Map<java.util.UUID, User> usersById = users.stream()
+            .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return volunteers.stream()
             .map(v -> toUserPlanDto(v, getRequiredUser(usersById, v.getId()), planId))
-            .sorted(UserPlanDto.lastNameComparator())
+            .sorted(UserPlanDto.nameComparator())
             .toList();
     }
 
-    public static UserEventDto toUserEventDto(Volunteer volunteer, UserInfo user) {
+    public static UserEventDto toUserEventDto(Volunteer volunteer, User user) {
         if (volunteer == null) {
             return UserEventDto.builder()
                 .volunteer(VolunteerAssemblingMapper.toDtoFromUser(user))
                 .volunteeringPlans(Collections.emptySet())
                 .planningPlans(Collections.emptySet())
                 .lockedPlans(Collections.emptySet())
-                .email(user.email())
+                .email(user.getEmail())
                 .build();
         }
         return UserEventDto.builder()
             .volunteer(VolunteerAssemblingMapper.toDtoFromUser(user))
-            .email(user.email())
+            .email(user.getEmail())
             .volunteeringPlans(volunteer.getVolunteeringPlans()
                 .stream()
                 .map(shiftPlan -> String.valueOf(shiftPlan.getId()))
@@ -66,13 +65,13 @@ public class UserAssemblingMapper {
             .build();
     }
 
-    public static Collection<UserEventDto> toUserEventDtoForUsers(Collection<Volunteer> volunteers, Collection<UserInfo> users) {
-        Map<String, Volunteer> volunteersById = volunteers.stream()
+    public static Collection<UserEventDto> toUserEventDtoForUsers(Collection<Volunteer> volunteers, Collection<User> users) {
+        Map<java.util.UUID, Volunteer> volunteersById = volunteers.stream()
             .collect(Collectors.toMap(Volunteer::getId, Function.identity()));
 
         return users.stream()
-            .map(u -> toUserEventDto(volunteersById.get(u.id()), u))
-            .sorted(UserEventDto.lastNameComparator())
+            .map(u -> toUserEventDto(volunteersById.get(u.getId()), u))
+            .sorted(UserEventDto.nameComparator())
             .toList();
     }
 
@@ -84,8 +83,8 @@ public class UserAssemblingMapper {
             .build();
     }
 
-    private static UserInfo getRequiredUser(Map<String, UserInfo> usersById, String userId) {
-        UserInfo user = usersById.get(userId);
+    private static User getRequiredUser(Map<java.util.UUID, User> usersById, java.util.UUID userId) {
+        User user = usersById.get(userId);
         if (user == null) {
             throw new NotFoundException();
         }

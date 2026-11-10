@@ -29,7 +29,7 @@ public class UserAttributeProviderImpl implements UserAttributeProvider {
         attributesCache = Caffeine.newBuilder()
             .maximumSize(2000)
             .expireAfterAccess(java.time.Duration.ofMinutes(20))
-            .build((userId) -> volunteerDao.findById(userId.toString())
+            .build((userId) -> volunteerDao.findById(userId)
                 .map(volunteer -> new UserAttributes(
                     volunteer.getVolunteeringPlans().stream().map(ShiftPlan::getId).collect(Collectors.toUnmodifiableSet()),
                     volunteer.getPlanningPlans().stream().map(ShiftPlan::getId).collect(Collectors.toUnmodifiableSet()),

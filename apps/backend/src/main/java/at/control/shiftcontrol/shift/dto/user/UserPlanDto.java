@@ -31,9 +31,9 @@ public class UserPlanDto {
     @NotNull
     private Collection<RoleDto> roles;
 
-    public static Comparator<UserPlanDto> lastNameComparator() {
+    public static Comparator<UserPlanDto> nameComparator() {
         return Comparator.comparing(
-            (UserPlanDto udp ) -> udp.getVolunteer().getLastName(),
+            (UserPlanDto udp ) -> udp.getVolunteer().getName(),
             Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
         );
     }

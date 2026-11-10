@@ -35,7 +35,7 @@ public final class ShiftSpecifications {
             var assignments = slots.join("assignments", JoinType.INNER);
             var volunteer = assignments.join("assignedVolunteer", JoinType.INNER);
 
-            return criteriaBuilder.equal(volunteer.get("id"), userId);
+            return criteriaBuilder.equal(volunteer.get("id"), java.util.UUID.fromString(userId));
         };
     }
 

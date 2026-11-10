@@ -65,7 +65,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
 
         // get event and volunteer
         var event = eventDao.getById(eventId);
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
 
         //VALIDATION: Check that volunteer is part of the event via any of their shift plans
         var userPlans = volunteer.getVolunteeringPlans();
@@ -114,7 +114,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
         var from = emergencyConstraint.getStartTime();
         var to = emergencyConstraint.getEndTime();
 
-        var conflictingAssignments = assignmentDao.getConflictingAssignments(volunteerId, from, to);
+        var conflictingAssignments = assignmentDao.getConflictingAssignments(volunteerId.toString(), from, to);
         for (var assignment : conflictingAssignments) {
             if (assignment.getPositionSlot().getShift().getShiftPlan().getLockStatus() == LockStatus.SELF_SIGNUP) {
                 log.info("Unassigning assignment id={} due to conflicting EMERGENCY time constraint id={}",
@@ -131,12 +131,12 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
                 var trigger = java.util.UUID.randomUUID();
                 if (plan.getPlanPlanners() != null) plan.getPlanPlanners().stream()
                     .map(at.control.shiftcontrol.shift.entity.Volunteer::getId).distinct().forEach(id ->
-                        notificationRequests.request(new NotificationRequest(trigger, java.util.UUID.fromString(id),
+                        notificationRequests.request(new NotificationRequest(trigger, id,
                             NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED, String.valueOf(plan.getEvent().getId()))));
 
                 // publish event
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotRequestLeave(
-                    assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId()));
+                    assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId().toString()));
             }
         }
     }

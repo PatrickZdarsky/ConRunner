@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.entity;
 
 import java.util.Collection;
+import java.util.UUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -25,7 +26,7 @@ import lombok.Setter;
 public class Volunteer {
     @Id
     @NotNull
-    private String id;
+    private UUID id;
 
     @Column(name = "calendar_share_id", unique = true, length = 64)
     private String calendarShareId;

@@ -72,7 +72,7 @@ public class DashboardServiceImpl implements DashboardService {
         var event = eventDao.getById(shiftPlan.getEvent().getId());
         var userShifts = shiftDao.searchUserRelatedShiftsInShiftPlan(shiftPlanId, userId);
         var auctions = assignmentDao.findAuctionsByShiftPlanId(shiftPlanId);
-        var volunteer = volunteerDao.getById(userId);
+        var volunteer = volunteerDao.getById(java.util.UUID.fromString(userId));
 
         // only show auctions where user is eligible to participate or own auctions
         var eligibleAuctions = auctions.stream().filter(
@@ -82,7 +82,7 @@ public class DashboardServiceImpl implements DashboardService {
             )).toList();
         var ownAuctions = auctions.stream().filter(
             assignment -> assignment.getAssignedVolunteer() != null &&
-                assignment.getAssignedVolunteer().getId().equals(userId)
+                assignment.getAssignedVolunteer().getId().toString().equals(userId)
         ).toList();
 
         // add both eligible and own auctions, avoiding duplicates

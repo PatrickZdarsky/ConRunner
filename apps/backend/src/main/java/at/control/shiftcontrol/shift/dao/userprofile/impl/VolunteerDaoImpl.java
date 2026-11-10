@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.dao.userprofile.impl;
 
 import java.util.Collection;
+import java.util.UUID;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ public class VolunteerDaoImpl implements VolunteerDao {
     }
 
     @Override
-    public @NonNull Optional<Volunteer> findById(String id) {
+    public @NonNull Optional<Volunteer> findById(UUID id) {
         return volunteerRepository.findById(id);
     }
 
@@ -33,7 +34,7 @@ public class VolunteerDaoImpl implements VolunteerDao {
     }
 
     @Override
-    public Collection<String> findAllIdsByShiftPlan(long shiftPlanId) {
+    public Collection<UUID> findAllIdsByShiftPlan(long shiftPlanId) {
         return volunteerRepository.findAllIdsByShiftPlan(shiftPlanId);
     }
 
@@ -53,12 +54,12 @@ public class VolunteerDaoImpl implements VolunteerDao {
     }
 
     @Override
-    public Collection<Volunteer> findAllByVolunteerIds(Collection<String> volunteerIds) {
+    public Collection<Volunteer> findAllByVolunteerIds(Collection<UUID> volunteerIds) {
         return volunteerRepository.findAllByVolunteerIds(volunteerIds);
     }
 
     @Override
-    public Collection<Volunteer> findAllByPlannerIds(Collection<String> plannerIds) {
+    public Collection<Volunteer> findAllByPlannerIds(Collection<UUID> plannerIds) {
         return volunteerRepository.findAllByPlannerIds(plannerIds);
     }
 
@@ -78,22 +79,22 @@ public class VolunteerDaoImpl implements VolunteerDao {
     }
 
     @Override
-    public Collection<Volunteer> findAllByShiftPlanAndVolunteerIds(long shiftPlanId, Collection<String> volunteerIds) {
+    public Collection<Volunteer> findAllByShiftPlanAndVolunteerIds(long shiftPlanId, Collection<UUID> volunteerIds) {
         return volunteerRepository.findAllByShiftPlanAndVolunteerIds(shiftPlanId, volunteerIds);
     }
 
     @Override
-    public Collection<Volunteer> findAllByEventAndVolunteerIds(long eventId, Collection<String> volunteerIds) {
+    public Collection<Volunteer> findAllByEventAndVolunteerIds(long eventId, Collection<UUID> volunteerIds) {
         return volunteerRepository.findAllByEventAndVolunteerIds(eventId, volunteerIds);
     }
 
     @Override
-    public Collection<Volunteer> findAllByShiftPlanAndPlannerIds(long shiftPlanId, Collection<String> plannerIds) {
+    public Collection<Volunteer> findAllByShiftPlanAndPlannerIds(long shiftPlanId, Collection<UUID> plannerIds) {
         return volunteerRepository.findAllByShiftPlanAndPlannerIds(shiftPlanId, plannerIds);
     }
 
     @Override
-    public Collection<Volunteer> findAllByEventAndPlannerIds(long eventId, Collection<String> plannerIds) {
+    public Collection<Volunteer> findAllByEventAndPlannerIds(long eventId, Collection<UUID> plannerIds) {
         return volunteerRepository.findAllByEventAndPlannerIds(eventId, plannerIds);
     }
 

@@ -40,7 +40,7 @@ public class EligibilityServiceImpl implements EligibilityService {
     public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull Long positionSlotId, @NonNull String userId) {
         return getSignupStateForPositionSlot(
             positionSlotDao.getById(positionSlotId),
-            volunteerDao.getById(userId)
+            volunteerDao.getById(java.util.UUID.fromString(userId))
         );
     }
 
@@ -48,7 +48,7 @@ public class EligibilityServiceImpl implements EligibilityService {
     public @NonNull PositionSignupState getSignupStateForPositionSlot(@NonNull PositionSlot positionSlot, @NonNull String userId) {
         return getSignupStateForPositionSlot(
             positionSlot,
-            volunteerDao.getById(userId)
+            volunteerDao.getById(java.util.UUID.fromString(userId))
         );
     }
 
@@ -69,7 +69,7 @@ public class EligibilityServiceImpl implements EligibilityService {
         }
 
         var conflictingConstraints =
-            timeConstraintDao.findByPositionSlotIdAndVolunteerId(positionSlot.getId(), volunteer.getId());
+            timeConstraintDao.findByPositionSlotIdAndVolunteerId(positionSlot.getId(), volunteer.getId().toString());
         if (!conflictingConstraints.isEmpty()) {
             return PositionSignupState.TIME_CONFLICT_TIME_CONSTRAINT;
         }
@@ -77,10 +77,10 @@ public class EligibilityServiceImpl implements EligibilityService {
         Collection<Assignment> conflictingAssignments;
         if (slotToExclude != null) {
             conflictingAssignments = assignmentDao.getConflictingAssignmentsExcludingSlot(
-                volunteer.getId(), slotToExclude
+                volunteer.getId().toString(), slotToExclude
             );
         } else {
-            conflictingAssignments = assignmentDao.getConflictingAssignments(volunteer.getId(), positionSlot);
+            conflictingAssignments = assignmentDao.getConflictingAssignments(volunteer.getId().toString(), positionSlot);
         }
         if (!conflictingAssignments.isEmpty()) {
             return PositionSignupState.TIME_CONFLICT_ASSIGNMENT;
@@ -92,7 +92,7 @@ public class EligibilityServiceImpl implements EligibilityService {
         }
 
         boolean hasCapacity = hasCapacity(positionSlot);
-        boolean isTradePossible = hasOpenTradeForUser(positionSlot, volunteer.getId());
+        boolean isTradePossible = hasOpenTradeForUser(positionSlot, volunteer.getId().toString());
 
         if (hasCapacity && isTradePossible) {
             return PositionSignupState.SIGNUP_OR_TRADE;
@@ -247,7 +247,7 @@ public class EligibilityServiceImpl implements EligibilityService {
         return slot.getAssignments() != null && slot.getAssignments().stream().anyMatch(assignment ->
             assignment.getOutgoingSwitchRequests().stream().anyMatch(req ->
                 req.getStatus() == TradeStatus.OPEN
-                    && req.getRequestedAssignment().getAssignedVolunteer().getId().equals(userId)
+                    && req.getRequestedAssignment().getAssignedVolunteer().getId().toString().equals(userId)
             )
         );
     }

@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class PlanVolunteerIdRow {
     private long planId;
     private String planName;
-    private String volunteerId;
+    private java.util.UUID volunteerId;
 }

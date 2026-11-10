@@ -73,7 +73,7 @@ public class EventDaoImpl implements EventDao {
 
     @Override
     public Collection<Event> getAllOpenEventsForUser(String userId) {
-        return eventRepository.getAllOpenEventsForUser(userId, Instant.now());
+        return eventRepository.getAllOpenEventsForUser(java.util.UUID.fromString(userId), Instant.now());
     }
 
     @Override
@@ -88,7 +88,7 @@ public class EventDaoImpl implements EventDao {
 
     @Override
     public Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, String userId) {
-        return eventRepository.getPlannersForEventAndUser(eventId, userId);
+        return eventRepository.getPlannersForEventAndUser(eventId, java.util.UUID.fromString(userId));
     }
 
     @Override

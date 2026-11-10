@@ -26,7 +26,7 @@ public class TrustAlertPart {
     public static TrustAlertPart of(TrustAlert trustAlert) {
         return TrustAlertPart.builder()
             .id(String.valueOf(trustAlert.getId()))
-            .volunteerId(trustAlert.getVolunteer().getId())
+            .volunteerId(trustAlert.getVolunteer().getId().toString())
             .alertType(trustAlert.getAlertType())
             .createdAt(trustAlert.getCreatedAt())
             .build();
