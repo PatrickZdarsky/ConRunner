@@ -44,4 +44,25 @@ class NotificationHistoryService {
         if (changed) revisions.increment(userId);
         return changed;
     }
+
+    @Transactional
+    public int markAllRead(UUID userId) {
+        int changed = repository.markAllRead(userId, Instant.now());
+        if (changed > 0) revisions.increment(userId);
+        return changed;
+    }
+
+    @Transactional
+    public boolean delete(UUID userId, UUID notificationId) {
+        boolean changed = repository.deleteOwned(notificationId, userId) == 1;
+        if (changed) revisions.increment(userId);
+        return changed;
+    }
+
+    @Transactional
+    public int clear(UUID userId) {
+        int changed = repository.deleteAllOwned(userId);
+        if (changed > 0) revisions.increment(userId);
+        return changed;
+    }
 }

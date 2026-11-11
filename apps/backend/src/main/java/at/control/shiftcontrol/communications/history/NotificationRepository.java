@@ -14,6 +14,18 @@ interface NotificationRepository extends JpaRepository<NotificationEntity, UUID>
     @Query("update NotificationEntity n set n.readAt = :readAt where n.id = :id and n.recipientId = :recipientId")
     int setReadAt(@Param("id") UUID id, @Param("recipientId") UUID recipientId, @Param("readAt") Instant readAt);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update NotificationEntity n set n.readAt = :readAt where n.recipientId = :recipientId and n.readAt is null")
+    int markAllRead(@Param("recipientId") UUID recipientId, @Param("readAt") Instant readAt);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from NotificationEntity n where n.id = :id and n.recipientId = :recipientId")
+    int deleteOwned(@Param("id") UUID id, @Param("recipientId") UUID recipientId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from NotificationEntity n where n.recipientId = :recipientId")
+    int deleteAllOwned(@Param("recipientId") UUID recipientId);
+
     @Modifying
     @Query(value = """
         insert into communications_notification

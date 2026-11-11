@@ -1,12 +1,36 @@
 package at.control.shiftcontrol.communications.request;
 
+import at.control.shiftcontrol.communications.api.NotificationContext;
+import at.control.shiftcontrol.communications.api.NotificationTypes;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class NotificationRequestWorkerTest {
+    @Test
+    void distinguishesBulkAdditionsAndRemovals() {
+        assertThat(NotificationTemplates.render(NotificationTypes.ROLES_CHANGED,
+            NotificationContext.decode(NotificationContext.encode("42", "", "added"))).body())
+            .isEqualTo("You were assigned new roles.");
+        assertThat(NotificationTemplates.render(NotificationTypes.MEMBERSHIP_CHANGED,
+            NotificationContext.decode(NotificationContext.encode("42", "", "removed"))).body())
+            .isEqualTo("You were removed from plans.");
+    }
+    @Test
+    void rendersContextAndPlanLinkFromQueuedRequest() {
+        var processing = mock(NotificationRequestProcessingService.class);
+        var request = new NotificationRequestProcessingService.ClaimedRequest(
+            UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(),
+            NotificationTypes.ASSIGNMENT_JOIN_REQUESTED,
+            NotificationContext.encode("42:7", "Reception", null), 1, false, true);
+        when(processing.claim(anyInt(), any())).thenReturn(List.of(request));
+        new NotificationRequestWorker(processing).process();
+        verify(processing).completeWithHistory(request, "Join requested", "A volunteer requested to join slot 'Reception'.",
+            "/events/42/plans?planId=7&mode=assignments&status=REQUEST_FOR_ASSIGNMENT");
+    }
     @Test
     void rendersTradeLinkFromValidatedEventIdentifier() {
         var processing = mock(NotificationRequestProcessingService.class);

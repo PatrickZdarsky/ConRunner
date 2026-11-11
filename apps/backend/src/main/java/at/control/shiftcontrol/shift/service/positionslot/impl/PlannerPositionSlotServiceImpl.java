@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.positionslot.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -117,7 +118,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
 
     private void notifyVolunteer(PositionSlot slot, UUID userId, String type) {
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), userId,
-            type, String.valueOf(slot.getShift().getShiftPlan().getEvent().getId())));
+            type, NotificationContext.encode(String.valueOf(slot.getShift().getShiftPlan().getEvent().getId()), slot.getName(), null)));
     }
 
     @Override

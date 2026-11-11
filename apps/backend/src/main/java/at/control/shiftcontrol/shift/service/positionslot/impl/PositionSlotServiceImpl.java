@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.positionslot.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -201,7 +202,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         if (plan.getPlanPlanners() == null) return;
         plan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
             notificationRequests.request(new NotificationRequest(triggerId, id,
-                type, String.valueOf(plan.getEvent().getId()))));
+                type, NotificationContext.encode(plan.getEvent().getId() + ":" + plan.getId(), slot.getName(), null))));
     }
 
     private void assertJoinPossible(PositionSlot positionSlot, Volunteer volunteer) {

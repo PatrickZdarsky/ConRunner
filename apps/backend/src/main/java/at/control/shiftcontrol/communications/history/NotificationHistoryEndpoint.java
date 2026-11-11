@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +39,21 @@ class NotificationHistoryEndpoint {
     void setRead(Authentication authentication, @PathVariable UUID id, @RequestBody ReadState state) {
         if (state == null || state.read() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Read state is required");
         if (!history.setRead(userId(authentication), id, state.read())) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/read-all")
+    void markAllRead(Authentication authentication) {
+        history.markAllRead(userId(authentication));
+    }
+
+    @DeleteMapping("/{id}")
+    void delete(Authentication authentication, @PathVariable UUID id) {
+        if (!history.delete(userId(authentication), id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping
+    void clear(Authentication authentication) {
+        history.clear(userId(authentication));
     }
 
     private UUID userId(Authentication authentication) {

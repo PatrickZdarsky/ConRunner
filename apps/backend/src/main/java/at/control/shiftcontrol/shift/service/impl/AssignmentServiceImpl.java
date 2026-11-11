@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -55,7 +56,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         rewardPointsService.onAssignmentReassignedAuction(oldAuction, auction, requestDto.getAcceptedRewardPointsConfigHash());
 
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), oldVolunteerId,
-            NotificationTypes.AUCTION_CLAIMED, String.valueOf(auction.getPositionSlot().getShift().getShiftPlan().getEvent().getId())));
+            NotificationTypes.AUCTION_CLAIMED, NotificationContext.encode(String.valueOf(auction.getPositionSlot().getShift().getShiftPlan().getEvent().getId()), auction.getPositionSlot().getName(), null)));
 
         publisher.publishEvent(ClaimedAuctionEvent.auctionClaimed(auction, oldAuction, oldVolunteerId.toString()));
         return auction;
@@ -193,7 +194,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         requests.forEach(request -> {
             notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
                 request.getAssignedVolunteer().getId(), NotificationTypes.ASSIGNMENT_JOIN_DECLINED,
-                String.valueOf(shiftPlan.getEvent().getId())));
+                NotificationContext.encode(String.valueOf(shiftPlan.getEvent().getId()), request.getPositionSlot().getName(), null)));
             publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId().toString()));
         });
 

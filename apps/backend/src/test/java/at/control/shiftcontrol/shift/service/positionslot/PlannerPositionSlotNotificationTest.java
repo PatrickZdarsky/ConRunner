@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.positionslot;
 
 import at.control.shiftcontrol.communications.api.NotificationRequest;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 import at.control.shiftcontrol.communications.api.NotificationRequests;
 import at.control.shiftcontrol.shift.dao.AssignmentDao;
 import at.control.shiftcontrol.shift.entity.Assignment;
@@ -47,6 +48,7 @@ class PlannerPositionSlotNotificationTest {
         when(assignment.getStatus()).thenReturn(AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
         when(eligibility.hasCapacity(slot)).thenReturn(true);
         when(slot.getShift()).thenReturn(shift);
+        when(slot.getName()).thenReturn("Reception");
         when(shift.getShiftPlan()).thenReturn(plan);
         when(plan.getEvent()).thenReturn(event);
         when(event.getId()).thenReturn(42L);
@@ -55,6 +57,7 @@ class PlannerPositionSlotNotificationTest {
         verify(notifications).request(request.capture());
         assertThat(request.getValue().recipientId()).isEqualTo(userId);
         assertThat(request.getValue().type()).isEqualTo("shift.assignment.join.accepted");
-        assertThat(request.getValue().templateData()).isEqualTo("42");
+        assertThat(NotificationContext.decode(request.getValue().templateData()))
+            .isEqualTo(new NotificationContext("42", "Reception", ""));
     }
 }

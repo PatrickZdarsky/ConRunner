@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -126,7 +127,7 @@ public class RoleServiceImpl implements RoleService {
         volunteerDao.save(volunteer);
 
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
-            NotificationTypes.ROLE_ASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
+            NotificationTypes.ROLE_ASSIGNED, NotificationContext.encode(String.valueOf(role.getShiftPlan().getEvent().getId()), role.getName(), null)));
 
         publisher.publishEvent(RoleVolunteerEvent.roleAssigned(role, volunteer.getId().toString()));
         return VolunteerAssemblingMapper.toDtoFromUser(userService.getUser(volunteer.getId()));
@@ -148,6 +149,6 @@ public class RoleServiceImpl implements RoleService {
         publisher.publishEvent(RoleVolunteerEvent.roleUnassigned(role, volunteer.getId().toString()));
         volunteerDao.save(volunteer);
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
-            NotificationTypes.ROLE_UNASSIGNED, String.valueOf(role.getShiftPlan().getEvent().getId())));
+            NotificationTypes.ROLE_UNASSIGNED, NotificationContext.encode(String.valueOf(role.getShiftPlan().getEvent().getId()), role.getName(), null)));
     }
 }

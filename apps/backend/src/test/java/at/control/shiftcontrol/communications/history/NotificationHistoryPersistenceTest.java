@@ -31,5 +31,13 @@ class NotificationHistoryPersistenceTest {
         assertThat(revisions.current(owner)).isEqualTo(1);
         assertThat(history.list(owner, 0, 10, null, true, null, null).getContent())
             .singleElement().satisfies(notificationResult -> assertThat(notificationResult.readAt()).isNotNull());
+        assertThat(history.delete(other, notification)).isFalse();
+        assertThat(history.clear(other)).isZero();
+        assertThat(history.setRead(owner, notification, false)).isTrue();
+        assertThat(history.markAllRead(other)).isZero();
+        assertThat(history.markAllRead(owner)).isEqualTo(1);
+        assertThat(history.delete(owner, notification)).isTrue();
+        assertThat(history.list(owner, 0, 10, null, null, null, null)).isEmpty();
+        assertThat(revisions.current(owner)).isEqualTo(4);
     }
 }

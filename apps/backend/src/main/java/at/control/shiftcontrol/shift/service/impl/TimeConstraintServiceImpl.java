@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -129,10 +130,11 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
 
                 var plan = assignment.getPositionSlot().getShift().getShiftPlan();
                 var trigger = java.util.UUID.randomUUID();
+                var slotName = assignment.getPositionSlot().getName();
                 if (plan.getPlanPlanners() != null) plan.getPlanPlanners().stream()
                     .map(at.control.shiftcontrol.shift.entity.Volunteer::getId).distinct().forEach(id ->
                         notificationRequests.request(new NotificationRequest(trigger, id,
-                            NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED, String.valueOf(plan.getEvent().getId()))));
+                            NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED, NotificationContext.encode(plan.getEvent().getId() + ":" + plan.getId(), slotName, null))));
 
                 // publish event
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotRequestLeave(

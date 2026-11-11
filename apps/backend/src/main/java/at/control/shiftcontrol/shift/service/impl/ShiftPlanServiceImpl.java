@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -382,10 +383,10 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             var eventId = String.valueOf(shiftPlan.getEvent().getId());
             if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN && shiftPlan.getPlanPlanners() != null) {
                 shiftPlan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
-                    notificationRequests.request(new NotificationRequest(triggerId, id, NotificationTypes.PLAN_VOLUNTEER_JOINED, eventId)));
+                    notificationRequests.request(new NotificationRequest(triggerId, id, NotificationTypes.PLAN_VOLUNTEER_JOINED, NotificationContext.encode(eventId + ":" + shiftPlan.getId(), shiftPlan.getName(), null))));
             } else if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
                 identityUsers.getPlatformAdmins().forEach(admin ->
-                    notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, eventId)));
+                    notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, NotificationContext.encode("volunteer:" + userId, shiftPlan.getName(), null))));
             }
         }
 

@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.communications.api.NotificationContext;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -274,7 +275,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             }
         }
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
-        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED));
+        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED, "added"));
         publisher.publishEvent(UserPlanBulkEvent.add(volunteers, roles, shiftPlan));
         return getUserPlanDtos(shiftPlanId, volunteers);
     }
@@ -289,7 +290,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             v.getRoles().removeAll(roles);
         }
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
-        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED));
+        volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED, "removed"));
         publisher.publishEvent(UserPlanBulkEvent.remove(volunteers, roles, shiftPlan));
         return getUserPlanDtos(shiftPlanId, volunteers);
     }
@@ -307,7 +308,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
                 }
             }
         }
-        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED));
+        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED, "added"));
         publisher.publishEvent(UserEventBulkEvent.add(volunteers, plans));
         return getUserEventDtos(volunteers);
     }
@@ -324,15 +325,19 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
                 Collections.emptySet()
             );
         }
-        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED));
+        volunteers.forEach(v -> notifyUser(v, plans, NotificationTypes.MEMBERSHIP_CHANGED, "removed"));
         publisher.publishEvent(UserEventBulkEvent.remove(volunteers, plans));
         return getUserEventDtos(volunteers);
     }
 
     private void notifyUser(Volunteer volunteer, Collection<ShiftPlan> plans, String type) {
+        notifyUser(volunteer, plans, type, "");
+    }
+
+    private void notifyUser(Volunteer volunteer, Collection<ShiftPlan> plans, String type, String change) {
         plans.stream().map(plan -> plan.getEvent().getId()).distinct().forEach(eventId ->
             notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
-                type, String.valueOf(eventId))));
+                type, NotificationContext.encode(String.valueOf(eventId), "", change))));
     }
 
     private @NonNull Collection<UserPlanDto> getUserPlanDtos(long shiftPlanId, Collection<Volunteer> volunteers) {
