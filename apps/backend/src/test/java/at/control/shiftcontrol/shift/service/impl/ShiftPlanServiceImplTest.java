@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ShiftPlanServiceImplTest {
+    @Mock at.control.shiftcontrol.shift.audit.OperationsAudit operationsAudit;
+    @Mock at.control.shiftcontrol.shift.audit.PlanningAudit planningAudit;
     @Mock EventDao eventDao;
     @Mock ShiftPlanDao shiftPlanDao;
     @Mock ShiftPlanInviteDao inviteDao;

@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TimeConstraintServiceImplTest {
 
+    @Mock at.control.shiftcontrol.shift.audit.OperationsAudit operationsAudit;
     @Mock
     private TimeConstraintDao timeConstraintDao;
     @Mock

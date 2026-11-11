@@ -64,7 +64,7 @@ class EventImportServiceImplTest {
     @Test
     void importEvent_createsLocationsActivitiesAndShiftsInOrder() throws Exception {
         EventImportWorkbookParser parser = new EventImportWorkbookParser();
-        service = new EventImportServiceImpl(eventDao, shiftPlanDao, shiftDao, locationDao, activityDao, shiftMapper, parser, publisher);
+        service = new EventImportServiceImpl(org.mockito.Mockito.mock(at.control.shiftcontrol.shift.audit.EventManagementAudit.class), eventDao, shiftPlanDao, shiftDao, locationDao, activityDao, shiftMapper, parser, publisher);
 
         MockMultipartFile file = new MockMultipartFile(
             "file",

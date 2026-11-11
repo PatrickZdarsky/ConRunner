@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerPositionSlotNotificationTest {
+    @Mock at.control.shiftcontrol.shift.audit.PlanningAudit planningAudit;
     @Mock AssignmentDao assignments;
     @Mock AssignmentService assignmentService;
     @Mock SecurityHelper security;

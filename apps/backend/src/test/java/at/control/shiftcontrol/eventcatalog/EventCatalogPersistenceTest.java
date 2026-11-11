@@ -29,6 +29,9 @@ import jakarta.persistence.EntityManager;
 @DataJpaTest
 @Import({TestcontainersConfiguration.class, EventService.class, LocationService.class, SessionService.class})
 class EventCatalogPersistenceTest {
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    at.control.shiftcontrol.eventcatalog.audit.CatalogAudit audit;
+
     private static final Instant START = Instant.parse("2026-05-12T07:00:00Z");
     private static final Instant END = Instant.parse("2026-05-12T22:00:00Z");
 

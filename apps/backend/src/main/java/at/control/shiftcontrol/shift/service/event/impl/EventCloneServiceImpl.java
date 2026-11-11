@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.event.impl;
 
+import at.control.shiftcontrol.shift.audit.EventManagementAudit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import at.control.shiftcontrol.shift.service.event.EventCloneService;
 @Service
 @RequiredArgsConstructor
 public class EventCloneServiceImpl implements EventCloneService {
+    private final EventManagementAudit eventManagementAudit;
     private final EventDao eventDao;
     private final ApplicationEventPublisher publisher;
 
@@ -63,6 +65,7 @@ public class EventCloneServiceImpl implements EventCloneService {
         // Persist everything once (cascades handle deep graph)
         Event persisted = eventDao.save(target);
 
+        eventManagementAudit.record("event", "cloned", persisted.getId(), null, eventManagementAudit.snapshot(persisted));
         publisher.publishEvent(EventEvent.eventCloned(persisted, source.getId()));
         return EventMapper.toEventDto(persisted);
     }

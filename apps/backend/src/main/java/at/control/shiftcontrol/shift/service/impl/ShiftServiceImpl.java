@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import org.springframework.transaction.annotation.Transactional;
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+import at.control.shiftcontrol.shift.audit.PlanningAudit;
 import java.util.UUID;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +38,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @RequiredArgsConstructor
 public class ShiftServiceImpl implements ShiftService {
     private final AssignmentAudit audit;
+    private final PlanningAudit planningAudit;
     private final ShiftDao shiftDao;
     private final ShiftPlanDao shiftPlanDao;
     private final ActivityDao activityDao;
@@ -93,6 +95,7 @@ public class ShiftServiceImpl implements ShiftService {
     }
 
     @Override
+    @Transactional
     public @org.jspecify.annotations.NonNull ShiftDto createShift(long shiftPlanId, @NonNull ShiftModificationDto modificationDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
 
@@ -104,19 +107,23 @@ public class ShiftServiceImpl implements ShiftService {
         validateModificationDtoAndSetShiftFields(modificationDto, newShift);
         newShift = shiftDao.save(newShift);
 
+        planningAudit.shiftCreated(newShift);
         publisher.publishEvent(ShiftEvent.shiftCreated(newShift));
         return shiftAssemblingMapper.assemble(newShift);
     }
 
     @Override
+    @Transactional
     public @org.jspecify.annotations.NonNull ShiftDto updateShift(long shiftId, @NonNull ShiftModificationDto modificationDto) {
         var shift = shiftDao.getById(shiftId);
         securityHelper.assertUserIsPlanner(shift);
 
+        var before = planningAudit.snapshot(shift);
         validateModificationDtoAndSetShiftFields(modificationDto, shift);
 
         shift = shiftDao.save(shift);
 
+        planningAudit.shiftUpdated(shift, before);
         publisher.publishEvent(ShiftEvent.shiftUpdated(shift));
         return shiftAssemblingMapper.assemble(shift);
     }
@@ -173,6 +180,7 @@ public class ShiftServiceImpl implements ShiftService {
         var shift = shiftDao.getById(shiftId);
         securityHelper.assertUserIsPlanner(shift);
 
+        planningAudit.shiftDeleted(shift);
         audit.removedWithShift(shift, "Assignment removed when shift was deleted");
         var shiftEvent = ShiftEvent.shiftDeleted(shift);
         shiftDao.delete(shift);

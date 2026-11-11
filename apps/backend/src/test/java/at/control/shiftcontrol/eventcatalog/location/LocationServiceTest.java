@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class LocationServiceTest {
+    @Mock at.control.shiftcontrol.eventcatalog.audit.CatalogAudit audit;
     @Mock
     private EventRepository eventRepository;
 

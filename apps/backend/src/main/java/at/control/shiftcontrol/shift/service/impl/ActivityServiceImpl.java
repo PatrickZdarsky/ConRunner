@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.shift.audit.EventManagementAudit;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
+    private final EventManagementAudit eventManagementAudit;
     private final EventDao eventDao;
     private final ActivityDao activityDao;
     private final LocationDao locationDao;
@@ -57,6 +60,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @org.jspecify.annotations.NonNull ActivityDto createActivity(long eventId, @NonNull ActivityModificationDto modificationDto) {
         var event = eventDao.getById(eventId);
 
@@ -72,21 +76,25 @@ public class ActivityServiceImpl implements ActivityService {
         //ACT
         activity = activityDao.save(activity);
 
+        eventManagementAudit.record("activity", "created", activity.getId(), null, eventManagementAudit.snapshot(activity));
         publisher.publishEvent(ActivityEvent.activityCreated(activity));
         return ActivityMapper.toActivityDto(activity);
     }
 
     @Override
     @AdminOnly
+    @Transactional
     public @org.jspecify.annotations.NonNull ActivityDto updateActivity(long activityId, @NonNull ActivityModificationDto modificationDto) {
         var activity = activityDao.getById(activityId);
 
+        var before = eventManagementAudit.snapshot(activity);
         //VALIDATION
         validateNameUniquenessInEvent(activity.getEvent().getId(), modificationDto.getName(), activityId);
         activity = validateModificationDtoAndSetActivityFields(modificationDto, activity);
 
         activity = activityDao.save(activity);
 
+        eventManagementAudit.record("activity", "updated", activity.getId(), before, eventManagementAudit.snapshot(activity));
         publisher.publishEvent(ActivityEvent.activityUpdated(activity));
         return ActivityMapper.toActivityDto(activity);
     }
@@ -129,6 +137,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void deleteActivity(long activityId) {
         var activity = activityDao.getById(activityId);
 
@@ -136,6 +145,7 @@ public class ActivityServiceImpl implements ActivityService {
             throw new BadRequestException("Cannot modify read-only activity");
         }
 
+        eventManagementAudit.record("activity", "deleted", activity.getId(), eventManagementAudit.snapshot(activity), null);
         var activityEvent = ActivityEvent.activityDeleted(activity);
         activityDao.delete(activity);
         publisher.publishEvent(activityEvent);

@@ -31,6 +31,21 @@ public interface AssignmentSwitchRequestRepository extends JpaRepository<Assignm
     Optional<AssignmentSwitchRequest> findBySlotsAndUsers(long offeredSlotId, java.util.UUID offeringUserId,
                                                           long requestedSlotId, java.util.UUID requestedUserId);
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select t from AssignmentSwitchRequest t
+        where (t.offeringAssignment.positionSlot.id = :positionSlotId and t.offeringAssignment.assignedVolunteer.id = :assignedUser)
+           or (t.requestedAssignment.positionSlot.id = :positionSlotId and t.requestedAssignment.assignedVolunteer.id = :assignedUser)
+        """)
+    List<AssignmentSwitchRequest> lockTradesForAssignment(long positionSlotId, java.util.UUID assignedUser);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        select t from AssignmentSwitchRequest t
+        where t.offeringAssignment.positionSlot.id = :positionSlotId and t.requestedAssignment.assignedVolunteer.id = :userId
+        """)
+    List<AssignmentSwitchRequest> lockTradesForOfferedPositionAndRequestedUser(long positionSlotId, java.util.UUID userId);
+
     @Modifying
     @Query("""
             UPDATE AssignmentSwitchRequest a

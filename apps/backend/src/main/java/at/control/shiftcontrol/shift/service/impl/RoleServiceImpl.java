@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -39,6 +40,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
+    private final OperationsAudit operationsAudit;
     private final RoleDao roleDao;
     private final ShiftPlanDao shiftPlanDao;
     private final VolunteerDao volunteerDao;
@@ -60,6 +62,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public @org.jspecify.annotations.NonNull RoleDto createRole(long shiftPlanId, @NonNull RoleModificationDto roleDto) {
         securityHelper.assertUserIsPlanner(shiftPlanId);
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
@@ -68,19 +71,24 @@ public class RoleServiceImpl implements RoleService {
         var role = RoleMapper.toRole(roleDto);
         role.setShiftPlan(shiftPlan);
 
+        role = roleDao.save(role);
+        operationsAudit.role(role, "created", null, operationsAudit.snapshot(role));
         publisher.publishEvent(RoleEvent.roleCreated(role));
-        return RoleMapper.toRoleDto(roleDao.save(role));
+        return RoleMapper.toRoleDto(role);
     }
 
     @Override
+    @Transactional
     public @org.jspecify.annotations.NonNull RoleDto updateRole(long roleId, @NonNull RoleModificationDto roleDto) {
         var role = roleDao.getById(roleId);
         securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
         validateUniqueNameInShiftPlan(roleDto.getName(), role.getShiftPlan().getId(), roleId);
 
+        var before = operationsAudit.snapshot(role);
         updateRole(roleDto, role);
         role = roleDao.save(role);
 
+        operationsAudit.role(role, "updated", before, operationsAudit.snapshot(role));
         publisher.publishEvent(RoleEvent.roleUpdated(role));
         return RoleMapper.toRoleDto(role);
     }
@@ -100,10 +108,12 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void deleteRole(long roleId) {
         Role role = roleDao.getById(roleId);
         securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
 
+        operationsAudit.role(role, "deleted", operationsAudit.snapshot(role), null);
         var roleEvent = RoleEvent.roleDeleted(role);
         publisher.publishEvent(roleEvent);
         roleDao.delete(role);
@@ -129,6 +139,7 @@ public class RoleServiceImpl implements RoleService {
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),
             NotificationTypes.ROLE_ASSIGNED, NotificationContext.encode(String.valueOf(role.getShiftPlan().getEvent().getId()), role.getName(), null)));
 
+        operationsAudit.membership(role, userId, true);
         publisher.publishEvent(RoleVolunteerEvent.roleAssigned(role, volunteer.getId().toString()));
         return VolunteerAssemblingMapper.toDtoFromUser(userService.getUser(volunteer.getId()));
     }
@@ -146,6 +157,7 @@ public class RoleServiceImpl implements RoleService {
             throw new NotFoundException("Role is not assigned to this user.");
         }
 
+        operationsAudit.membership(role, userId, false);
         publisher.publishEvent(RoleVolunteerEvent.roleUnassigned(role, volunteer.getId().toString()));
         volunteerDao.save(volunteer);
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), volunteer.getId(),

@@ -22,6 +22,9 @@ public class TrustAlertDaoImpl implements TrustAlertDao {
     }
 
     @Override
+    public java.util.Optional<TrustAlert> findById(long id) { return repository.findById(id); }
+
+    @Override
     public TrustAlert save(TrustAlert alert) {
         return repository.save(alert);
     }

@@ -1,0 +1,5 @@
+# The audit store uses JDBC and therefore needs its migration even when Hibernate
+# creates the remaining local development schema.
+databaseChangeLog:
+  - include:
+      file: db/changelog/audit/db.changelog-audit.yaml

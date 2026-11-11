@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.shift.audit.EventManagementAudit;
 import java.util.Collection;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,6 +25,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class LocationServiceImpl implements LocationService {
+    private final EventManagementAudit eventManagementAudit;
     private final LocationDao locationDao;
     private final EventDao eventDao;
     private final SecurityHelper securityHelper;
@@ -46,6 +49,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @NonNull LocationDto createLocation(long eventId, @NonNull LocationModificationDto modificationDto) {
         var event = eventDao.getById(eventId);
 
@@ -61,6 +65,7 @@ public class LocationServiceImpl implements LocationService {
 
         newLocation = locationDao.save(newLocation);
 
+        eventManagementAudit.record("location", "created", newLocation.getId(), null, eventManagementAudit.snapshot(newLocation));
         publisher.publishEvent(LocationEvent.locationCreated(newLocation));
         return LocationMapper.toLocationDto(newLocation);
     }
@@ -68,6 +73,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @NonNull LocationDto updateLocation(long locationId, @NonNull LocationModificationDto modificationDto) {
         var location = locationDao.getById(locationId);
 
@@ -77,12 +83,14 @@ public class LocationServiceImpl implements LocationService {
 
         validateNameUniquenessInEvent(location.getEvent().getId(), modificationDto.getName(), locationId);
 
+        var before = eventManagementAudit.snapshot(location);
         location.setName(modificationDto.getName());
         location.setDescription(modificationDto.getDescription());
         location.setUrl(modificationDto.getUrl());
 
         location = locationDao.save(location);
 
+        eventManagementAudit.record("location", "updated", location.getId(), before, eventManagementAudit.snapshot(location));
         publisher.publishEvent(LocationEvent.locationUpdated(location));
         return LocationMapper.toLocationDto(location);
     }
@@ -96,6 +104,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void deleteLocation(long locationId) {
         var location = locationDao.getById(locationId);
 
@@ -103,6 +112,7 @@ public class LocationServiceImpl implements LocationService {
             throw new BadRequestException("Cannot modify read-only location");
         }
 
+        eventManagementAudit.record("location", "deleted", location.getId(), eventManagementAudit.snapshot(location), null);
         var locationEvent = LocationEvent.locationDeleted(location);
         locationDao.delete(location);
         publisher.publishEvent(locationEvent);

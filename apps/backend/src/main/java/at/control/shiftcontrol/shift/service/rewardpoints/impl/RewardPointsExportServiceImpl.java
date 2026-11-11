@@ -45,7 +45,7 @@ import at.control.shiftcontrol.identity.UserService;
 
 @Service
 public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl implements RewardPointsExportService {
-    public RewardPointsExportServiceImpl(RewardPointsCalculator calculator,
+    public RewardPointsExportServiceImpl(at.control.shiftcontrol.audit.api.AuditRecorder auditRecorder, RewardPointsCalculator calculator,
                                          RewardPointsLedgerService ledgerService,
                                          RewardPointsShareTokenDao rewardPointsShareTokenDao,
                                          EventDao eventDao, VolunteerDao volunteerDao,
@@ -53,7 +53,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
                                          UserService userService,
                                          ApplicationEventPublisher publisher,
                                          UniqueCodeGenerator uniqueCodeGenerator) {
-        super(calculator, ledgerService, rewardPointsShareTokenDao, eventDao, volunteerDao, rewardPointsTransactionDao, userService, publisher,
+        super(auditRecorder, calculator, ledgerService, rewardPointsShareTokenDao, eventDao, volunteerDao, rewardPointsTransactionDao, userService, publisher,
             uniqueCodeGenerator);
     }
 

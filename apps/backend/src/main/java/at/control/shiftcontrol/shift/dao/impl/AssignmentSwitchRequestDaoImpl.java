@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDao {
     private final AssignmentSwitchRequestRepository assignmentSwitchRequestRepository;
+    private final at.control.shiftcontrol.shift.audit.OperationsAudit operationsAudit;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -61,13 +62,12 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
 
     @Override
     public void cancelTradesForPositionSlot(Long positionSlotId, UUID assignedUser) {
-        assignmentSwitchRequestRepository.cancelTradesForAssignment(positionSlotId, assignedUser, TradeStatus.CANCELED);
+        cancel(assignmentSwitchRequestRepository.lockTradesForAssignment(positionSlotId, assignedUser));
     }
 
     @Override
     public void cancelTradesForAssignment(Assignment assignment) {
-        assignmentSwitchRequestRepository.cancelTradesForAssignment(assignment.getPositionSlot().getId(), assignment.getAssignedVolunteer().getId(),
-            TradeStatus.CANCELED);
+        cancel(assignmentSwitchRequestRepository.lockTradesForAssignment(assignment.getPositionSlot().getId(), assignment.getAssignedVolunteer().getId()));
     }
 
     @Override
@@ -82,7 +82,16 @@ public class AssignmentSwitchRequestDaoImpl implements AssignmentSwitchRequestDa
 
     @Override
     public void cancelTradesForOfferedPositionAndRequestedUser(long positionSlotId, UUID userId) {
-        assignmentSwitchRequestRepository.cancelTradesForOfferedPositionAndRequestedUser(positionSlotId, userId, TradeStatus.CANCELED);
+        cancel(assignmentSwitchRequestRepository.lockTradesForOfferedPositionAndRequestedUser(positionSlotId, userId));
+    }
+
+    private void cancel(Collection<AssignmentSwitchRequest> trades) {
+        for (var trade : trades) {
+            if (trade.getStatus() == TradeStatus.CANCELED) continue;
+            var before = operationsAudit.snapshot(trade);
+            trade.setStatus(TradeStatus.CANCELED);
+            operationsAudit.trade(trade, "cancelled", before);
+        }
     }
 
     @Override

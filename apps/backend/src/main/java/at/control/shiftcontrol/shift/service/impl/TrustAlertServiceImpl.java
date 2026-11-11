@@ -1,6 +1,9 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import at.control.shiftcontrol.communications.api.NotificationTypes;
+import at.control.shiftcontrol.audit.api.AuditRecorder;
+import at.control.shiftcontrol.audit.api.AuditEntry;
+import java.util.List;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,6 +29,7 @@ import at.control.shiftcontrol.shift.service.TrustAlertService;
 @Service
 @RequiredArgsConstructor
 public class TrustAlertServiceImpl implements TrustAlertService {
+    private final AuditRecorder auditRecorder;
     private final TrustAlertDao trustAlertDao;
     private final TrustAlertAssemblingMapper trustAlertAssemblingMapper;
     private final ApplicationEventPublisher publisher;
@@ -46,6 +50,7 @@ public class TrustAlertServiceImpl implements TrustAlertService {
     public @NonNull TrustAlertDisplayDto save(@NonNull TrustAlertDto alert) {
         TrustAlert entity = trustAlertAssemblingMapper.toEntity(alert);
         entity = trustAlertDao.save(entity);
+        record(entity, true);
 
         var triggerId = java.util.UUID.randomUUID();
         identityUsers.getPlatformAdmins().forEach(admin -> notificationRequests.request(
@@ -58,7 +63,19 @@ public class TrustAlertServiceImpl implements TrustAlertService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void delete(long id) {
-        trustAlertDao.delete(id);
+        trustAlertDao.findById(id).ifPresent(entity -> {
+            record(entity, false);
+            trustAlertDao.delete(id);
+        });
+    }
+    private void record(TrustAlert entity, boolean created) {
+        String userId = entity.getVolunteer().getId().toString();
+        String type = entity.getAlertType().name();
+        auditRecorder.record("shift", created ? "trust_alert.created" : "trust_alert.deleted", "trust_alert",
+            Long.toString(entity.getId()), null, created ? "Trust alert created" : "Trust alert deleted",
+            List.of(new AuditEntry.Change("volunteerId", created ? null : userId, created ? userId : null),
+                new AuditEntry.Change("type", created ? null : type, created ? type : null)));
     }
 }

@@ -2,6 +2,7 @@ package at.control.shiftcontrol.eventcatalog.session;
 
 import java.time.Instant;
 import java.util.List;
+import at.control.shiftcontrol.eventcatalog.audit.CatalogAudit;
 import java.util.UUID;
 
 import at.control.shiftcontrol.eventcatalog.event.CatalogEventEntity;
@@ -17,11 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class SessionService {
+    private final CatalogAudit audit;
     private final EventRepository eventRepository;
     private final LocationRepository locationRepository;
     private final SessionRepository sessionRepository;
 
-    public SessionService(EventRepository eventRepository, LocationRepository locationRepository, SessionRepository sessionRepository) {
+    public SessionService(EventRepository eventRepository, LocationRepository locationRepository, SessionRepository sessionRepository, CatalogAudit audit) {
+        this.audit = audit;
         this.eventRepository = eventRepository;
         this.locationRepository = locationRepository;
         this.sessionRepository = sessionRepository;
@@ -40,7 +43,9 @@ public class SessionService {
         session.setEventId(eventId);
         session.setReadOnly(false);
         apply(session, data);
-        return toDetails(sessionRepository.save(session));
+        session = sessionRepository.save(session);
+        audit.record("session", "created", session.getId(), null, snapshot(session));
+        return toDetails(session);
     }
 
     @Transactional
@@ -54,8 +59,11 @@ public class SessionService {
         }
         validateEventAndLocation(getEvent(session.getEventId()), data);
         assertNameAvailable(session.getEventId(), data.name(), session);
+        var before = snapshot(session);
         apply(session, data);
-        return toDetails(sessionRepository.save(session));
+        session = sessionRepository.save(session);
+        audit.record("session", "updated", session.getId(), before, snapshot(session));
+        return toDetails(session);
     }
 
     public SessionDetails get(UUID sessionId) {
@@ -73,6 +81,7 @@ public class SessionService {
         if (session.isReadOnly()) {
             throw new EventCatalogConflictException("Cannot modify a read-only imported session");
         }
+        audit.record("session", "deleted", session.getId(), snapshot(session), null);
         sessionRepository.delete(session);
     }
 
@@ -127,6 +136,10 @@ public class SessionService {
         if (sessionRepository.existsByEventIdAndNameIgnoreCase(eventId, name)) {
             throw new EventCatalogConflictException("Session name must be unique within an event");
         }
+    }
+
+    private static CatalogAudit.Snapshot snapshot(SessionEntity e) {
+        return new CatalogAudit.Snapshot(e.getName(), CatalogAudit.value(e.getStartTime()), CatalogAudit.value(e.getEndTime()), CatalogAudit.value(e.getEventId()), CatalogAudit.value(e.getLocationId()));
     }
 
     private static void apply(SessionEntity session, SessionData data) {

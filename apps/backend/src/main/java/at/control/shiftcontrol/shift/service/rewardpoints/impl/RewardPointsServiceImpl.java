@@ -1,6 +1,9 @@
 package at.control.shiftcontrol.shift.service.rewardpoints.impl;
 
 import java.time.Instant;
+import at.control.shiftcontrol.audit.api.AuditRecorder;
+import at.control.shiftcontrol.audit.api.AuditEntry;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +48,7 @@ import at.control.shiftcontrol.identity.UserService;
 @RequiredArgsConstructor
 @Primary
 public class RewardPointsServiceImpl implements RewardPointsService {
+    private final AuditRecorder auditRecorder;
     private final RewardPointsCalculator calculator;
     private final RewardPointsLedgerService ledgerService;
 
@@ -257,6 +261,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void manualAdjust(UUID volunteerId, long eventId, int points, String reason) {
         if (points == 0) {
             return; // no-op
@@ -278,6 +283,9 @@ public class RewardPointsServiceImpl implements RewardPointsService {
             sourceKey,
             metadata
         ));
+        auditRecorder.record("shift", "reward.adjusted", "volunteer", volunteerId.toString(), null,
+            "Reward points adjusted", List.of(new AuditEntry.Change("eventId", null, Long.toString(eventId)),
+                new AuditEntry.Change("pointsDelta", null, Integer.toString(points))));
     }
 
     @Override
@@ -333,6 +341,7 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
     @Override
     @AdminOnly
+    @Transactional
     public RewardPointsShareTokenDto createRewardPointsShareToken(RewardPointsShareTokenCreateRequestDto requestDto) {
         var tokenCode = callGenerateUniqueCode();
 
@@ -356,6 +365,8 @@ public class RewardPointsServiceImpl implements RewardPointsService {
             rewardPointsShareTokenDao.save(token);
         }
 
+        auditRecorder.record("shift", "reward_share.created", "reward_share", Long.toString(token.getId()), token.getName(),
+            "Reward share created", List.of());
         publisher.publishEvent(RewardPointsShareTokenEvent.shareTokenCreated(token));
         return RewardPointsMapper.toRewardPointsShareTokenDto(token);
     }
@@ -371,9 +382,12 @@ public class RewardPointsServiceImpl implements RewardPointsService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void deleteRewardPointsShareToken(long id) {
         var token = rewardPointsShareTokenDao.getById(id);
 
+        auditRecorder.record("shift", "reward_share.deleted", "reward_share", Long.toString(token.getId()), token.getName(),
+            "Reward share deleted", List.of());
         var rewardPointsShareTokenEvent = RewardPointsShareTokenEvent.shareTokenDeleted(token);
         rewardPointsShareTokenDao.delete(token);
         publisher.publishEvent(rewardPointsShareTokenEvent);

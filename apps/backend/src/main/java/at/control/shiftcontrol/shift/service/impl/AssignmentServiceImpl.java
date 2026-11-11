@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -40,6 +41,7 @@ import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsService;
 @RequiredArgsConstructor
 public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentAudit audit;
+    private final OperationsAudit operationsAudit;
     private final RewardPointsService rewardPointsService;
     private final AssignmentDao assignmentDao;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
@@ -78,6 +80,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new IllegalStateException("more than one inverse trade is open" + inverse);
         }
         if (!inverse.isEmpty()) {
+            operationsAudit.tradeDeleted(inverse.get(0));
             assignmentSwitchRequestDao.delete(inverse.get(0));
         }
         // cancel all trades for involved assignments

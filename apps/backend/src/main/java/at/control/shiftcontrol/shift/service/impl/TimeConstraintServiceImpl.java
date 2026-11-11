@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
 
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
@@ -45,6 +46,7 @@ import org.springframework.stereotype.Service;
 public class TimeConstraintServiceImpl implements TimeConstraintService {
     private final TimeConstraintDao timeConstraintDao;
     private final AssignmentAudit audit;
+    private final OperationsAudit operationsAudit;
     private final AssignmentDao assignmentDao;
     private final EventDao eventDao;
     private final VolunteerDao volunteerDao;
@@ -104,6 +106,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
         }
 
         //NOTIFY: Publish event
+        operationsAudit.constraint(entity, true);
         publisher.publishEvent(TimeConstraintEvent.timeConstraintCreated(entity));
         return TimeConstraintMapper.toDto(entity);
     }
@@ -168,9 +171,11 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
     }
 
     @Override
+    @Transactional
     public void delete(long timeConstraintId) {
         var timeConstraint = timeConstraintDao.getById(timeConstraintId);
 
+        operationsAudit.constraint(timeConstraint, false);
         var timeConstraintEvent = TimeConstraintEvent.timeConstraintDeleted(timeConstraint);
         timeConstraintDao.delete(timeConstraint);
         publisher.publishEvent(timeConstraintEvent);

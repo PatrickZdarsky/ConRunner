@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.event.impl;
 
+import at.control.shiftcontrol.shift.audit.EventManagementAudit;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +49,7 @@ public class EventImportServiceImpl implements EventImportService {
     private static final int DEFAULT_NO_ROLE_POINTS_PER_MIN = 0;
     private static final int DEFAULT_SHIFT_BONUS_REWARD_POINTS = 0;
 
+    private final EventManagementAudit eventManagementAudit;
     private final EventDao eventDao;
     private final ShiftPlanDao shiftPlanDao;
     private final ShiftDao shiftDao;
@@ -101,6 +103,7 @@ public class EventImportServiceImpl implements EventImportService {
 
         shifts = new ArrayList<>(shiftDao.saveAll(shifts));
 
+        eventManagementAudit.record("event", "imported", event.getId(), null, eventManagementAudit.snapshot(event));
         publisher.publishEvent(EventEvent.eventImported(event));
         return EventImportResultDto.builder()
             .event(EventMapper.toEventDto(event))

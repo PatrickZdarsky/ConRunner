@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
+
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
@@ -57,6 +59,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class UserAdministrationServiceImpl implements UserAdministrationService {
+    private final OperationsAudit operationsAudit;
     private final VolunteerDao volunteerDao;
     private final ShiftPlanDao shiftPlanDao;
     private final UserService userService;
@@ -147,6 +150,10 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         var volunteerToRemove = toRemovePlans(updateDto.getVolunteeringPlans(), originalVolunteeringPlans);
         var planningToRemove = toRemovePlans(updateDto.getPlanningPlans(), originalPlanningPlans);
 
+        volunteerToAdd.forEach(id -> operationsAudit.planAccess(userId, id, "membership_added", false, true));
+        volunteerToRemove.forEach(id -> operationsAudit.planAccess(userId, id, "membership_removed", true, false));
+        planningToAdd.forEach(id -> operationsAudit.planAccess(userId, id, "planner_access_added", false, true));
+        planningToRemove.forEach(id -> operationsAudit.planAccess(userId, id, "planner_access_removed", true, false));
         removePlans(volunteer, volunteerToRemove, planningToRemove);
         addPlans(volunteer, volunteerToAdd, planningToAdd);
 
@@ -190,11 +197,14 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
 
         assertRolesChanged(currentRoles, requestedRoles);
 
+        var originalRoles = new java.util.ArrayList<>(volunteer.getRoles());
         var rolesToAdd = toAdd(updateDto.getRoles(), currentRoles);
         addRoles(volunteer, rolesToAdd, requestedRoles);
 
         var rolesToRemove = toRemove(updateDto.getRoles(), currentRoles);
         removeRoles(volunteer, rolesToRemove);
+        requestedRoles.stream().filter(role -> rolesToAdd.contains(role.getId())).forEach(role -> operationsAudit.membership(role, userId, true));
+        originalRoles.stream().filter(role -> rolesToRemove.contains(role.getId())).forEach(role -> operationsAudit.membership(role, userId, false));
 
         var user = userService.getUser(volunteer.getId());
         userAttributeProvider.invalidateUserCache(userId);
@@ -217,6 +227,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
                 volunteer.setLockedPlans(new HashSet<>());
             }
             volunteer.getLockedPlans().add(plan);
+            operationsAudit.planAccess(userId, plan.getId(), "locked", false, true);
         }
         userAttributeProvider.invalidateUserCache(userId);
         notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_LOCKED);
@@ -234,6 +245,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             securityHelper.assertUserIsPlanner(plan);
             securityHelper.assertVolunteerIsLockedInPlan(plan, volunteer);
             volunteer.getLockedPlans().remove(plan);
+            operationsAudit.planAccess(userId, plan.getId(), "unlocked", true, false);
         }
         userAttributeProvider.invalidateUserCache(userId);
         notifyUser(volunteer, plans, NotificationTypes.VOLUNTEER_UNLOCKED);
@@ -271,6 +283,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             for (Role role : roles) {
                 if (!v.getRoles().contains(role)) {
                     v.getRoles().add(role);
+                    operationsAudit.membership(role, v.getId(), true);
                 }
             }
         }
@@ -287,7 +300,9 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var roles = roleDao.findAllById(updateDto.getRoles().stream().map(ConvertUtil::idToLong).toList());
         for (Volunteer v : volunteers) {
-            v.getRoles().removeAll(roles);
+            for (Role role : roles) {
+                if (v.getRoles().remove(role)) operationsAudit.membership(role, v.getId(), false);
+            }
         }
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
         volunteers.forEach(v -> notifyUser(v, java.util.List.of(shiftPlan), NotificationTypes.ROLES_CHANGED, "removed"));
@@ -305,6 +320,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
             for (ShiftPlan plan : plans) {
                 if (!v.getVolunteeringPlans().contains(plan)) {
                     v.getVolunteeringPlans().add(plan);
+                    operationsAudit.planAccess(v.getId(), plan.getId(), "membership_added", false, true);
                 }
             }
         }
@@ -320,6 +336,7 @@ public class UserAdministrationServiceImpl implements UserAdministrationService 
         var volunteers = volunteerDao.findAllByVolunteerIds(updateDto.getVolunteers());
         var plans = shiftPlanDao.getByIds(updateDto.getPlans().stream().map(ConvertUtil::idToLong).collect(Collectors.toSet()));
         for (Volunteer v : volunteers) {
+            plans.stream().filter(plan -> v.getVolunteeringPlans().contains(plan)).forEach(plan -> operationsAudit.planAccess(v.getId(), plan.getId(), "membership_removed", true, false));
             removePlans(v,
                 plans.stream().map(ShiftPlan::getId).collect(Collectors.toSet()),
                 Collections.emptySet()

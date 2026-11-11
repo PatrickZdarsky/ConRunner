@@ -1,0 +1,37 @@
+{
+  "realm": "shiftcontrol",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "shiftcontrol-local",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "protocolMappers": [
+        {
+          "name": "backend-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "shiftcontrol-backend",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "b0eb6e1e-cb81-4d1e-b093-179d30420001",
+      "username": "dev",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "dev@example.test",
+      "credentials": [{"type": "password", "value": "dev", "temporary": false}]
+    }
+  ]
+}

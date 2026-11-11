@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class EventServiceTest {
     private static final java.util.UUID USER_ID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000001");
+    @Mock at.control.shiftcontrol.shift.audit.EventManagementAudit eventManagementAudit;
     @Mock
     private EventDao eventDao;
 

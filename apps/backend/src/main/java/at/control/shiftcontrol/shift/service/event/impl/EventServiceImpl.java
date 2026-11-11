@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.event.impl;
 
+import at.control.shiftcontrol.shift.audit.EventManagementAudit;
 import org.springframework.transaction.annotation.Transactional;
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import java.net.MalformedURLException;
@@ -55,6 +56,7 @@ import at.control.shiftcontrol.shift.util.SocialLinksParser;
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+    private final EventManagementAudit eventManagementAudit;
     private final AssignmentAudit audit;
     private final EventDao eventDao;
     private final VolunteerDao volunteerDao;
@@ -204,6 +206,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @AdminOnly
+    @Transactional
     public EventDto createEvent(@NonNull EventModificationDto modificationDto) {
         validateEventModificationDto(modificationDto);
         validateNameUniqueness(modificationDto.getName(), null);
@@ -213,21 +216,25 @@ public class EventServiceImpl implements EventService {
 
         syncSocialMediaLinks(event, modificationDto);
 
+        eventManagementAudit.record("event", "created", event.getId(), null, eventManagementAudit.snapshot(event));
         publisher.publishEvent(EventEvent.eventCreated(event));
         return EventMapper.toEventDto(event);
     }
 
     @Override
     @AdminOnly
+    @Transactional
     public EventDto updateEvent(long eventId, @NonNull EventModificationDto modificationDto) {
         validateEventModificationDto(modificationDto);
         validateNameUniqueness(modificationDto.getName(), eventId);
 
         Event event = eventDao.getById(eventId);
+        var before = eventManagementAudit.snapshot(event);
         EventMapper.updateEvent(event, modificationDto);
         syncSocialMediaLinks(event, modificationDto);
         eventDao.save(event);
 
+        eventManagementAudit.record("event", "updated", event.getId(), before, eventManagementAudit.snapshot(event));
         publisher.publishEvent(EventEvent.eventUpdated(event));
         return EventMapper.toEventDto(event);
     }
@@ -262,6 +269,7 @@ public class EventServiceImpl implements EventService {
         var event = eventDao.getById(eventId);
 
         if (event.getShiftPlans() != null) event.getShiftPlans().forEach(plan -> audit.removedWithPlan(plan, "Assignment removed when event was deleted"));
+        eventManagementAudit.record("event", "deleted", event.getId(), eventManagementAudit.snapshot(event), null);
         var eventEvent = EventEvent.eventDeleted(event);
         eventDao.delete(event);
         publisher.publishEvent(eventEvent);

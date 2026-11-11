@@ -27,6 +27,7 @@ class SessionServiceTest {
     private static final Instant EVENT_START = Instant.parse("2026-05-12T07:00:00Z");
     private static final Instant EVENT_END = Instant.parse("2026-05-12T22:00:00Z");
 
+    @Mock at.control.shiftcontrol.eventcatalog.audit.CatalogAudit audit;
     @Mock
     private EventRepository eventRepository;
 

@@ -110,7 +110,7 @@ class AuditPersistenceTest {
         var context = org.mockito.Mockito.mock(at.control.shiftcontrol.audit.api.AuditContext.class);
         org.mockito.Mockito.when(context.actor()).thenReturn(new AuditEntry.Actor(AuditEntry.ActorKind.HUMAN, userId, null, "Alex"));
         var audit = new at.control.shiftcontrol.shift.audit.AssignmentAudit(new at.control.shiftcontrol.audit.api.AuditRecorder(writer, context), users);
-        var service = new at.control.shiftcontrol.shift.service.impl.AssignmentServiceImpl(audit, rewards, dao, switchDao, events, notifications);
+        var service = new at.control.shiftcontrol.shift.service.impl.AssignmentServiceImpl(audit, org.mockito.Mockito.mock(at.control.shiftcontrol.shift.audit.OperationsAudit.class), rewards, dao, switchDao, events, notifications);
         var slot = org.mockito.Mockito.mock(at.control.shiftcontrol.shift.entity.PositionSlot.class, org.mockito.Mockito.RETURNS_DEEP_STUBS);
         org.mockito.Mockito.when(slot.getId()).thenReturn(42L);
         org.mockito.Mockito.when(slot.getName()).thenReturn("Reception");

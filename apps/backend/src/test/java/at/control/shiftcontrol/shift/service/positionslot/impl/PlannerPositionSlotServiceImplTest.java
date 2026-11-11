@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PlannerPositionSlotServiceImplTest {
+    @Mock at.control.shiftcontrol.shift.audit.PlanningAudit planningAudit;
     @Mock
     private SecurityHelper securityHelper;
 

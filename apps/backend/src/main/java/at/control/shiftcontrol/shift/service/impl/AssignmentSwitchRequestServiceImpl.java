@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
+
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
@@ -61,6 +63,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
     @Lazy
     @Autowired(required = false)
     private AssignmentSwitchRequestService self;
+    private final OperationsAudit operationsAudit;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
     private final AssignmentDao assignmentDao;
     private final PositionSlotDao positionSlotDao;
@@ -263,6 +266,8 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                 (a, _) -> a
             ));
 
+        var previousTrades = existingAnyStatus.stream().collect(Collectors.toMap(AssignmentSwitchRequest::getId, operationsAudit::snapshot, (a, b) -> a));
+
         // either insert new trade or update existing trade to OPEN
         trades = trades.stream()
             .map(t -> {
@@ -297,6 +302,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         }
 
         trades = assignmentSwitchRequestDao.saveAll(trades);
+        trades.forEach(t -> operationsAudit.trade(t, previousTrades.containsKey(t.getId()) ? "reopened" : "created", previousTrades.get(t.getId())));
 
         trades.forEach(trade -> notificationRequests.request(new NotificationRequest(
             java.util.UUID.randomUUID(), trade.getRequestedAssignment().getAssignedVolunteer().getId(),
@@ -357,7 +363,9 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
         var offeringUserId = trade.getOfferingAssignment().getAssignedVolunteer().getId();
         var eventId = String.valueOf(trade.getOfferingAssignment().getPositionSlot().getShift().getShiftPlan().getEvent().getId());
         var requestedSlotName = trade.getRequestedAssignment().getPositionSlot().getName();
+        var before = operationsAudit.snapshot(trade);
         AssignmentSwitchRequest executedTrade = assignmentService.executeTrade(trade);
+        operationsAudit.trade(executedTrade, "accepted", before);
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), offeringUserId, NotificationTypes.TRADE_ACCEPTED, NotificationContext.encode(eventId, requestedSlotName, null)));
 
         return tradeMapper.toDto(executedTrade);
@@ -379,17 +387,20 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
             throw new StateViolationException("Trade is not open");
         }
 
+        var before = operationsAudit.snapshot(trade);
         trade.setStatus(TradeStatus.REJECTED);
 
         trade = assignmentSwitchRequestDao.save(trade);
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
             trade.getOfferingAssignment().getAssignedVolunteer().getId(), NotificationTypes.TRADE_DECLINED,
             NotificationContext.encode(String.valueOf(trade.getOfferingAssignment().getPositionSlot().getShift().getShiftPlan().getEvent().getId()), trade.getRequestedAssignment().getPositionSlot().getName(), null)));
+        operationsAudit.trade(trade, "declined", before);
         publisher.publishEvent(TradeEvent.tradeDeclined(trade));
         return tradeMapper.toDto(trade);
     }
 
     @Override
+    @Transactional
     public @NonNull TradeDto cancelTrade(long id, @NonNull UUID currentUserId) {
         // get trade
         AssignmentSwitchRequest trade = assignmentSwitchRequestDao.getById(id);
@@ -403,9 +414,11 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
             throw new StateViolationException("Trade is not open");
         }
 
+        var before = operationsAudit.snapshot(trade);
         trade.setStatus(TradeStatus.CANCELED);
 
         trade = assignmentSwitchRequestDao.save(trade);
+        operationsAudit.trade(trade, "cancelled", before);
         publisher.publishEvent(TradeEvent.tradeCanceled(trade));
         return tradeMapper.toDto(trade);
     }

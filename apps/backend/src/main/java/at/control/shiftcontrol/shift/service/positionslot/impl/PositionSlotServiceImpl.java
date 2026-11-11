@@ -2,6 +2,7 @@ package at.control.shiftcontrol.shift.service.positionslot.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+import at.control.shiftcontrol.shift.audit.PlanningAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -56,6 +57,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 public class PositionSlotServiceImpl implements PositionSlotService {
     private final AssignmentAudit audit;
+    private final PlanningAudit planningAudit;
     private final PositionSlotDao positionSlotDao;
     private final ShiftDao shiftDao;
     private final RoleDao roleDao;
@@ -328,6 +330,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public PositionSlotDto createPositionSlot(@NonNull Long shiftId, @NonNull PositionSlotModificationDto modificationDto) {
         //VERIFY
         var shift = shiftDao.getById(shiftId);
@@ -342,6 +345,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         positionSlot = positionSlotDao.save(positionSlot);
 
         //NOTIFY: publish event
+        planningAudit.slotCreated(positionSlot);
         publisher.publishEvent(PositionSlotEvent.positionSlotCreated(positionSlot));
         return positionSlotAssemblingMapper.assemble(positionSlot);
     }
@@ -357,10 +361,12 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public PositionSlotDto updatePositionSlot(@NonNull Long positionSlotId, @NonNull PositionSlotModificationDto modificationDto) {
         //VERIFY
         var positionSlot = positionSlotDao.getById(positionSlotId);
         securityHelper.assertUserIsPlanner(positionSlot);
+        var before = planningAudit.snapshot(positionSlot);
         validateUniqueNameInShift(modificationDto.getName(), positionSlot.getShift(), positionSlot.getId());
         validateModificationDtoAndSetPositionSlotFields(modificationDto, positionSlot);
 
@@ -368,6 +374,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         positionSlot = positionSlotDao.save(positionSlot);
 
         //NOTIFY: publish event
+        planningAudit.slotUpdated(positionSlot, before);
         publisher.publishEvent(PositionSlotEvent.positionSlotUpdated(positionSlot));
         return positionSlotAssemblingMapper.assemble(positionSlot);
     }
@@ -407,6 +414,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         var positionSlot = positionSlotDao.getById(positionSlotId);
         securityHelper.assertUserIsPlanner(positionSlot);
 
+        planningAudit.slotDeleted(positionSlot);
         audit.removedWithSlot(positionSlot, "Assignment removed when position was deleted");
         var positionSlotEvent = PositionSlotEvent.positionSlotDeleted(positionSlot);
         positionSlotDao.delete(positionSlot);

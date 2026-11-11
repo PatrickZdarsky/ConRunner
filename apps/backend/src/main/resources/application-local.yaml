@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-local.yaml
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shiftcontrol
+    username: shiftcontrol
+    password: shiftcontrol
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+oidc:
+  provider:
+    issuer-uri: http://localhost:8180/realms/shiftcontrol
+    audience: shiftcontrol-backend
+
+identity:
+  bootstrap-platform-admins:
+    - issuer: http://localhost:8180/realms/shiftcontrol
+      subject: b0eb6e1e-cb81-4d1e-b093-179d30420001

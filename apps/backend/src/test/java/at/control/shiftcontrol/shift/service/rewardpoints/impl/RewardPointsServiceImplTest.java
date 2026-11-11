@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RewardPointsServiceImplTest {
+    @Mock at.control.shiftcontrol.audit.api.AuditRecorder auditRecorder;
     @Mock
     private RewardPointsCalculator calculator;
 

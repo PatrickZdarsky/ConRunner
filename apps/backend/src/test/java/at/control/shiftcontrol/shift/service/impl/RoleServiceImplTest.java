@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RoleServiceImplTest {
+    @Mock at.control.shiftcontrol.shift.audit.OperationsAudit operationsAudit;
     @Mock
     private RoleDao roleDao;
 

@@ -2,6 +2,8 @@ package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
 import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+import at.control.shiftcontrol.shift.audit.OperationsAudit;
+import at.control.shiftcontrol.shift.audit.PlanningAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -94,6 +96,8 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     private static final int INVITE_CODE_LENGTH = 8;
     private static final int MAX_INVITE_CODE_GENERATION_ATTEMPTS = 10;
     private final AssignmentAudit audit;
+    private final OperationsAudit operationsAudit;
+    private final PlanningAudit planningAudit;
     private final AssignmentDao assignmentDao;
     private final VolunteerService volunteerService;
 
@@ -116,6 +120,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @NonNull ShiftPlanCreateDto createShiftPlan(long eventId, @NonNull ShiftPlanModificationDto modificationDto) {
         var event = eventDao.getById(eventId);
         validateUniqueNameInEvent(eventId, modificationDto.getName(), null);
@@ -135,6 +140,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             .createdAt(Instant.now())
             .build();
         volunteerInvite = shiftPlanInviteDao.save(volunteerInvite);
+        operationsAudit.invite(volunteerInvite, "created", null, true);
 
         var plannerInvite = ShiftPlanInvite.builder()
             .code(callGenerateUniqueCode())
@@ -145,7 +151,9 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             .createdAt(Instant.now())
             .build();
         plannerInvite = shiftPlanInviteDao.save(plannerInvite);
+        operationsAudit.invite(plannerInvite, "created", null, true);
 
+        planningAudit.planCreated(plan);
         publisher.publishEvent(ShiftPlanEvent.planCreated(plan));
         var shiftPlanDto = ShiftPlanMapper.toShiftPlanDto(plan);
 
@@ -158,12 +166,15 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     @AdminOnly
+    @Transactional
     public @NonNull ShiftPlanDto update(long shiftPlanId, @NonNull ShiftPlanModificationDto modificationDto) {
         var plan = shiftPlanDao.getById(shiftPlanId);
         validateUniqueNameInEvent(plan.getEvent().getId(), modificationDto.getName(), shiftPlanId);
 
+        var before = planningAudit.snapshot(plan);
         ShiftPlanMapper.updateShiftPlan(modificationDto, plan);
         shiftPlanDao.save(plan);
+        planningAudit.planUpdated(plan, before);
         publisher.publishEvent(ShiftPlanEvent.planUpdated(plan));
         return ShiftPlanMapper.toShiftPlanDto(plan);
     }
@@ -187,11 +198,13 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         var invites = shiftPlanInviteDao.findAllByShiftPlanId(shiftPlanId);
         for (var invite : invites) {
+            operationsAudit.invite(invite, "deleted", invite.isActive(), null);
             var inviteEvent = ShiftPlanInviteEvent.inviteDeleted(invite);
             shiftPlanInviteDao.delete(invite);
             publisher.publishEvent(inviteEvent);
         }
 
+        planningAudit.planDeleted(shiftPlan);
         audit.removedWithPlan(shiftPlan, "Assignment removed when plan was deleted");
         var shiftPlanEvent = ShiftPlanEvent.planDeleted(shiftPlan);
         shiftPlanDao.delete(shiftPlan);
@@ -199,6 +212,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     }
 
     @Override
+    @Transactional
     public @NonNull ShiftPlanInviteCreateResponseDto createShiftPlanInviteCode(long shiftPlanId, @NonNull ShiftPlanInviteCreateRequestDto requestDto) {
         var actor = currentActor.get();
         validatePermission(shiftPlanId, requestDto.getType(), actor);
@@ -240,6 +254,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             invite.setCode(callGenerateUniqueCode());
             shiftPlanInviteDao.save(invite);
         }
+        operationsAudit.invite(invite, "created", null, true);
         publisher.publishEvent(ShiftPlanInviteEvent.inviteCreated(invite));
         return ShiftPlanInviteCreateResponseDto.builder()
             .code(invite.getCode())
@@ -259,21 +274,26 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     }
 
     @Override
+    @Transactional
     public void revokeShiftPlanInvite(long inviteId) {
         var actor = currentActor.get();
         var invite = shiftPlanInviteDao.getById(inviteId);
         validatePermission(invite.getShiftPlan().getId(), invite.getType(), actor);
+        var wasActive = invite.isActive();
         invite.setActive(false);
         invite.setRevokedAt(Instant.now());
+        operationsAudit.invite(invite, "revoked", wasActive, false);
         publisher.publishEvent(ShiftPlanInviteEvent.inviteRevoked(invite));
         shiftPlanInviteDao.save(invite);
     }
 
     @Override
+    @Transactional
     public void deleteShiftPlanInvite(long inviteId) {
         var actor = currentActor.get();
         var invite = shiftPlanInviteDao.getById(inviteId);
         validatePermission(invite.getShiftPlan().getId(), invite.getType(), actor);
+        operationsAudit.invite(invite, "deleted", invite.isActive(), null);
         ShiftPlanInviteEvent inviteEvent = ShiftPlanInviteEvent.inviteDeleted(invite);
         shiftPlanInviteDao.delete(invite);
         publisher.publishEvent(inviteEvent);
@@ -363,7 +383,14 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         // volunteer data might not yet exist
         Volunteer volunteer = volunteerService.getOrCreate(userId);
 
+        boolean wasVolunteer = shiftPlan.getPlanVolunteers().contains(volunteer);
         boolean joinedNow = addUserToShiftPlanIfAbsent(invite.getType(), shiftPlan, volunteer);
+        if (joinedNow) {
+            if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
+                operationsAudit.planAccess(userId, shiftPlan.getId(), "planner_access_added", false, true);
+            }
+            if (!wasVolunteer) operationsAudit.planAccess(userId, shiftPlan.getId(), "membership_added", false, true);
+        }
 
         var rolesToAssign = invite.getAutoAssignRoles();
         addRolesToUser(rolesToAssign, volunteer);
@@ -377,6 +404,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         if (invite.getMaxUses() != null && invite.getUses() >= invite.getMaxUses()) {
             invite.setActive(false);
             invite.setRevokedAt(Instant.now());
+            operationsAudit.invite(invite, "revoked", true, false);
         }
         // save updates
         shiftPlanInviteDao.save(invite);
@@ -445,6 +473,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             for (var role : rolesToAssign) {
                 if (!volunteer.getRoles().contains(role)) {
                     volunteer.getRoles().add(role);
+                    operationsAudit.membership(role, volunteer.getId(), true);
                 }
             }
             volunteerDao.save(volunteer);
@@ -452,12 +481,14 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     }
 
     @Override
+    @Transactional
     public void updateLockStatus(long shiftPlanId, @NonNull LockStatus lockStatus) {
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
         securityHelper.assertUserIsPlanner(shiftPlan);
         if (shiftPlan.getLockStatus().equals(lockStatus)) {
             throw new BadRequestException("Lock status already in requested state");
         }
+        var before = planningAudit.snapshot(shiftPlan);
         // automatically unassign all open auctions and decline all signup requests when switching back to SELF_SIGNUP
         if (lockStatus.equals(LockStatus.SELF_SIGNUP)) {
             assignmentService.unassignAllAuctions(shiftPlan);
@@ -465,6 +496,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         }
         shiftPlan.setLockStatus(lockStatus);
         shiftPlanDao.save(shiftPlan);
+        planningAudit.planUpdated(shiftPlan, before);
         publisher.publishEvent(ShiftPlanEvent.planLockStatusChanged(shiftPlan));
     }
 
@@ -489,6 +521,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         var volunteer = volunteerDao.getById(actor.requireUserId());
         volunteer.getVolunteeringPlans().remove(plan);
+        operationsAudit.planAccess(actor.requireUserId(), plan.getId(), "membership_removed", true, false);
 
         userAttributeProvider.invalidateUserCache(actor.requireUserId());
 
