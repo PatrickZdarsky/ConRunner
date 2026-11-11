@@ -7,7 +7,7 @@ import {TypedFormControlDirective} from "../../directives/typed-form-control.dir
 import {InputDateComponent} from "../inputs/input-date/input-date.component";
 import {InputMultiselectComponent} from "../inputs/input-multiselect/input-multiselect.component";
 import {DecimalPipe, NgClass} from "@angular/common";
-import {ScheduleStatisticsDto} from "../../../shiftservice-client";
+import {ScheduleStatisticsDto} from "../../../api-client";
 
 type ShiftRelevancesEnum = "MY_SHIFTS" | "SIGNUP_POSSIBLE";
 

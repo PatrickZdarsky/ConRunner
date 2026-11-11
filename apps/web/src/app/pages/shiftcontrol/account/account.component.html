@@ -6,18 +6,11 @@
   <div class="card grid grid-cols-[auto_1fr] w-[30rem] h-fit gap-sm gap-x-md items-center">
     <h1 class="col-span-2 signature-gradient-font">Account Information</h1>
 
-    <span class="badge w-fit">Given Name</span>
+    <span class="badge w-fit">Name</span>
     <xsb-input-text #givenName name="userGivenName"
                     [disguise]="true"
                     [formControl]="form.controls.givenName"
                     [xsb-typed]="[givenName, form.controls.givenName]"
-    />
-
-    <span class="badge w-fit">Last Name</span>
-    <xsb-input-text #lastName name="userLastName"
-                    [disguise]="true"
-                    [formControl]="form.controls.lastName"
-                    [xsb-typed]="[lastName, form.controls.lastName]"
     />
 
     <span class="badge w-fit">E-Mail</span>

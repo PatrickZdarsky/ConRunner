@@ -4,7 +4,7 @@ import { icons } from "../../../../util/icons";
 import {PageService} from "../../../../services/page/page.service";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
-import {EventEndpointService, EventShiftPlansOverviewDto, LocationEndpointService} from "../../../../../shiftservice-client";
+import {EventEndpointService, EventShiftPlansOverviewDto, LocationEndpointService} from "../../../../../api-client";
 import {BehaviorSubject, combineLatestWith, map, of, shareReplay, startWith, switchMap, take, tap} from "rxjs";
 import {BC_EVENT} from "../../../../breadcrumbs";
 import {AsyncPipe} from "@angular/common";

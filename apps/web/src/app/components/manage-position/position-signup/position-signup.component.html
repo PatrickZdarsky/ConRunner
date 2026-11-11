@@ -14,8 +14,7 @@
                 </div>
                 <div class="flex flex-row flex-wrap gap-x-xs items-center">
                   @if (requestedTrade.requestedAssignment.assignment.assignedVolunteer.id === user.account.volunteer.id) {
-                    <span>{{requestedTrade.requestedAssignment.assignment.assignedVolunteer.firstName}}
-                      {{requestedTrade.requestedAssignment.assignment.assignedVolunteer.lastName | slice:0:1}} requested</span>
+                    <span>{{requestedTrade.requestedAssignment.assignment.assignedVolunteer.name}} requested</span>
                     <xsb-input-button size="text" content="this position" (xsbClick)="dialogTradeInfo$.next(requestedTrade)" />
                     <span>
                       from you.
@@ -25,8 +24,7 @@
                     <span>You requested</span>
                     <xsb-input-button size="text" content="a trade" (xsbClick)="dialogTradeInfo$.next(requestedTrade)" />
                     <span>
-                      with {{requestedTrade.requestedAssignment.assignment.assignedVolunteer.firstName}}
-                      {{requestedTrade.requestedAssignment.assignment.assignedVolunteer.lastName | slice:0:1}}.
+                      with {{requestedTrade.requestedAssignment.assignment.assignedVolunteer.name}}
                     </span>
                   }
                 </div>
@@ -48,14 +46,12 @@
                     </span>
                     <xsb-input-button size="text" content="this position" (xsbClick)="dialogTradeInfo$.next(offeredTrade)" />
                     to <span>
-                      {{offeredTrade.requestedAssignment.assignment.assignedVolunteer.firstName}}
-                          {{offeredTrade.requestedAssignment.assignment.assignedVolunteer.lastName | slice:0:1}}.
+                      {{offeredTrade.requestedAssignment.assignment.assignedVolunteer.name}}
                     </span>
                   }
                   @else {
                     <span>
-                      {{offeredTrade.offeringAssignment.assignment.assignedVolunteer.firstName}}
-                          {{offeredTrade.offeringAssignment.assignment.assignedVolunteer.lastName | slice:0:1}}. offers
+                      {{offeredTrade.offeringAssignment.assignment.assignedVolunteer.name}} offers
                     </span>
                     <xsb-input-button size="text" content="their position" (xsbClick)="dialogTradeInfo$.next(offeredTrade)" />
                   }

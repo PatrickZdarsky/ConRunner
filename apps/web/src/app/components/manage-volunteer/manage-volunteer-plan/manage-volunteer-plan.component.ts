@@ -12,7 +12,7 @@ import {
 } from "rxjs";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import { icons } from "../../../util/icons";
-import {ShiftPlanDto, UserEventDto, UserEventEndpointService} from "../../../../shiftservice-client";
+import {ShiftPlanDto, UserEventDto, UserEventEndpointService} from "../../../../api-client";
 import {AsyncPipe} from "@angular/common";
 import {InputMultiToggleComponent, MultiToggleOptions} from "../../inputs/input-multitoggle/input-multi-toggle.component";
 import {TypedFormControlDirective} from "../../../directives/typed-form-control.directive";

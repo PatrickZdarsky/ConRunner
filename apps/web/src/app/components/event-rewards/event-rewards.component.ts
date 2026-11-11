@@ -1,5 +1,5 @@
 import {Component, inject, Input} from "@angular/core";
-import {EventShiftPlansOverviewDto} from "../../../shiftservice-client";
+import {EventShiftPlansOverviewDto} from "../../../api-client";
 import {BehaviorSubject} from "rxjs";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {icons} from "../../util/icons";

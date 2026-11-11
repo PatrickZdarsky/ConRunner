@@ -16,7 +16,7 @@ describe("breadcrumbsGuard", () => {
       providers: [
         {
           provide: PageService,
-          useValue: jasmine.createSpyObj("PageService", ["withBreadcrumbs"])
+          useValue: jasmine.createSpyObj("PageService", ["withBreadcrumbs", "withCalendarLink"])
         }
       ]
     });

@@ -33,7 +33,7 @@
         }
         <div class="flex flex-col items-start">
           <h2 class="m-0 flex gap-md items-center text-base">
-            {{rank.firstName}} {{rank.lastName.slice(0,1)}}.
+            {{rank.name}}
 
             @if (rank.rank === ownRank?.rank) {
               <small class="text-text-success">(You)</small>
@@ -57,7 +57,7 @@
   >
     @for (rank of ranksRest; track rank) {
       <span class="font-semibold opacity-60">#{{rank.rank}}</span>
-      <b class="m-0">{{rank.firstName}} {{rank.lastName.slice(0,1)}}.</b>
+      <b class="m-0">{{rank.name}}</b>
       <span class="justify-self-start pl-sm">5 hours</span>
     }
 

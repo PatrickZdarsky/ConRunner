@@ -1,5 +1,5 @@
 import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
-import {PositionSlotDto, TradeCandidatesDto, VolunteerDto} from "../../../../shiftservice-client";
+import {PositionSlotDto, TradeCandidatesDto, VolunteerDto} from "../../../../api-client";
 import {BehaviorSubject, filter, map, startWith} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {DialogComponent} from "../../dialog/dialog.component";
@@ -67,7 +67,7 @@ export class DialogTradeRequestComponent {
 
         return value.eligibleTradeRecipients
           .map(rec => ({
-            name: `${rec.firstName} ${rec.lastName}`,
+            name: rec.name,
             value: rec
           }))
           .sort((a, b) => a.name.localeCompare(b.name)) as SelectOptions<VolunteerDto>;

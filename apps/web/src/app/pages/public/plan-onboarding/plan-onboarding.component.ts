@@ -4,7 +4,7 @@ import {BC_EVENT, BC_PLAN_ONBOARDING} from "../../../breadcrumbs";
 import {InputButtonComponent} from "../../../components/inputs/input-button/input-button.component";
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
-import {ShiftPlanInviteDetailsDto, ShiftPlanInviteEndpointService} from "../../../../shiftservice-client";
+import {ShiftPlanInviteDetailsDto, ShiftPlanInviteEndpointService} from "../../../../api-client";
 import {BehaviorSubject, combineLatestWith, filter, map, Subscription, switchMap, take, withLatestFrom} from "rxjs";
 import {AsyncPipe, DatePipe} from "@angular/common";
 import {TooltipDirective} from "../../../directives/tooltip.directive";

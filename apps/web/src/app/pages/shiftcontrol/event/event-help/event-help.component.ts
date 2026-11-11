@@ -1,7 +1,7 @@
 import {Component, inject} from "@angular/core";
 import {PageService} from "../../../../services/page/page.service";
 import { icons } from "../../../../util/icons";
-import {EventEndpointService} from "../../../../../shiftservice-client";
+import {EventEndpointService} from "../../../../../api-client";
 import {BC_EVENT} from "../../../../breadcrumbs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";

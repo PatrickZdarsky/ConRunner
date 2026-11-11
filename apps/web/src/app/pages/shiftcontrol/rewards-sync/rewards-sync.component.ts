@@ -1,6 +1,6 @@
 import {Component, inject} from "@angular/core";
 import { icons } from "../../../util/icons";
-import {RewardPointsEndpointService, RewardPointsShareTokenDto} from "../../../../shiftservice-client";
+import {RewardPointsEndpointService, RewardPointsShareTokenDto} from "../../../../api-client";
 import {BehaviorSubject,} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {ManageRewardsShareTokenComponent} from "../../../components/manage-rewards-share-token/manage-rewards-share-token.component";

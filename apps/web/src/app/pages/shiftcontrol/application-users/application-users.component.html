@@ -36,7 +36,7 @@
       } @else {
         @for (user of page.items; track user.volunteer.id) {
 
-          <span>{{user.volunteer.firstName}} {{user.volunteer.lastName}}</span>
+          <span>{{user.volunteer.name}}</span>
           <span>{{user.email}}</span>
           <span>{{user.volunteeringPlans.length}} Plans</span>
 

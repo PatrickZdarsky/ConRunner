@@ -6,7 +6,7 @@ import {
   UserEventEndpointService,
   UserPlanEndpointService,
   VolunteerDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {
   BehaviorSubject, catchError,
   combineLatest,

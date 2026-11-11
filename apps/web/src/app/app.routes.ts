@@ -17,7 +17,6 @@ import {
   BC_EVENT_HELP,
   BC_EVENT_VOLUNTEER_DASHBOARD,
   BC_REWARDS_SYNC,
-  BC_PRETALX_SYNC,
   BC_AUDIT_LOG,
   BC_TRUST_ALERTS,
   BC_VOLUNTEER,
@@ -37,7 +36,6 @@ import {CreateEventComponent} from "./pages/shiftcontrol/event/create-event/crea
 import {EventHelpComponent} from "./pages/shiftcontrol/event/event-help/event-help.component";
 import {VolunteerDashboardComponent} from "./pages/shiftcontrol/event/volunteer-dashboard/volunteer-dashboard.component";
 import {RewardsSyncComponent} from "./pages/shiftcontrol/rewards-sync/rewards-sync.component";
-import {PretalxSyncComponent} from "./pages/shiftcontrol/pretalx-sync/pretalx-sync.component";
 import {AuditLogComponent} from "./pages/shiftcontrol/audit-log/audit-log.component";
 import {TrustAlertsComponent} from "./pages/shiftcontrol/trust-alerts/trust-alerts.component";
 import {VolunteerComponent} from "./pages/shiftcontrol/volunteer/volunteer.component";
@@ -84,8 +82,6 @@ export const routes: Routes = ([
   /* admin */
   { path: "rewards-sync", component: RewardsSyncComponent,
     data: {breadcrumbs: BC_REWARDS_SYNC}, canActivate: [authenticatedGuard, isAdminGuard]},
-  { path: "pretalx-sync", component: PretalxSyncComponent,
-    data: {breadcrumbs: BC_PRETALX_SYNC}, canActivate: [authenticatedGuard, isAdminGuard]},
   { path: "audit", component: AuditLogComponent,
     data: {breadcrumbs: BC_AUDIT_LOG}, canActivate: [authenticatedGuard, isAdminGuard]},
   { path: "trust", component: TrustAlertsComponent,

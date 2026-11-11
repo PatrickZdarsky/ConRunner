@@ -1,7 +1,7 @@
 import {Component, inject, Input, Output} from "@angular/core";
 import {
   RoleDto, RoleEndpointService, RoleModificationDto, ShiftPlanDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {mapValue} from "../../util/value-maps";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";

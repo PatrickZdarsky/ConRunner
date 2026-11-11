@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import {ShiftDto} from "../../shiftservice-client";
+import {ShiftDto} from "../../api-client";
 import LockStatusEnum = ShiftDto.LockStatusEnum;
 
 @Pipe({

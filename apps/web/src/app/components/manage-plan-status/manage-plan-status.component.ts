@@ -3,7 +3,7 @@ import {
   AssignmentDto,
   PaginationDtoShiftDto,
   ShiftPlanDto, SignupEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {
   BehaviorSubject,
   combineLatestWith,

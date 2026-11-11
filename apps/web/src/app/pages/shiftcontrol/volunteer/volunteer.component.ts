@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy} from "@angular/core";
 import {PageService} from "../../../services/page/page.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {UserEventDto, UserEventEndpointService} from "../../../../shiftservice-client";
+import {UserEventDto, UserEventEndpointService} from "../../../../api-client";
 import {BehaviorSubject, filter,  Subscription} from "rxjs";
 import {BC_VOLUNTEER} from "../../../breadcrumbs";
 import {AsyncPipe} from "@angular/common";
@@ -38,9 +38,9 @@ export class VolunteerComponent implements OnDestroy {
     this._pageSubscription = this.volunteer$.pipe(
       filter(v => v !== undefined)
     ).subscribe(v => {
-      this._pageService.configurePageName(`${v.volunteer.firstName} ${v.volunteer.lastName}`);
+      this._pageService.configurePageName(v.volunteer.name);
       this._pageService.configureBreadcrumb(BC_VOLUNTEER,
-        `${v.volunteer.firstName} ${v.volunteer.lastName.substring(0,1)}.`, `${v.volunteer.id}`
+        v.volunteer.name, `${v.volunteer.id}`
       );
     });
   }

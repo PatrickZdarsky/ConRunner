@@ -1,84 +1,17 @@
-<div class="flex flex-row gap-lg">
-
-  <div class="card flex flex-col gap-md h-fit max-w-[30rem]">
-
-    <h1 class="signature-gradient-font">Audit Log</h1>
-    <p>
-      The audit log contains all recorded application events of ShiftControl.<br>
-    </p>
-
+<div class="card flex flex-col gap-md">
+  <h1 class="signature-gradient-font">Audit Log</h1>
+  <div class="flex gap-md">
+    <xsb-input-text #module placeholder="Module" [formControl]="form.controls.module" [xsb-typed]="[module, form.controls.module]" />
+    <xsb-input-text #action placeholder="Action" [formControl]="form.controls.action" [xsb-typed]="[action, form.controls.action]" />
   </div>
-
-  <div class="card grid card grid-cols-[10rem_1fr_1fr_2fr_auto] gap-y-xs gap-x-md h-fit w-[min(100%,90rem)] items-center">
-    <h1 class="signature-gradient-font col-span-5">Events</h1>
-
-    <small class="pb-sm">Time</small>
-    <div class="flex flex-row gap-md items-center pb-sm">
-      <small>Type</small>
-      <xsb-input-text
-        placeholder="Filter event type"
-        #type
-        [formControl]="form.controls.type"
-        [xsb-typed]="[type, form.controls.type]"
-        size="minimal"
-      />
+  @if (page$ | async; as page) {
+    @for (event of page.items ?? []; track event.id) {
+      <div class="border-b py-sm"><small>{{event.occurredAt | date:'short'}} · {{event.module}} · {{event.action}}</small><p>{{event.summary}}</p><small>{{event.actorLabel}}</small></div>
+    } @empty { <p>No audit entries found.</p> }
+    <div class="flex gap-md">
+      <xsb-input-button content="Previous" size="text" [lock]="form.controls.page.value <= 0" (xsbClick)="form.controls.page.setValue(form.controls.page.value - 1)" />
+      <span>Page {{form.controls.page.value + 1}}</span>
+      <xsb-input-button content="Next" size="text" [lock]="(form.controls.page.value + 1) * 50 >= (page.total ?? 0)" (xsbClick)="form.controls.page.setValue(form.controls.page.value + 1)" />
     </div>
-    <div class="flex flex-row gap-md items-center pb-sm">
-      <small>Key</small>
-      <xsb-input-text
-        size="minimal"
-        placeholder="Filter event key"
-        #key
-        [formControl]="form.controls.key"
-        [xsb-typed]="[key, form.controls.key]"
-      />
-    </div>
-    <small class="pb-sm">Description</small>
-    <small class="pb-sm"></small>
-
-    <hr class="col-span-5 mb-sm" />
-
-    @if (page$ | async; as page) {
-
-      @if(page.items.length === 0) {
-        <span class="col-span-4">
-          No events at this time.
-        </span>
-      } @else {
-        @for (event of page.items; track event.id) {
-
-          <span>{{event.timestamp | date:"short"}}</span>
-          <span>{{event.eventType}}</span>
-          <span class="break-all">{{event.routingKey}}</span>
-          <span>{{event.description}}</span>
-
-          <div class="flex flex-row gap-md justify-end">
-            @if ((event.actingUserId?.length ?? 0) > 0) {
-              <a routerLink="/volunteers/{{event.actingUserId}}">View acting User</a>
-            }
-            <xsb-input-button size="text" content="View Event JSON" (xsbClick)="viewEventDetails(event)" />
-          </div>
-        }
-      }
-
-      <hr class="col-span-5 mt-sm" />
-
-      <div class="col-span-4 flex flex-row gap-md items-center pt-sm">
-        <xsb-input-button size="text" content="Previous"
-                          (xsbClick)="form.controls.paginationIndex.setValue(page.page - 1)"
-                          [lock]="page.page <= 0"
-        />
-
-        <span>Page {{page.page + 1}}/{{page.pages | min:1}}</span>
-
-        <xsb-input-button size="text" content="Next"
-                          (xsbClick)="form.controls.paginationIndex.setValue(page.page + 1)"
-                          [lock]="page.page >= page.pages - 1"
-        />
-      </div>
-      <small class="justify-self-end">Viewing {{page.items.length}} of {{page.total}} Events</small>
-    }
-
-  </div>
-
+  }
 </div>

@@ -2,7 +2,7 @@ import {Component, inject} from "@angular/core";
 import {PageService} from "../../../services/page/page.service";
 import {BC_SHIFT_DETAILS, BC_EVENT} from "../../../breadcrumbs";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ShiftDetailsDto, ShiftEndpointService} from "../../../../shiftservice-client";
+import {ShiftDetailsDto, ShiftEndpointService} from "../../../../api-client";
 import {BehaviorSubject, filter, map, Observable} from "rxjs";
 import {ManageShiftComponent, manageShiftParams} from "../../../components/manage-shift/manage-shift.component";
 import {AsyncPipe} from "@angular/common";

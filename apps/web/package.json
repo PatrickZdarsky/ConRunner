@@ -11,12 +11,7 @@
     "lint": "ng lint",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "generate-notificationservice-client": "dotnet tsrts --project ../backend/notificationservice/NotificationService.csproj --output ./src/notificationservice-client --naming-style camelCase",
-    "generate-notificationservice-client-ci": "docker compose -f scripts/scripts.compose.yml up notificationservice-client-downloader",
-    "generate-shiftservice-client": "openapi-generator-cli generate -g typescript-angular -i http://shiftservice.127.0.0.1.nip.io/v3/api-docs -o ./src/shiftservice-client --additional-properties fileNaming=kebab-case,withInterfaces=true --generate-alias-as-model --type-mappings set=Array",
-    "generate-auditservice-client": "openapi-generator-cli generate -g typescript-angular -i http://auditservice.127.0.0.1.nip.io/v3/api-docs -o ./src/auditservice-client --additional-properties fileNaming=kebab-case,withInterfaces=true --generate-alias-as-model --type-mappings set=Array",
-    "generate-shiftservice-client-ci": "docker compose -f scripts/scripts.compose.yml up shiftservice-client-generator",
-    "generate-auditservice-client-ci": "docker compose -f scripts/scripts.compose.yml up auditservice-client-generator"
+    "generate-client": "../../dev client"
   },
   "private": true,
   "dependencies": {

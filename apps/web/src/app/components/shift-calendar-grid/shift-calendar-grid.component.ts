@@ -7,7 +7,7 @@ import {
   ShiftColumnDto,
   ShiftDto,
   EventScheduleContentDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {AsyncPipe, DatePipe, NgClass} from "@angular/common";
 import {
   BehaviorSubject,

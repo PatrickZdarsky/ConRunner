@@ -1,6 +1,6 @@
 import {Component, inject, Input, Output} from "@angular/core";
 import {BehaviorSubject, combineLatestWith, filter, map, shareReplay, Subject} from "rxjs";
-import {ShiftPlanEndpointService, UserEventDto} from "../../../shiftservice-client";
+import {ShiftPlanEndpointService, UserEventDto} from "../../../api-client";
 import {icons} from "../../util/icons";
 import {FormBuilder} from "@angular/forms";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";

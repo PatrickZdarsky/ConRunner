@@ -12,7 +12,7 @@ import {
   SocialMediaLinkDto,
   UserEventEndpointService,
   UserProfileDto
-} from "../../../../shiftservice-client";
+} from "../../../../api-client";
 import {combineLatest, map, Observable, of, shareReplay, switchMap, tap} from "rxjs";
 import {AsyncPipe, DatePipe, DecimalPipe} from "@angular/common";
 import {TooltipDirective} from "../../../directives/tooltip.directive";

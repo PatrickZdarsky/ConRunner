@@ -1,50 +1,11 @@
-# ShiftControl
+# ShiftControl web
 
-## API client generation
+The Angular application uses the HTTP API of `apps/backend`. See the [root development guide](../../README.md#local-development) for setup and commands.
 
-The frontend uses generated TypeScript Angular clients for backend APIs.
+The generated client in `src/api-client` is ignored by Git. Run `../../dev client` after changing backend HTTP endpoints or DTOs; it generates the OpenAPI description from this checkout using an isolated temporary database and the pinned OpenAPI Generator version. Do not edit generated files.
 
-### Shiftservice client
+Run `npm run build` from this directory after generating the client. The local dev server proxies `/api` and WebSocket requests to the backend. Pretalx synchronization is not available until its backend integration is implemented.
 
-Generate the Shiftservice client with:
+For a container build, first run `./dev client` from the repository root, then `docker build -t shiftcontrol-web apps/web`. Supply `KEYCLOAK_URL`, `KEYCLOAK_REALM`, `KEYCLOAK_CLIENT_ID`, and `API_BASE_PATH` at runtime. `API_BASE_PATH` is the browser-accessible backend origin; configure a reverse proxy for `/api` (including WebSocket upgrades) or configure the backend to allow the web origin.
 
-```bash
-npm run generate-shiftservice-client
-```
-
-This writes the generated client to:
-
-```text
-src/shiftservice-client
-```
-
-The generated client is development output and is already gitignored, so it should not be committed.
-
-The script expects the Shiftservice OpenAPI endpoint to be reachable at:
-
-```text
-http://shiftservice.127.0.0.1.nip.io/v3/api-docs
-```
-
-In local development that usually means:
-
-1. start `shiftservice`
-2. verify that `/v3/api-docs` is reachable
-3. run `npm run generate-shiftservice-client`
-
-### Alternative CI/container-based generation
-
-If you want to use the repository's Docker-based generation flow instead, run:
-
-```bash
-npm run generate-shiftservice-client-ci
-```
-
-### Other generated clients
-
-The frontend also contains scripts for other backend clients:
-
-```bash
-npm run generate-auditservice-client
-npm run generate-notificationservice-client
-```
+Cypress is optional during setup; run `npx cypress install` in this directory before using its interactive or end-to-end commands.

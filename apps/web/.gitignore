@@ -46,3 +46,5 @@ src/shiftservice-client
 src/auditservice-client
 src/notificationservice-client
 openapitools.json
+
+src/api-client

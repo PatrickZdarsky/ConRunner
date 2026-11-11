@@ -1,7 +1,7 @@
 import {Component, inject, Input, Output} from "@angular/core";
 import {
   PretalxApiKeyDetailsDto, PretalxApiKeyDto, PretalxEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {InputTextComponent} from "../inputs/input-text/input-text.component";

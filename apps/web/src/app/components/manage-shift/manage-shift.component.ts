@@ -5,7 +5,7 @@ import {
   LocationDto, LocationEndpointService, RoleEndpointService,
   ShiftDto,
   ShiftEndpointService, ShiftPlanDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {InputSelectComponent, SelectOptions} from "../inputs/input-select/input-select.component";
 import {
   BehaviorSubject, combineLatest,

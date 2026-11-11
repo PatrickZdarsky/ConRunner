@@ -5,9 +5,9 @@ import {
   PositionSlotDto,
   PositionSlotEndpointService, PositionSlotTradeEndpointService,
   ShiftDto, ShiftPlanDto, TradeCandidatesDto, TradeInfoDto, VolunteerDto, TradeCreateDto
-} from "../../../../shiftservice-client";
+} from "../../../../api-client";
 import {icons} from "../../../util/icons";
-import {AsyncPipe, SlicePipe} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {InputButtonComponent} from "../../inputs/input-button/input-button.component";
 import {ToastService} from "../../../services/toast/toast.service";
 import {mapValue} from "../../../util/value-maps";
@@ -40,7 +40,6 @@ interface tradeRequestOptions {
     AsyncPipe,
     InputButtonComponent,
     DialogTradeRequestComponent,
-    SlicePipe,
     FaIconComponent,
     DialogTradeDetailsComponent,
     DialogManageAssignmentsComponent

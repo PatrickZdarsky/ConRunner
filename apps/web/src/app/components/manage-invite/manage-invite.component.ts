@@ -1,7 +1,7 @@
 import {Component, inject, Input, OnDestroy, Output} from "@angular/core";
 import {
   RoleEndpointService, ShiftPlanDto, ShiftPlanInviteCreateRequestDto, ShiftPlanInviteDto, ShiftPlanInviteEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {TypedFormControlDirective} from "../../directives/typed-form-control.directive";

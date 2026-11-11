@@ -2,7 +2,7 @@ import { effect, Injectable, Signal, inject } from "@angular/core";
 import {KEYCLOAK_EVENT_SIGNAL, KeycloakEvent, KeycloakEventType, ReadyArgs, typeEventArgs} from "keycloak-angular";
 import Keycloak, {KeycloakProfile} from "keycloak-js";
 import {BehaviorSubject, map, Observable, tap} from "rxjs";
-import {UserProfileDto, UserProfileEndpointService} from "../../../shiftservice-client";
+import {UserProfileDto, UserProfileEndpointService} from "../../../api-client";
 
 @Injectable({
   providedIn: "root"
@@ -37,36 +37,6 @@ export class UserService {
     this._userProfile$.pipe(
       map(profile => profile?.account.platformAdmin === true)
     ).subscribe(isPlatformAdmin => this._isPlatformAdmin$.next(isPlatformAdmin));
-  }
-
-  private async syncUserState(event: KeycloakEvent) {
-    const isReadyEvent = event.type === KeycloakEventType.Ready;
-    const isAuthenticated = isReadyEvent
-      ? typeEventArgs<ReadyArgs>(event.args)
-      : this.keycloak.authenticated === true;
-
-    if (!isAuthenticated) {
-      this._kcProfile$.next(null);
-      this._userProfile$.next(null);
-      return;
-    }
-
-    try {
-      const profile = await this.keycloak.loadUserProfile();
-      this._kcProfile$.next(profile);
-    } catch {
-      this._kcProfile$.next(null);
-    }
-
-    this.userService.getCurrentUserProfile().pipe(
-      tap(user => this._userProfile$.next(user))
-    ).subscribe({
-      error: () => {
-        if (this.keycloak.authenticated !== true) {
-          this._userProfile$.next(null);
-        }
-      }
-    });
   }
 
   /**
@@ -172,4 +142,34 @@ export class UserService {
   public logout() {
     this.keycloak.logout({redirectUri: window.location.origin});
   }
+  private async syncUserState(event: KeycloakEvent) {
+    const isReadyEvent = event.type === KeycloakEventType.Ready;
+    const isAuthenticated = isReadyEvent
+      ? typeEventArgs<ReadyArgs>(event.args)
+      : this.keycloak.authenticated === true;
+
+    if (!isAuthenticated) {
+      this._kcProfile$.next(null);
+      this._userProfile$.next(null);
+      return;
+    }
+
+    try {
+      const profile = await this.keycloak.loadUserProfile();
+      this._kcProfile$.next(profile);
+    } catch {
+      this._kcProfile$.next(null);
+    }
+
+    this.userService.getCurrentUserProfile().pipe(
+      tap(user => this._userProfile$.next(user))
+    ).subscribe({
+      error: () => {
+        if (this.keycloak.authenticated !== true) {
+          this._userProfile$.next(null);
+        }
+      }
+    });
+  }
+
 }

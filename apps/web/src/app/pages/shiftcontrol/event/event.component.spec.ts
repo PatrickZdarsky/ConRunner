@@ -13,8 +13,8 @@ import {
   UserEventEndpointService,
   UserEventDto,
   UserProfileDto
-} from "../../../../shiftservice-client";
-import {ShiftPlanDto} from "../../../../shiftservice-client/model/shift-plan-dto";
+} from "../../../../api-client";
+import {ShiftPlanDto} from "../../../../api-client/model/shift-plan-dto";
 
 describe("EventComponent", () => {
   const eventId = "event-1";
@@ -149,6 +149,13 @@ describe("EventComponent", () => {
   });
 
   it("offers platform admins a leave action when they currently belong to event plans", async () => {
+    userProfile$.next(createProfile({
+      platformAdmin: true,
+      planningPlans: ["plan-1"],
+      volunteeringPlans: [],
+      planningEvents: [],
+      volunteeringEvents: []
+    }));
     const internals = component as unknown as {
       canLeaveEventMembership$: Observable<boolean>;
     };
@@ -254,14 +261,13 @@ function createProfile({
     account: {
       volunteer: {
         id: "volunteer-1",
-        firstName: "Ada",
-        lastName: "Admin"
+        username: "ada",
+        name: "Ada Admin"
       },
       username: "ada",
       email: "ada@example.com",
       platformAdmin
     },
-    notifications: [],
     assignedRoles: [],
     planningPlans,
     volunteeringPlans,

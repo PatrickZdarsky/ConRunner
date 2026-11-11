@@ -5,7 +5,7 @@ import {
   EventEndpointService,
   EventShiftPlansOverviewDto,
   ShiftPlanDashboardOverviewDto
-} from "../../../../../shiftservice-client";
+} from "../../../../../api-client";
 import {BC_EVENT} from "../../../../breadcrumbs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PageService} from "../../../../services/page/page.service";

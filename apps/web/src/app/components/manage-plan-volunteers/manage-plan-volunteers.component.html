@@ -28,7 +28,7 @@
           @if (lockControls$ | async; as lockControls){
             @for (volunteer of page.items; track volunteer.volunteer.id) {
 
-              <span>{{volunteer.volunteer.firstName}} {{volunteer.volunteer.lastName}}</span>
+              <span>{{volunteer.volunteer.name}}</span>
               <span>{{volunteer.email}}</span>
 
               <div>

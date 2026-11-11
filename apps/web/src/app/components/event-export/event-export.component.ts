@@ -1,6 +1,6 @@
 import {Component, inject, Input} from "@angular/core";
 import {BehaviorSubject} from "rxjs";
-import {EventDto, EventEndpointService} from "../../../shiftservice-client";
+import {EventDto, EventEndpointService} from "../../../api-client";
 import { icons } from "../../util/icons";
 import {ToastService} from "../../services/toast/toast.service";
 import {mapValue} from "../../util/value-maps";

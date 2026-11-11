@@ -18,9 +18,9 @@
         <!-- info caption -->
         <span class="col-span-3 mb-md">
           @if (mappedInfo.isOwnRequest) {
-            You requested to trade one of your positions in exchange with {{mappedInfo.otherVolunteer.firstName}} {{mappedInfo.otherVolunteer.lastName}}.
+            You requested to trade one of your positions in exchange with {{mappedInfo.otherVolunteer.name}}
           } @else {
-            {{mappedInfo.otherVolunteer.firstName}} {{mappedInfo.otherVolunteer.lastName}} offered to trade a position in exchange for yours.
+            {{mappedInfo.otherVolunteer.name}} offered to trade a position in exchange for yours.
           }
         </span>
 
@@ -34,9 +34,9 @@
         <div class="badge w-fit col-start-3 mb-md">
           <fa-icon [icon]="icons.trade" />
           @if (mappedInfo.isOwnRequest) {
-            Requested from {{mappedInfo.otherVolunteer.firstName}} {{mappedInfo.otherVolunteer.lastName | slice:0:1}}.
+            Requested from {{mappedInfo.otherVolunteer.name}}
           } @else {
-            Offered by {{mappedInfo.otherVolunteer.firstName}} {{mappedInfo.otherVolunteer.lastName | slice:0:1}}.
+            Offered by {{mappedInfo.otherVolunteer.name}}
           }
         </div>
 

@@ -56,12 +56,12 @@ export class PageComponent implements OnInit {
         }
 
         const volunteer = profile.account.volunteer;
-        const displayName = `${volunteer.firstName} ${volunteer.lastName}`.trim() || profile.account.username;
+        const displayName = volunteer.name.trim() || profile.account.username;
 
         return {
           displayName,
           imageUrl: profile.account.profile?.trim() || volunteer.profile?.trim() || null,
-          initials: this.getInitials(volunteer.firstName, volunteer.lastName, profile.account.username)
+          initials: this.getInitials(volunteer.name, undefined, profile.account.username)
         };
       })
     );

@@ -1,5 +1,5 @@
 import {Component, Input} from "@angular/core";
-import {LeaderBoardDto, RankDto} from "../../../shiftservice-client";
+import {LeaderBoardDto, RankDto} from "../../../api-client";
 import { icons } from "../../util/icons";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {DecimalPipe} from "@angular/common";

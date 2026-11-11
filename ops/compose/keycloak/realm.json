@@ -28,6 +28,8 @@
     {
       "id": "b0eb6e1e-cb81-4d1e-b093-179d30420001",
       "username": "dev",
+      "firstName": "Local",
+      "lastName": "Developer",
       "enabled": true,
       "emailVerified": true,
       "email": "dev@example.test",

@@ -1,191 +1,82 @@
+/* eslint-disable @typescript-eslint/member-ordering -- injected dependencies initialize fields below */
 import {Component, inject, OnDestroy} from "@angular/core";
 import {UserService} from "../../../services/user/user.service";
 import {FormBuilder, FormControl, ReactiveFormsModule} from "@angular/forms";
 import {InputTextComponent} from "../../../components/inputs/input-text/input-text.component";
 import {TypedFormControlDirective} from "../../../directives/typed-form-control.directive";
 import {InputButtonComponent} from "../../../components/inputs/input-button/input-button.component";
-import {NotificationSettingsDto, RoleDto, UserProfileDto, UserProfileEndpointService} from "../../../../shiftservice-client";
+import {
+  EmailPreferenceEndpointService, InAppPreferenceEndpointService, NotificationPreferenceEndpointService,
+  UserProfileDto, UserProfileEndpointService
+} from "../../../../api-client";
 import {InputMultiToggleComponent, MultiToggleOptions} from "../../../components/inputs/input-multitoggle/input-multi-toggle.component";
-import {BehaviorSubject, catchError, EMPTY, forkJoin, map, pairwise, startWith, Subscription, switchMap} from "rxjs";
+import {BehaviorSubject, catchError, concatMap, EMPTY, forkJoin, Subscription, switchMap} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {ToastService} from "../../../services/toast/toast.service";
 import {environment} from "../../../environment";
 import {mapValue} from "../../../util/value-maps";
 
-type notificationToggleValue = NotificationSettingsDto.ChannelsEnum | "ALL";
-
+type notificationToggleValue = "ALL" | "EMAIL" | "PUSH";
 @Component({
   selector: "app-account",
-  imports: [
-    InputTextComponent,
-    ReactiveFormsModule,
-    TypedFormControlDirective,
-    InputButtonComponent,
-    InputMultiToggleComponent,
-    AsyncPipe
-  ],
-  templateUrl: "./account.component.html",
-  standalone: true,
-  styleUrl: "./account.component.scss"
+  imports: [InputTextComponent, ReactiveFormsModule, TypedFormControlDirective, InputButtonComponent, InputMultiToggleComponent, AsyncPipe],
+  templateUrl: "./account.component.html", standalone: true, styleUrl: "./account.component.scss"
 })
 export class AccountComponent implements OnDestroy {
-
-  public readonly form;
-
-  protected testOptions: MultiToggleOptions<notificationToggleValue> = [
-    {name: "All", value: "ALL"},
-    {name: "Email", value: NotificationSettingsDto.ChannelsEnum.Email},
-    {name: "Push", value: NotificationSettingsDto.ChannelsEnum.Push}
-  ];
-  protected readonly notificationFormControls$ = new BehaviorSubject<undefined | Map<
-      NotificationSettingsDto.TypeEnum, FormControl<null | notificationToggleValue>
-    >>(undefined);
-  protected readonly isPlatformAdmin$;
-  protected readonly currentUserProfile$;
-
   private readonly _userService = inject(UserService);
   private readonly _fb = inject(FormBuilder);
   private readonly _userProfileService = inject(UserProfileEndpointService);
+  private readonly preferences = inject(NotificationPreferenceEndpointService);
+  private readonly email = inject(EmailPreferenceEndpointService);
+  private readonly inApp = inject(InAppPreferenceEndpointService);
   private readonly _toastService = inject(ToastService);
-
-  private readonly _profileSubscription;
-  private _notificationChangesSubscription?: Subscription;
-
+  private readonly subscriptions = new Subscription();
+  private readonly labels = new Map<string, string>();
+  public readonly form = this._fb.nonNullable.group({givenName: "", email: "", username: ""});
+  protected readonly testOptions: MultiToggleOptions<notificationToggleValue> = [
+    {name: "All", value: "ALL"}, {name: "Email", value: "EMAIL"}, {name: "Push", value: "PUSH"}
+  ];
+  protected readonly notificationFormControls$ =
+    new BehaviorSubject<Map<string, FormControl<notificationToggleValue | null>> | undefined>(undefined);
+  protected readonly isPlatformAdmin$ = this._userService.isPlatformAdmin$;
+  protected readonly currentUserProfile$ = this._userService.userProfile$;
   constructor() {
-    this.form = this._fb.group({
-      notification: this._fb.control<string | null>(null),
-      givenName: this._fb.nonNullable.control<string>(""),
-      lastName: this._fb.nonNullable.control<string>(""),
-      email: this._fb.nonNullable.control<string>(""),
-      username: this._fb.nonNullable.control<string>(""),
-      checked: this._fb.nonNullable.control<boolean>(false)
-    });
-
-    this.isPlatformAdmin$ = this._userService.isPlatformAdmin$;
-    this.currentUserProfile$ = this._userService.userProfile$;
-
-    this._profileSubscription = this.currentUserProfile$.subscribe(appProfile => {
-      if(appProfile) {
-        this.form.setValue({
-          givenName: appProfile.account.volunteer.firstName,
-          lastName: appProfile.account.volunteer.lastName,
-          email: appProfile.account.email,
-          username: appProfile.account.username,
-          checked: false,
-          notification: null
-        });
+    this.subscriptions.add(this.currentUserProfile$.subscribe(profile => {
+      if (profile) {
+        this.form.setValue({givenName: profile.account.volunteer.name, email: profile.account.email, username: profile.account.username});
       }
-    });
-
-    this._userProfileService.getCurrentUserProfile().subscribe(profile => {
-      const notificationControls = new Map(profile.notifications
-        .filter(notif => {
-          if(notif.type.startsWith("ADMIN_")) {
-            return profile.account.platformAdmin === true;
-          }
-
-          if(notif.type.startsWith("PLANNER_")){
-            return profile.planningPlans.length > 0;
-          }
-
-          if(notif.type.startsWith("VOLUNTEER_")){
-            return true;
-          }
-
-          return false;
-        })
-        .map(notification => {
-          const currentValue = notification.channels.length === 2 ? "ALL" :
-            notification.channels.length === 1 ? Array.from(notification.channels)[0] : null;
-          const control = this._fb.control<null | notificationToggleValue>(currentValue);
-          return [notification.type, control] as const;
-        })
-        .sort((a,b) => a[0].localeCompare(b[0]))
-      );
-
-      const notificationChanges$ = [...notificationControls.entries()].map(([type, control]) => control.valueChanges.pipe(
-        startWith(control.value),
-        pairwise(),
-        switchMap(([oldValue, newValue]) => this._userProfileService.updateNotificationSettings({
-          type: type,
-          channels: newValue === "ALL" ? [NotificationSettingsDto.ChannelsEnum.Email, NotificationSettingsDto.ChannelsEnum.Push] :
-            newValue ? [newValue] : []
-        }).pipe(
-          this._toastService.tapSaving("Notification Setting", item => this.getNotificationKindName(item.type)),
-          catchError(() => {
-            // on error, revert the change
-            control.setValue(oldValue, {emitEvent: false});
-            return [];
-          })
-        ))
-      ));
-
-      this._notificationChangesSubscription = notificationChanges$.length === 0 ?
-        undefined :
-        forkJoin(notificationChanges$).subscribe();
-
-      this.notificationFormControls$.next(notificationControls);
-    });
+    }));
+    this.subscriptions.add(this.preferences.listNotificationPreferences().subscribe(items => {
+      const controls = new Map<string, FormControl<notificationToggleValue | null>>();
+      for (const item of items) {
+        if (!item.type) {continue;}
+        const type = item.type;
+        this.labels.set(type, item.label ?? type);
+        const initial = item.email && item.inApp ? "ALL" : item.email ? "EMAIL" : item.inApp ? "PUSH" : null;
+        const control = this._fb.control<notificationToggleValue | null>(initial);
+        controls.set(type, control);
+        this.subscriptions.add(control.valueChanges.pipe(concatMap(value => forkJoin({
+          email: this.email.updateEmailPreference(type, {enabled: value === "ALL" || value === "EMAIL"}),
+          inApp: this.inApp.updateInAppPreference(type, {enabled: value === "ALL" || value === "PUSH"})
+        }).pipe(catchError(() => {
+          this._toastService.showError("Notification settings", "Could not save the setting. Reload the page to see its current value.");
+          return EMPTY;
+        })))).subscribe());
+      }
+      this.notificationFormControls$.next(controls);
+    }));
   }
-
-  ngOnDestroy(): void {
-    this._profileSubscription.unsubscribe();
-    this._notificationChangesSubscription?.unsubscribe();
-  }
-
-  /**
-   * open the external keycloak management console
-   */
-  goToManagement() {
-    window.location.href = this._userService.manageUrl;
-  }
-
-  signOut() {
-    this._userService.logout();
-  }
-
-  protected getNotificationKindName(type: NotificationSettingsDto.TypeEnum): string {
-    switch (type) {
-      case NotificationSettingsDto.TypeEnum.VolunteerAutoAssigned:
-        return "Auto Assignments";
-      case NotificationSettingsDto.TypeEnum.VolunteerShiftReminder:
-        return "Shift Reminders";
-      case NotificationSettingsDto.TypeEnum.VolunteerRequestHandled:
-        return "Request Updates";
-      case NotificationSettingsDto.TypeEnum.VolunteerTradeOrAuction:
-        return "Trades & Auctions";
-      case NotificationSettingsDto.TypeEnum.VolunteerPlansChanged:
-        return "Plan Changes";
-      case NotificationSettingsDto.TypeEnum.VolunteerRolesChanged:
-        return "Role Changes";
-      case NotificationSettingsDto.TypeEnum.VolunteerStatusChanged:
-        return "User Status Changes";
-      case NotificationSettingsDto.TypeEnum.PlannerVolunteerRequest:
-        return "Requests";
-      case NotificationSettingsDto.TypeEnum.PlannerVolunteerJoinedPlan:
-        return "Volunteer Joined";
-      case NotificationSettingsDto.TypeEnum.AdminPlannerJoinedPlan:
-        return "Planner Joined";
-      case NotificationSettingsDto.TypeEnum.AdminTrustAlertReceived:
-        return "Trust Alerts";
-      case NotificationSettingsDto.TypeEnum.AdminRewardSyncUsed:
-        return "Rewards Synced";
-    }
-  }
-
-  protected getRoleLabel(role: RoleDto): string {
-    return role.description?.trim()
-      ? `${role.name}: ${role.description}`
-      : role.name;
-  }
-
+  ngOnDestroy(): void { this.subscriptions.unsubscribe(); }
+  goToManagement() { window.location.href = this._userService.manageUrl; }
+  signOut() { this._userService.logout(); }
+  protected getNotificationKindName(type: string): string { return this.labels.get(type) ?? type; }
   protected getCalendarLink(profile: UserProfileDto | null): string | null {
     const shareId = profile?.calendarShareId?.trim();
     if(!shareId) {
       return null;
     }
 
-    const basePath = environment.shiftserviceBasePath.replace(/\/+$/, "");
+    const basePath = environment.apiBasePath.replace(/\/+$/, "");
     return `${basePath}/api/v1/calendar/share/${encodeURIComponent(shareId)}`;
   }
 

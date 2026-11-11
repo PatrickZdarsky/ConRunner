@@ -9,7 +9,7 @@ import {
   TimeConstraintCreateDto,
   TimeConstraintDto,
   TimeConstraintEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {BehaviorSubject, of, switchMap} from "rxjs";
 import {FormBuilder} from "@angular/forms";
 import {DialogAddEmergencyComponent} from "../dialog-add-emergency/dialog-add-emergency.component";

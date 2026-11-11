@@ -5,20 +5,10 @@ import { switchMap } from "rxjs/operators";
 import { environment } from "../environment";
 import { UserService } from "../services/user/user.service";
 
-function normalizeUrl(url: string): string {
-  return new URL(url, window.location.origin).href.replace(/\/$/, "");
-}
-
 function isProtectedApiRequest(url: string): boolean {
-  const requestUrl = normalizeUrl(url);
-  const protectedBasePaths = [
-    environment.shiftserviceBasePath,
-    environment.auditserviceBasePath,
-  ]
-    .filter(basePath => !basePath.includes("PLACEHOLDER"))
-    .map(normalizeUrl);
-
-  return protectedBasePaths.some(basePath => requestUrl.startsWith(basePath));
+  const requestUrl = new URL(url, window.location.origin);
+  const apiBase = new URL(environment.apiBasePath, window.location.origin);
+  return requestUrl.origin === apiBase.origin && requestUrl.pathname.startsWith("/api/");
 }
 
 export const authTokenInterceptor: HttpInterceptorFn = (request, next) => {

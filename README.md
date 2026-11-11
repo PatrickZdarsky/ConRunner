@@ -11,7 +11,7 @@ incrementally from the existing system.
 .
 ├── apps/
 │   ├── backend/             # one Spring Boot/Spring Modulith deployable
-│   └── web/                 # future Angular application
+│   └── web/                 # Angular web application
 ├── contracts/               # contracts for genuinely external consumers only
 ├── docs/
 │   ├── adr/                 # architecture decision records
@@ -34,9 +34,22 @@ Java 25 is the generated project's baseline.
 ./mvnw test
 ```
 
-The root build aggregates the backend. Future applications should be added to the repository build
-only when they have a real build configuration; placeholder directories are deliberately not fake
-Maven modules.
+For a local backend with PostgreSQL and Keycloak, see [local development](ops/compose/README.md).
+
+The root Maven build aggregates the backend; the Angular application uses npm from `apps/web`.
+
+## Local development
+
+Prerequisites: Java 25, Node.js and npm, Python 3, curl, Docker and Docker Compose. From the repository root:
+
+```sh
+./dev client   # first setup and after backend HTTP API/DTO changes
+./dev up       # start PostgreSQL, Keycloak, backend and Angular
+```
+
+Open http://localhost:4200 and sign in as `dev` / `dev`. The dev command installs frontend dependencies on first client generation. The Angular dev server reloads frontend changes and proxies `/api` (including WebSockets) to the backend on port 8081. Press Ctrl+C to stop the application processes; `./dev down` stops the infrastructure and keeps the database volume. The client generator uses a separate temporary PostgreSQL container and backend instance, so it does not modify the development database or rely on a running backend. It writes the OpenAPI artifact to `apps/backend/target/openapi.json` and the ignored TypeScript client to `apps/web/src/api-client`.
+
+Run `npm run build` in `apps/web` to verify the frontend after generating the client. If a backend endpoint or DTO changes, rerun `./dev client`; frontend-only edits do not require regeneration. Keycloak realm import happens when its container is created; an existing Keycloak container must be recreated to pick up realm configuration changes. See [local backend development](ops/compose/README.md) for details.
 
 ## Architectural direction
 

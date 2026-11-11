@@ -1,7 +1,7 @@
 import {Component, inject, Input, Output} from "@angular/core";
 import {
   RewardPointsEndpointService, RewardPointsShareTokenCreateRequestDto, RewardPointsShareTokenDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {InputTextComponent} from "../inputs/input-text/input-text.component";
@@ -101,7 +101,7 @@ export class ManageRewardsShareTokenComponent {
   }
 
   protected copyLink(token: RewardPointsShareTokenDto) {
-    const link = `${environment.shiftserviceBasePath}/api/v1/reward-points/share/${token.token}`;
+    const link = `${environment.apiBasePath}/api/v1/reward-points/share/${token.token}`;
     navigator.clipboard.writeText(link).then(() => {
       this._toastService.showSuccess("Link Copied", "The share link has been copied to your clipboard.");
     }).catch(() => {

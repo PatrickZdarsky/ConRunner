@@ -5,7 +5,7 @@ import {
   PositionSlotEndpointService,
   SignupEndpointService,
   VolunteerDto
-} from "../../../../shiftservice-client";
+} from "../../../../api-client";
 import {BehaviorSubject, debounceTime, map, Observable, of, shareReplay, startWith, switchMap, take} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {DialogComponent} from "../../dialog/dialog.component";
@@ -157,7 +157,7 @@ export class DialogManageAssignmentsComponent {
   }
 
   private nameMatches(volunteer: VolunteerDto, nameFilter: string): boolean {
-    const fullName = `${volunteer.firstName} ${volunteer.lastName}`.toLowerCase().replaceAll(" ", "");
+    const fullName = volunteer.name.toLowerCase().replaceAll(" ", "");
     return fullName.includes(nameFilter.replaceAll(" ","").toLowerCase());
   }
 

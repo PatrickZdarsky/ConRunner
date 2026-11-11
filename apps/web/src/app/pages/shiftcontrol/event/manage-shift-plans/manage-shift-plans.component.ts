@@ -8,7 +8,7 @@ import {
   EventShiftPlansOverviewDto, RoleEndpointService,
   ShiftPlanDto,
   ShiftPlanInviteEndpointService
-} from "../../../../../shiftservice-client";
+} from "../../../../../api-client";
 import {
   BehaviorSubject,
   combineLatestWith,

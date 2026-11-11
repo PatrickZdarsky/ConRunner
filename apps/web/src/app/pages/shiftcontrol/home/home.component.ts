@@ -4,7 +4,7 @@ import {UserService} from "../../../services/user/user.service";
 import {AsyncPipe, NgClass} from "@angular/common";
 import {BehaviorSubject, combineLatestWith, map, withLatestFrom} from "rxjs";
 import {icons} from "../../../util/icons";
-import {EventEndpointService} from "../../../../shiftservice-client";
+import {EventEndpointService} from "../../../../api-client";
 
 @Component({
   selector: "app-home",
@@ -50,11 +50,6 @@ export class HomeComponent {
           href: "volunteers",
           spotlight: false
         }, {
-          title:"Pretalx Sync",
-          content: "Import and sync events from pretalx",
-          href: "pretalx-sync",
-          spotlight: false
-        }, {
           title:"Audit Log",
           content: "Track changes and activities within the system",
           href: "audit",
@@ -71,8 +66,8 @@ export class HomeComponent {
   }
 
   protected get name$(){
-    return this._userService.kcProfile$.pipe(
-      map(user => `${user?.firstName}`)
+    return this._userService.userProfile$.pipe(
+      map(user => user?.account.volunteer.name || user?.account.username || "there")
     );
   }
 

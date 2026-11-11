@@ -1,7 +1,7 @@
 import {Component, inject} from "@angular/core";
 import { icons } from "../../../util/icons";
 import {FormBuilder} from "@angular/forms";
-import {TrustAlertDisplayDto, TrustAlertEndpointService} from "../../../../shiftservice-client";
+import {TrustAlertDisplayDto, TrustAlertEndpointService} from "../../../../api-client";
 import {debounceTime, shareReplay, startWith, switchMap} from "rxjs";
 import {AsyncPipe, DatePipe} from "@angular/common";
 import {InputButtonComponent} from "../../../components/inputs/input-button/input-button.component";

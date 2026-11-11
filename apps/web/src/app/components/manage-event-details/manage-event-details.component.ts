@@ -5,7 +5,7 @@ import {TypedFormControlDirective} from "../../directives/typed-form-control.dir
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {InputDateComponent} from "../inputs/input-date/input-date.component";
 import {InputButtonComponent} from "../inputs/input-button/input-button.component";
-import {EventDto, EventEndpointService} from "../../../shiftservice-client";
+import {EventDto, EventEndpointService} from "../../../api-client";
 import {mapValue} from "../../util/value-maps";
 import {ActivatedRoute, Router} from "@angular/router";
 import {BehaviorSubject, Subject} from "rxjs";

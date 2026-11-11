@@ -7,7 +7,7 @@ import {
   ShiftPlanDto,
   ShiftPlanEndpointService,
   SignupEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {BehaviorSubject, combineLatestWith, filter, of, startWith, Subject, Subscription, switchMap} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {LockStatusPipe} from "../../pipes/lock-status.pipe";

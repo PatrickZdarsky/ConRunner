@@ -3,7 +3,7 @@ import { icons } from "../../../util/icons";
 import {
   PretalxApiKeyDetailsDto,
   PretalxEndpointService
-} from "../../../../shiftservice-client";
+} from "../../../../api-client";
 import {BehaviorSubject,} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {ManagePretalxTokenComponent} from "../../../components/manage-pretalx-token/manage-pretalx-token.component";

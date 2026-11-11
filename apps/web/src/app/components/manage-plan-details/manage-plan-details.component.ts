@@ -3,7 +3,7 @@ import {BehaviorSubject, Subject} from "rxjs";
 import {
   ShiftPlanDto,
   ShiftPlanEndpointService
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import { icons } from "../../util/icons";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ToastService} from "../../services/toast/toast.service";

@@ -10,7 +10,7 @@ import {
   ShiftContextDto,
   ShiftEndpointService,
   TradeInfoDto
-} from "../../../shiftservice-client";
+} from "../../../api-client";
 import {UserService} from "../../services/user/user.service";
 import {AsyncPipe, DatePipe} from "@angular/common";
 import {RouterLink} from "@angular/router";
@@ -82,16 +82,14 @@ export class ShiftTradeAuctionComponent {
           event,
           isOwnRequest,
           otherVolunteer,
-          initials: `${otherVolunteer.firstName.substring(0,1)}${otherVolunteer.lastName.substring(0,1)}`,
+          initials: otherVolunteer.name.substring(0, 1),
           otherPosition: otherAssignment.positionSlotContext,
           otherShift: trade.requestedAssignment.shiftContext,
           ownPosition: ownAssignment.positionSlotContext,
           ownShift: trade.offeringAssignment.shiftContext,
           caption: {
             pre: isOwnRequest ? "You asked " : "",
-            name: isOwnRequest ?
-              `${otherVolunteer.firstName} ${otherVolunteer.lastName.substring(0,1)}.` :
-              `${otherVolunteer.firstName} ${otherVolunteer.lastName.substring(0,1)}.`,
+            name: otherVolunteer.name,
             middle: isOwnRequest ? " to trade their position in " : " wants to trade their position in ",
             shiftName: otherAssignment.shiftContext.name
           }
@@ -109,18 +107,12 @@ export class ShiftTradeAuctionComponent {
           event,
           auction,
           isOwnRequest,
-          initials: `${
-            auction.assignment.assignedVolunteer.firstName.substring(0,1)}${auction.assignment.assignedVolunteer.lastName.substring(0,1)
-          }`,
-          title: `${
-            auction.assignment.assignedVolunteer.firstName} ${auction.assignment.assignedVolunteer.lastName.substring(0,1)
-          }. offers their position in ${auction.shiftContext.name}`,
+          initials: auction.assignment.assignedVolunteer.name.substring(0, 1),
+          title: `${auction.assignment.assignedVolunteer.name} offers their position in ${auction.shiftContext.name}`,
           slot: auction.positionSlotContext,
           shift: auction.shiftContext,
           caption: {
-            name: isOwnRequest ? "You" : `${
-              auction.assignment.assignedVolunteer.firstName} ${auction.assignment.assignedVolunteer.lastName.substring(0,1)
-            }.`,
+            name: isOwnRequest ? "You" : auction.assignment.assignedVolunteer.name,
             middle: isOwnRequest ? " offered your position in " : " offers their position in ",
             shiftName: auction.shiftContext.name
           }

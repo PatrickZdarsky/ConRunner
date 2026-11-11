@@ -1,6 +1,6 @@
 import {Component, inject} from "@angular/core";
 import {RouterLink} from "@angular/router";
-import {EventDto, EventEndpointService} from "../../../../shiftservice-client";
+import {EventDto, EventEndpointService} from "../../../../api-client";
 import {map, Observable} from "rxjs";
 import {AsyncPipe, DatePipe} from "@angular/common";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";

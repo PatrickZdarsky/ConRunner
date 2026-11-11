@@ -4,10 +4,10 @@ import {
   PositionSlotTradeEndpointService, ShiftContextDto,
   TradeInfoDto,
   VolunteerDto
-} from "../../../../shiftservice-client";
+} from "../../../../api-client";
 import {BehaviorSubject, combineLatestWith, filter, map, Observable, of, switchMap} from "rxjs";
 import {UserService} from "../../../services/user/user.service";
-import {AsyncPipe, DatePipe, SlicePipe} from "@angular/common";
+import {AsyncPipe, DatePipe} from "@angular/common";
 import {DialogComponent, dialogResult} from "../../dialog/dialog.component";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {icons} from "../../../util/icons";
@@ -32,7 +32,6 @@ interface mappedInfo {
   selector: "app-dialog-trade-details",
   imports: [
     AsyncPipe,
-    SlicePipe,
     DialogComponent,
     FaIconComponent,
     DatePipe,

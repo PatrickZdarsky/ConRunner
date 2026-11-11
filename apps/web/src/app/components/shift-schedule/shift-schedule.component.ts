@@ -2,7 +2,7 @@ import {Component, Input} from "@angular/core";
 import {RouterLink} from "@angular/router";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {TooltipDirective} from "../../directives/tooltip.directive";
-import {EventDto, PositionSlotDto, ShiftDto, ShiftPlanDto} from "../../../shiftservice-client";
+import {EventDto, PositionSlotDto, ShiftDto, ShiftPlanDto} from "../../../api-client";
 import {BehaviorSubject} from "rxjs";
 import {AsyncPipe, DatePipe, NgClass} from "@angular/common";
 import {icons} from "../../util/icons";

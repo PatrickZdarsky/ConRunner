@@ -1,7 +1,7 @@
 import {Component, inject} from "@angular/core";
 import { icons } from "../../../util/icons";
 import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
-import {PaginationDtoUserEventDto, UserEventEndpointService} from "../../../../shiftservice-client";
+import {PaginationDtoUserEventDto, UserEventEndpointService} from "../../../../api-client";
 import {debounceTime, EMPTY, Observable, of, pairwise, shareReplay, startWith, switchMap} from "rxjs";
 import {AsyncPipe} from "@angular/common";
 import {InputButtonComponent} from "../../../components/inputs/input-button/input-button.component";

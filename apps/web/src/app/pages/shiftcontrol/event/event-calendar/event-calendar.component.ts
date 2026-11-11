@@ -9,7 +9,7 @@ import {
   EventEndpointService, EventScheduleContentDto, EventScheduleEndpointService, EventScheduleLayoutDto, LocationDto, LocationEndpointService,
   ShiftColumnDto,
   ShiftDto
-} from "../../../../../shiftservice-client";
+} from "../../../../../api-client";
 import {
   BehaviorSubject,
   catchError,

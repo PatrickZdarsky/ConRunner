@@ -33,7 +33,7 @@
         @for (alert of page.items; track alert.id) {
 
           <span class="badge h-fit w-fit mr-xl case capitalize">{{alert.alertType.toString().toLowerCase()}}</span>
-          <span>{{alert.volunteerDto.firstName}} {{alert.volunteerDto.lastName}}</span>
+          <span>{{alert.volunteerDto.name}}</span>
           <span>{{alert.alertTypeDescription}}</span>
           <span>{{alert.createdAt | date:"short"}}</span>
 

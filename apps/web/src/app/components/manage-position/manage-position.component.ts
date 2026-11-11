@@ -18,7 +18,7 @@ import PositionSignupStateEnum = PositionSlotDto.PositionSignupStateEnum;
 import {ToastService} from "../../services/toast/toast.service";
 import {descriptionLengthValidator, nameLengthValidator} from "../../util/textValidators";
 import {mapValue} from "../../util/value-maps";
-import {PositionSlotDto, PositionSlotEndpointService, RoleDto, ShiftDto, VolunteerDto} from "../../../shiftservice-client";
+import {PositionSlotDto, PositionSlotEndpointService, RoleDto, ShiftDto, VolunteerDto} from "../../../api-client";
 
 export interface managePositionParams {
   shift: ShiftDto;
