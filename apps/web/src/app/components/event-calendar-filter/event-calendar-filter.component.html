@@ -1,0 +1,67 @@
+<div
+  class="card compact grid grid-cols-[1fr_auto_auto_auto_auto_auto_auto] grid-rows-[1fr-1fr] gap-sm gap-x-xl w-full justify-self-end items-center"
+  [ngClass]="{'hidden': !showFilters}"
+>
+
+  <div class="flex flex-row col-start-1 row-start-1 row-span-2">
+    <ng-content></ng-content>
+  </div>
+
+  <!-- date picker -->
+  <div class="col-start-2 row-start-1">
+    <xsb-input-date #datePicker name="calendar-filter-date"
+                    [formControl]="viewForm.controls.date"
+                    [xsb-typed]="[datePicker, viewForm.controls.date]" />
+  </div>
+
+  <!-- view mode selection -->
+  <div class="col-start-2 row-start-2 hidden">
+    <xsb-input-select #viewMode [options]="viewModeOptions" [formControl]="viewForm.controls.viewMode"
+                      [xsb-typed]="[viewMode, viewForm.controls.viewMode]" [icon]="iconView" name="calendar-view-mode" />
+  </div>
+
+  @if (showShiftFilterForm) {
+
+    <!-- title filter -->
+    <div class="flex gap-sm items-center col-start-3 col-span-2 row-start-1">
+      <xsb-input-text class="w-full" #shiftName placeholder="Shift name" name="calendar-filter-name" [formControl]="searchForm.controls.shiftName"
+                      [xsb-typed]="[shiftName, searchForm.controls.shiftName]" />
+    </div>
+
+    <!-- shift plan filter -->
+    <div class="col-start-3 row-start-2">
+      <xsb-input-multiselect #plansCats naming="Locations" emptyNaming="All Shift Plans" [options]="plansOptions" [formControl]="searchForm.controls.plansList"
+                             [xsb-typed]="[plansCats, searchForm.controls.plansList]" name="calendar-filter-plans"/>
+    </div>
+
+    <!-- categories multiselects -->
+    <div class="col-start-5 row-start-2">
+      <xsb-input-multiselect #rolesCats naming="Roles" emptyNaming="All Roles" [options]="rolesOptions" [formControl]="searchForm.controls.rolesList"
+                             [xsb-typed]="[rolesCats, searchForm.controls.rolesList]" name="calendar-filter-roles"/>
+    </div>
+    <div class="col-start-5 row-start-1">
+      <xsb-input-multiselect #locationsCats naming="Locations" emptyNaming="All Locations" [options]="locationsOptions" [formControl]="searchForm.controls.locationsList"
+                             [xsb-typed]="[locationsCats, searchForm.controls.locationsList]" name="calendar-filter-locations"/>
+    </div>
+    <div class="col-start-4 row-start-2">
+      <xsb-input-multiselect #relevanceCats emptyNaming="All Associations" naming="Associations" [options]="availabilityOptions" [formControl]="searchForm.controls.relevanceList"
+                             [xsb-typed]="[relevanceCats, searchForm.controls.relevanceList]" name="calendar-filter-availability"/>
+    </div>
+
+    <!-- summary -->
+    <div class="col-start-6 row-span-2 flex flex-col justify-center justify-self-end px-lg">
+      @if(statistics !== undefined) {
+        <small>{{statistics.totalShifts}} shifts</small>
+        <small>{{statistics.totalHours | number:'1.0-0'}} hours</small>
+
+        @if (statisticsMode === "admin" || statisticsMode === "planner"){
+          <small>{{statistics.unassignedCount}} required signups</small>
+        }
+        @if (statisticsMode === "volunteer" || statisticsMode === "planner"){
+          <small>{{statistics.shiftCountForSignup}} eligible shifts</small>
+        }
+      }
+    </div>
+  }
+
+</div>

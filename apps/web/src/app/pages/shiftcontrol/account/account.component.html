@@ -1,0 +1,97 @@
+
+<!-- cards row -->
+<div class="flex flex-wrap flex-row gap-xl">
+
+  <!-- user management card -->
+  <div class="card grid grid-cols-[auto_1fr] w-[30rem] h-fit gap-sm gap-x-md items-center">
+    <h1 class="col-span-2 signature-gradient-font">Account Information</h1>
+
+    <span class="badge w-fit">Given Name</span>
+    <xsb-input-text #givenName name="userGivenName"
+                    [disguise]="true"
+                    [formControl]="form.controls.givenName"
+                    [xsb-typed]="[givenName, form.controls.givenName]"
+    />
+
+    <span class="badge w-fit">Last Name</span>
+    <xsb-input-text #lastName name="userLastName"
+                    [disguise]="true"
+                    [formControl]="form.controls.lastName"
+                    [xsb-typed]="[lastName, form.controls.lastName]"
+    />
+
+    <span class="badge w-fit">E-Mail</span>
+    <xsb-input-text #email name="userEmail"
+                    [disguise]="true"
+                    [formControl]="form.controls.email"
+                    [xsb-typed]="[email, form.controls.email]"
+    />
+
+    <span class="badge w-fit">Username</span>
+    <xsb-input-text #username name="userUsername"
+                    [disguise]="true"
+                    [formControl]="form.controls.username"
+                    [xsb-typed]="[username, form.controls.username]"
+    />
+
+    @if (isPlatformAdmin$ | async) {
+      <span class="badge w-fit">Platform Role</span>
+      <span>Administrator</span>
+    }
+
+    <div class="col-span-2 flex flex-row gap-lg pt-lg">
+      <xsb-input-button name="me-manage-account" content="Manage Account" (xsbClick)="goToManagement()" size="minimal" />
+      <xsb-input-button name="me-sign-out" action="danger" content="Sign Out" (xsbClick)="signOut()" size="minimal" />
+    </div>
+  </div>
+
+  <!-- notification preferences card -->
+  <div class="card grid grid-cols-[auto_1fr] gap-y-sm gap-x-lg w-fit h-fit items-baseline">
+    <h1 class="col-span-2 signature-gradient-font">Notifications</h1>
+
+    @if(notificationFormControls$ | async; as notificationControls){
+
+      @for (item of notificationControls.entries(); track item[0]){
+        <label for="me-notifications-{{item[0]}}">{{getNotificationKindName(item[0])}}:</label>
+        <xsb-input-multitoggle #notification name="me-notifications-{{item[0]}}"
+                               [formControl]="item[1]" [options]="testOptions" [nullable]="true" nullName="None"
+                               [xsb-typed]="[notification, item[1]]"
+        />
+      }
+    }
+
+  </div>
+
+  <!-- calendar feed card -->
+  @if (currentUserProfile$ | async; as profile) {
+    <div class="card flex flex-col gap-md w-[30rem] h-fit">
+      <h1 class="signature-gradient-font">Calendar Feed</h1>
+
+      <p class="text-sm">
+        Subscribe to your personal shift calendar in Apple Calendar, Google Calendar, Outlook, or any app that supports iCal feeds.
+      </p>
+
+      @if (getCalendarLink(profile); as calendarLink) {
+        <div class="flex flex-col gap-xs">
+          <span class="badge w-fit">Subscription Link</span>
+          <a class="break-all text-sm underline" [href]="calendarLink" target="_blank" rel="noreferrer">
+            {{calendarLink}}
+          </a>
+        </div>
+
+        <p class="text-sm text-slate-600">
+          Regenerating this link invalidates the old one. Any existing calendar subscription must be updated with the new URL.
+        </p>
+
+        <div class="flex flex-row gap-lg pt-sm">
+          <xsb-input-button name="me-copy-calendar-link" content="Copy Link" size="minimal" (xsbClick)="copyCalendarLink(profile)" />
+          <xsb-input-button name="me-regenerate-calendar-link" content="Regenerate Link" size="minimal" (xsbClick)="regenerateCalendarLink()" />
+        </div>
+      } @else {
+        <p class="text-sm text-slate-600">
+          Your personal calendar link is being prepared.
+        </p>
+      }
+    </div>
+  }
+</div>

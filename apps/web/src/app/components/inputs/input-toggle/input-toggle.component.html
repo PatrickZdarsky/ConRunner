@@ -1,0 +1,38 @@
+@if (!disguise){
+  <div class="relative cursor-pointer" [ngClass]="{
+  'pointer-events-none opacity-60' : disabled
+}" (click)="input.click(); (ngControl?.touched ?? true) ? 0 : onTouched?.()" (keydown)="input.click()" tabindex="0">
+
+    <input #input type="checkbox" tabindex="-1" class="w-0 h-0 opacity-0 absolute" [name]="name" [id]="name"
+           [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0" (blur)="onTouched ? onTouched() : 0">
+
+    <!-- toggle icon container -->
+    <div class="h-6 w-11 border-ctr aspect-square active:outline-none p-xxs flex items-center border-framing-item hover:border-framing-highlight transition-colors" [ngClass]="{
+          'focus:border-framing-highlight' : valid || disabled,
+          'focus:border-framing-default_danger' : !valid && !disabled,
+          'rounded-lg text-sm' : size === 'minimal',
+          'rounded-xl' : size === 'regular',
+          'flex-row-reverse': value,
+          'bg-background-item_success': value,
+          'bg-background-item': !value
+        }">
+
+      <!-- background -->
+      <div class="h-full transition-colors grid place-content-center" [ngClass]="{
+
+          'text-framing-highlight_success' : value,
+          'text-framing-highlight': !value
+        }">
+
+        <!-- fa icon with height for alignment hack - seems to be consistent across zooms? -->
+        @if (value) {
+          <fa-icon style="height:1.35em" [icon]="checkIcon" />
+        } @else {
+          <fa-icon style="height:1.35em" [icon]="crossIcon"/>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+

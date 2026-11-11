@@ -1,0 +1,69 @@
+<div class="flex flex-row gap-lg">
+
+  <div class="card flex flex-col gap-md h-fit max-w-[30rem]">
+
+    <h1 class="signature-gradient-font">About Volunteers</h1>
+    <p>
+      As soon as an user signs up with a new account, they appear in this list. <br>
+      Users will need to join a Shift Plan so that they can volunteer and sign up to shifts.
+    </p>
+
+  </div>
+
+  <div class="card grid card grid-cols-[10rem_1fr_1fr_1fr] gap-y-xs gap-x-md h-fit w-[min(100%,70rem)] items-center">
+    <h1 class="signature-gradient-font col-span-4">Application Users</h1>
+
+    <small class="pb-sm self-end">Full name</small>
+    <small class="pb-sm self-end">E-Mail</small>
+    <small class="pb-sm self-end">Joined Plans</small>
+    <div class="pb-sm justify-self-end self-end">
+      <xsb-input-text #search
+        [formControl]="form.controls.search"
+        [xsb-typed]="[search, form.controls.search]"
+        placeholder="Filter Users"
+        name="application-users-search"
+      />
+    </div>
+
+    <hr class="col-span-4 mb-sm" />
+
+    @if (page$ | async; as page) {
+
+      @if(page.items.length === 0) {
+        <span class="col-span-4">
+          No application users at this time.
+        </span>
+      } @else {
+        @for (user of page.items; track user.volunteer.id) {
+
+          <span>{{user.volunteer.firstName}} {{user.volunteer.lastName}}</span>
+          <span>{{user.email}}</span>
+          <span>{{user.volunteeringPlans.length}} Plans</span>
+
+          <div class="flex flex-row gap-md justify-end">
+            <a [routerLink]="'/volunteers/' + user.volunteer.id">Manage Volunteer</a>
+          </div>
+        }
+      }
+
+      <hr class="col-span-4 mt-sm" />
+
+      <div class="col-span-3 flex flex-row gap-md items-center pt-sm">
+        <xsb-input-button size="text" content="Previous"
+                          (xsbClick)="form.controls.paginationIndex.setValue(page.page - 1)"
+                          [lock]="page.page <= 0"
+        />
+
+        <span>Page {{page.page + 1}}/{{page.pages | min:1}}</span>
+
+        <xsb-input-button size="text" content="Next"
+                          (xsbClick)="form.controls.paginationIndex.setValue(page.page + 1)"
+                          [lock]="page.page >= page.pages - 1"
+        />
+      </div>
+      <small class="justify-self-end">Viewing {{page.items.length}} of {{page.total}} Volunteers</small>
+    }
+
+  </div>
+
+</div>

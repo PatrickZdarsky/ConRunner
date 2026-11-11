@@ -1,0 +1,58 @@
+@if (volunteer$ | async; as volunteer){
+  <div class="flex flex-row gap-lg">
+
+    <div class="card grid grid-cols-[15rem] gap-md h-fit">
+      <h1 class="signature-gradient-font">Volunteer Details</h1>
+
+      <div class="flex flex-col gap-xs">
+        <div class="flex flex-row gap-md items-center">
+          <fa-icon [icon]="icons.name" />
+          <small>Full Name</small>
+        </div>
+        <span>{{volunteer.volunteer.firstName}} {{volunteer.volunteer.lastName}}</span>
+      </div>
+
+      <div class="flex flex-col gap-xs">
+        <div class="flex flex-row gap-md items-center">
+          <fa-icon [icon]="icons.email" />
+          <small>E-Mail</small>
+        </div>
+        <a href="mailto:{{volunteer.email}}">{{volunteer.email}}</a>
+      </div>
+    </div>
+
+
+    <div class="card grid card grid-cols-4 gap-y-xs gap-x-md h-fit w-[min(100%,70rem)] items-center">
+      <h1 class="signature-gradient-font col-span-4">Volunteer Shift Plans</h1>
+
+      <small class="pb-sm">Shift Plan</small>
+      <small class="pb-sm">Access Level</small>
+      <small class="pb-sm">Access Locked</small>
+      <small class="pb-sm justify-self-end"></small>
+
+      <hr class="col-span-4 mb-sm" />
+
+      <app-manage-volunteer-plan [manageData]="(newPlanData$ | async) ?? undefined" (planChanged)="volunteerChanged.next(volunteer)" />
+
+
+      @if (volunteerPlanRows$ | async; as plans) {
+
+        <hr class="col-span-4 mb-sm mt-sm" />
+
+        @for (plan of plans; track plan.plan?.id) {
+          <app-manage-volunteer-plan [manageData]="plan" (planChanged)="volunteerChanged.next(volunteer)" />
+        }
+
+        @if (plans.length > 0) {
+          <hr class="col-span-4 mt-sm" />
+        }
+
+        <small class="col-span-4 pt-sm">Viewing {{plans.length}} Shift Plans</small>
+      }
+
+    </div>
+
+
+  </div>
+}
+

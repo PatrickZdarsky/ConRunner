@@ -1,0 +1,59 @@
+@if (event$ | async; as event) {
+
+  <div class="grid grid-cols-[minmax(30rem,40rem)_auto] max-w-[100rem] grid-rows-[auto_1fr] gap-md h-full">
+
+    <div class="row-span-2 col-start-1 row-start-1 card flex flex-col gap-md flex-1 min-w-[20rem] max-w-[40rem]">
+
+      <div class="flex flex-row gap-sm">
+        <h1 class="compact signature-gradient-font grow">
+          <fa-icon class="icon" [icon]="icons.shift" />
+          Your Timeline
+        </h1>
+
+        <div class="badge hint"
+             tooltipMaxWidth="30ex"
+             [app-tooltip]="'Days where you signed up for shifts in this event'"
+        >
+          <fa-icon [icon]="icons.day" />
+          {{event.ownEventStatistics.busyDays}} Busy Days
+        </div>
+
+        <div class="badge hint"
+             tooltipMaxWidth="30ex"
+             [app-tooltip]="'Sum of your shift durations in this event'"
+        >
+          <fa-icon [icon]="icons.hour" />
+          {{event.ownEventStatistics.totalHours | number:"1.0-0"}} Hours
+        </div>
+
+      </div>
+
+      <div class="overflow-y-auto grow">
+        <app-shift-schedule [showShiftPersonalDetails]="true" [showShiftDescription]="true" [shifts]="(shifts$ | async) ?? []" />
+      </div>
+    </div>
+
+    <div class="col-start-2 row-start-1 card h-fit max-h-full flex flex-col gap-md overflow-y-auto] w-[clamp(20rem, 100%, 50rem)]">
+      <h1 class="compact signature-gradient-font">
+        <fa-icon class="icon" [icon]="icons.volunteers" />
+        Community Shift Offers
+      </h1>
+
+      <div class="overflow-y-auto">
+        <app-shift-trade-auction
+          [event]="(event$ | async)?.eventOverview"
+          [trades]="(trades$ | async) ?? []"
+          [auctions]="(auctions$ | async) ?? []"
+          (itemsChanged)="reloadTradeAuctions$.next()"
+        />
+      </div>
+    </div>
+
+    <div class="col-start-2 row-start-2 w-[clamp(20rem, 100%, 60rem)]">
+      <app-manage-unavailability [event]="event" />
+    </div>
+
+  </div>
+
+}
+

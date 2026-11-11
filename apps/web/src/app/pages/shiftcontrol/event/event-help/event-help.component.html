@@ -1,0 +1,31 @@
+<div class="card w-fit flex flex-col gap-lg">
+  <h1 class="signature-gradient-font compact">
+    <fa-icon [icon]="icons.help" class="icon" />
+    Help & Contacts
+  </h1>
+
+  <p>
+    You can always contact one of the Shift Planners of your joined Plans.<br>
+    Shift Planners can manage your Assignments and help you with any questions regarding your Shifts.
+  </p>
+
+  @if (help$ | async; as help) {
+    <div class="grid grid-cols-[auto_auto_1fr] gap-lg gap-y-sm items-center">
+      @for (plan of help; track plan.planId) {
+        @for (contact of plan.contacts; track contact.userId) {
+
+          <div class="badge w-fit">
+            <fa-icon [icon]="icons.plan" class="icon" />
+            <span>{{plan.planName}}</span>
+          </div>
+
+          <span>
+            {{contact.firstName}} {{contact.lastName}}
+          </span>
+
+          <a href="mailto:{{contact.email}}">{{contact.email}}</a>
+        }
+      }
+    </div>
+  }
+</div>

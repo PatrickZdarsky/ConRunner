@@ -1,0 +1,31 @@
+@if (viewWhen === true) {
+    <xsb-dialog success="Set Emergency" (closeDialog)="closed($event)">
+
+    <ng-container dialog-header>
+      <h1>Set emergency absence</h1>
+    </ng-container>
+
+    <ng-container dialog-body>
+      <div class="grid grid-cols-2 gap-lg pb-lg">
+
+        <div class="max-w-[min(50vw,30rem)] col-span-2">
+          If you are spontaneously unable to attend your shifts due to an emergency, you can inform the planners with an emergency unavailability.<br>
+          This should be only used as a last resort in case of unforeseen events.<br>
+          All your shifts during this day will be offered to other volunteers.
+        </div>
+
+        <!-- add unavailability date -->
+        <div class="grid grid-cols-[auto_1fr] gap-md gap-x-lg items-center">
+          <small class="col-span-2">Emergency date</small>
+
+          <div class="col-span-2">
+            <xsb-input-date #emergencyDate name="event-unavailability-from"
+                            [formControl]="form.controls.emergencyDate"
+                            [xsb-typed]="[emergencyDate, form.controls.emergencyDate]" />
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+  </xsb-dialog>
+}

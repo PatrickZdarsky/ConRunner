@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100.48 103.78">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        mask: url(#mask);
+      }
+
+      .cls-3 {
+        fill: #666;
+      }
+
+      .cls-4 {
+        fill: #999;
+      }
+
+      .cls-5 {
+        fill: #ccc;
+      }
+
+      .cls-6 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-7 {
+        fill: #e6e6e6;
+      }
+    </style>
+    <mask id="mask" x="-25.8" y="-10.76" width="149.53" height="131.73" maskUnits="userSpaceOnUse">
+      <g>
+        <rect class="cls-1" x="-14.07" y="-10.76" width="128.61" height="128.61"/>
+        <g id="shift">
+          <rect class="cls-7" x="16.45" y="34.19" width="65.02" height="22.97"/>
+          <path class="cls-7" d="M44.57-.55L-24.43,80.86c-3.17,3.74-.51,9.48,4.39,9.48H117.96c4.9,0,7.56-5.74,4.39-9.48L53.36-.55c-2.3-2.71-6.49-2.71-8.79,0Z"/>
+        </g>
+        <g id="shift-2" data-name="shift">
+          <rect class="cls-5" x="16.45" y="58.6" width="65.02" height="22.97"/>
+          <path class="cls-5" d="M44.57,23.86L-21.99,102.39c-3.17,3.74-.51,9.48,4.39,9.48H115.52c4.9,0,7.56-5.74,4.39-9.48L53.36,23.86c-2.3-2.71-6.49-2.71-8.79,0Z"/>
+        </g>
+        <g id="shift-3" data-name="shift">
+          <rect class="cls-4" x="16.45" y="81.86" width="65.02" height="22.97"/>
+          <path class="cls-4" d="M44.57,47.12L-7.34,108.37c-3.17,3.74-.51,9.48,4.39,9.48h103.82c4.9,0,7.56-5.74,4.39-9.48l-51.91-61.25c-2.3-2.71-6.49-2.71-8.79,0Z"/>
+        </g>
+        <g id="shift-4" data-name="shift">
+          <path class="cls-3" d="M44.57,70.84l-26.74,31.55c-3.17,3.74-.51,9.48,4.39,9.48h53.48c4.9,0,7.56-5.74,4.39-9.48l-26.74-31.55c-2.3-2.71-6.49-2.71-8.79,0Z"/>
+        </g>
+      </g>
+    </mask>
+    <linearGradient id="linear-gradient" x1="5.76" y1="100.75" x2="94.72" y2="11.78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9068ed"/>
+      <stop offset=".25" stop-color="#9471ee"/>
+      <stop offset=".6" stop-color="#9e86f3"/>
+      <stop offset=".99" stop-color="#8d67e0"/>
+    </linearGradient>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <g class="cls-2">
+      <path id="calendar" class="cls-6" d="M85.48,103.78H15c-8.28,0-15-6.72-15-15v-50.69h100.48v50.69c0,8.28-6.72,15-15,15ZM100.48,23.75c0-8.28-6.72-15-15-15H15C6.72,8.75,0,15.47,0,23.75v5.1h100.48v-5.1ZM26.68,5.01c0-2.76-2.24-5-5-5h-2.06c-2.76,0-5,2.24-5,5v3.74h12.06v-3.74ZM85.43,5C85.43,2.24,83.19,0,80.43,0h-2.06c-2.76,0-5,2.24-5,5v3.75s12.06,0,12.06,0v-3.75Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,23 @@
+.toast-info {
+  @apply border-framing-item_hint bg-background-item_hint cursor-pointer;
+
+  &:hover {
+    @apply border-framing-highlight_hint;
+  }
+}
+
+.toast-success {
+  @apply border-framing-item_success bg-background-item_success cursor-pointer;
+
+  &:hover {
+    @apply border-framing-highlight_success;
+  }
+}
+
+.toast-error {
+  @apply border-framing-item_danger bg-background-item_danger cursor-pointer;
+
+  &:hover {
+    @apply border-framing-highlight_danger;
+  }
+}

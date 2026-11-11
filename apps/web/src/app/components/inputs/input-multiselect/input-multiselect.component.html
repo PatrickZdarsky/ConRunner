@@ -1,0 +1,63 @@
+<div class="contents" [id]="name" [attr.value]="value?.toString()">
+
+  <!-- select anchor -->
+  @if (!disguise) {
+    <div tabindex="0" role="button"
+           class="flex gap-lg items-center cursor-pointer transition-all py-xs px-sm rounded-md select-none
+         border-framing-item bg-background-item active:border-framing-highlight
+    hover:border-framing-highlight focus-within:border-framing-highlight"
+           [xsb-flyout]="optionsFlyout" [ngClass]="{
+        'border-ctr' : border,
+        'pointer-events-none opacity-60' : disabled
+      }">
+
+      <!-- icon -->
+      @if (icon !== undefined) {
+        <fa-icon [icon]="icon" />
+      }
+
+      <!-- value and arrow -->
+      <div class="grow flex gap-lg items-center">
+        <div class="grow">{{currentValueName}}</div>
+        <fa-icon [icon]="caretDownIcon" class="light:text-text-light-secondary opacity-50" />
+      </div>
+
+    </div>
+  }
+
+  @else {
+    {{currentValueName}}
+  }
+
+  <!-- options flyout -->
+  <xsb-flyout #optionsFlyout [closeOnClick]="false">
+    <div class="flex flex-col gap-xs max-h-56 overflow-y-auto select-none">
+
+      <!-- option items -->
+      @for (option of allOptions; track option) {
+        <div role="option" [attr.aria-selected]="isSelected(option.value)"
+               (click)="toggleValue(option.value)" (keyup)="toggleValue(option.value)" tabindex="0"
+               class="flex gap-md items-center cursor-pointer hover:opacity-100" [ngClass]="{
+          'opacity-100' : isSelected(option.value),
+          'opacity-50' : !isSelected(option.value),
+        }">
+
+          <!-- active icon -->
+          <fa-icon [icon]="circleCheckIcon" class="text-sm light:text-signature-600 text-text-secondary"
+                   [ngClass]="{'opacity-0' : !isSelected(option.value)}" />
+
+          <!-- display name -->
+          <div>
+            {{option.name}}
+          </div>
+        </div>
+      }
+
+      @if (allOptions.length === 0){
+        <span>No options available</span>
+      }
+
+    </div>
+  </xsb-flyout>
+
+</div>

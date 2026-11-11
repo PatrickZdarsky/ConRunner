@@ -1,0 +1,23 @@
+@if (manageData$ | async; as manageData) {
+  @if (manageData.event; as event) {
+
+    <div class="flex flex-col gap-lg">
+      <div class="flex flex-col gap-md">
+        <hr>
+        <small>Clone Event</small>
+        <span>Cloning this event will copy all its configuration, but no volunteer sign-ups.</span>
+        <xsb-input-button content="Clone Event" class="w-fit" size="minimal" (xsbClick)="clone(event)" />
+      </div>
+
+      <div class="flex flex-col gap-md">
+        <hr>
+        <small>Export Event</small>
+        <span>Exporting this event will save a schedule overview, including all of its shifts with associated locations and activities.</span>
+        <div class="flex flex-row gap-md">
+          <xsb-input-button content="Export CSV" class="w-fit" size="minimal" (xsbClick)="exportEvent(event,'csv')" />
+          <xsb-input-button content="Export Excel" class="w-fit" size="minimal" (xsbClick)="exportEvent(event,'xlsx')" />
+        </div>
+      </div>
+    </div>
+  }
+}

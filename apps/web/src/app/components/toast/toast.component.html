@@ -1,0 +1,39 @@
+<div class="card compact flex flex-col gap-sm w-[min(calc(100vw-2rem),25rem)] mb-md"
+     [ngClass]="toastClasses"
+     (click)="click()"
+     tabindex="0"
+     (keydown)="click()"
+>
+  <div class="flex flex-row justify-between items-center">
+    @if (title) {
+      <h2 class="mb-0 flex flex-row gap-sm items-center">
+
+        @if (type === "notification") {
+          <fa-icon [icon]="icons.notification" />
+        }
+        @else {
+          <fa-icon [icon]="icons.info" />
+        }
+
+        {{title}}
+      </h2>
+    }
+
+    <div class="flex flex-row items-center gap-lg">
+
+      @if (url !== undefined) {
+        <small>Click to view</small>
+      }
+      @else if (options.closeButton) {
+        <small>Click to close</small>
+      }
+    </div>
+  </div>
+
+  @if (message) {
+    <span>{{message}}</span>
+  }
+
+</div>
+
+

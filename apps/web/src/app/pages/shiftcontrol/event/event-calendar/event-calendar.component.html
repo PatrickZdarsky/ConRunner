@@ -1,0 +1,80 @@
+<!-- wrapper -->
+<div class="flex flex-col gap-md h-full">
+
+  <!-- header with filters-->
+  <app-event-calendar-filter>
+    <div class="flex flex-col pl-lg">
+      <h1 class="signature-gradient-font">Event Calendar</h1>
+      <div class="flex flex-row gap-lg items-center">
+        <xsb-input-multitoggle class="w-fit" #calendarMode
+                               [formControl]="form.controls.calendarMode"
+                               [options]="calendarModeOptions"
+                               [xsb-typed]="[calendarMode, form.controls.calendarMode]"
+        />
+        <div class="badge">
+          @if (form.controls.calendarMode.value === "shift"){
+            Discover all your shifts of this event
+          }
+          @else {
+            Explore the official schedule of the event
+          }
+        </div>
+      </div>
+    </div>
+  </app-event-calendar-filter>
+
+  <!-- calendar -->
+  <div class="card compact flex-grow overflow-hidden !bg-opacity-100">
+    <app-shift-calendar-grid />
+  </div>
+
+</div>
+
+
+<!-- view/edit/manage shift -->
+@if (selectedShift$ | async; as shiftParams){
+  @if (shiftParams !== null && shiftParams !== undefined){
+
+    <xsb-dialog #dialog
+                (closeDialog)="selectedShift$.next(undefined)" [maxSize]="true"
+                [expandUrl]="(shiftParams.shift?.id ?? undefined) !== undefined ? ('/shifts/' + shiftParams.shift?.id) : undefined"
+    >
+
+      <ng-container dialog-header>
+        <h1 class="signature-gradient-font">
+          {{manage.title$ | async}}
+        </h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <app-manage-shift #manage
+                          [manageData]="shiftParams"
+                          (shiftChanged)="shiftChanged$.next($event)"
+                          (navigateOut)="dialog.close()"
+        />
+      </ng-container>
+    </xsb-dialog>
+  }
+}
+
+@if (selectedActivity$ | async; as activityData){
+  @if (activityData !== null && activityData !== undefined){
+
+    <xsb-dialog #dialog (closeDialog)="selectedActivity$.next(undefined)">
+
+      <ng-container dialog-header>
+        <h1 class="signature-gradient-font">
+          {{
+            (isPlatformAdmin$ | async) ?
+            activityData.activity === undefined ? 'Create Activity' : activityData.activity.name :
+            activityData.activity?.name
+          }}
+        </h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <app-manage-activity [manageData]="activityData" (activityChanged)="activityChanged$.next($event); dialog.close()" />
+      </ng-container>
+    </xsb-dialog>
+  }
+}

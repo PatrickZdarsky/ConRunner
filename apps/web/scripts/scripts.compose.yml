@@ -1,0 +1,41 @@
+services:
+
+  shiftservice-client-generator:
+    restart: no
+    image: openapitools/openapi-generator-cli
+    volumes:
+      - ../src/shiftservice-client:/client
+    command: >
+      generate
+      -i https://github.com/PilotWhale-OS/shiftcontrol-java-backend/releases/latest/download/shiftservice-openapi.json
+      -g typescript-angular
+      -o /client
+      --additional-properties=fileNaming=kebab-case,withInterfaces=true
+      --generate-alias-as-model
+      --type-mappings set=Array
+
+  auditservice-client-generator:
+    restart: no
+    image: openapitools/openapi-generator-cli
+    volumes:
+      - ../src/auditservice-client:/client
+    command: >
+      generate
+      -i https://github.com/PilotWhale-OS/shiftcontrol-java-backend/releases/latest/download/auditservice-openapi.json
+      -g typescript-angular
+      -o /client
+      --additional-properties=fileNaming=kebab-case,withInterfaces=true
+      --generate-alias-as-model
+      --type-mappings set=Array
+
+  notificationservice-client-downloader:
+    build:
+      dockerfile: downloader.Dockerfile
+    volumes:
+      - ../src/notificationservice-client:/client
+    command: >
+      sh -c "
+      cd / &&
+      wget -O notificationservice-ts-client.tar.gz https://github.com/PilotWhale-OS/shiftcontrol-notificationservice/releases/latest/download/notificationservice-ts-client.tar.gz &&
+      tar -xzf notificationservice-ts-client.tar.gz -C /client
+      "

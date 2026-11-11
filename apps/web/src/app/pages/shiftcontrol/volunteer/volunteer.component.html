@@ -1,0 +1,4 @@
+@if (volunteer$ | async; as volunteer) {
+
+  <app-manage-volunteer [volunteer]="volunteer" (volunteerChanged)="reloadVolunteer(volunteer.volunteer.id)" />
+}

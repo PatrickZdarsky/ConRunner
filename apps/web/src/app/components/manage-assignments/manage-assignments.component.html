@@ -1,0 +1,129 @@
+@if (plan$ | async; as plan) {
+  <div class="flex flex-row flex-wrap gap-lg w-full">
+
+    <!-- status widget -->
+    <div class="card success flex flex-col gap-lg w-[30rem]">
+
+      <div class="flex flex-row gap-md items-center">
+        <div class="badge success h-ft self-end flex items-center gap-sm">
+          <fa-icon [icon]="icons.phase" class="pr-sm" />
+          Assignment Phase
+        </div>
+        <h2 class="compact">{{plan.lockStatus | lockStatus}}</h2>
+      </div>
+
+      <p>
+        This shift plan is currently in the phase "{{plan.lockStatus | lockStatus}}".<br>
+        {{plan.lockStatus | lockStatus:"description"}}
+      </p>
+
+      <hr />
+
+      <div class="flex flex-row gap-md">
+
+        <xsb-input-multitoggle #assignmentPhase
+                               [formControl]="form.controls.assignmentPhase"
+                               [options]="phaseOptions"
+                               [xsb-typed]="[assignmentPhase, form.controls.assignmentPhase]"
+        />
+        <xsb-input-button class="grow" size="minimal" content="Change Phase" action="success"
+                          [disableLockIcon]="true"
+                          (xsbClick)="updatePhase(plan)"
+                          [lock]="plan.lockStatus === form.controls.assignmentPhase.value" />
+      </div>
+
+      @if (plan.lockStatus !== form.controls.assignmentPhase.value){
+        <p class="whitespace-pre-line">
+          {{getChanges(plan.lockStatus, form.controls.assignmentPhase.value)}}{{form.controls.assignmentPhase.value | lockStatus:"description"}}
+        </p>
+      } @else {
+        <span>Select another phase to preview changes.</span>
+      }
+    </div>
+
+    <!-- assignment action list -->
+    <div class="card flex-1 h-fit flex flex-col gap-lg">
+
+      <!-- header -->
+      <div class="flex flex-row gap-md items-center">
+        <div class="badge h-ft self-end flex items-center gap-sm">
+          <fa-icon [icon]="icons.signedUp" class="pr-sm" />
+          Volunteer Assignments
+        </div>
+      </div>
+
+      <!-- filter-->
+      <div class="flex flex-col gap-sm w-fit">
+        <!--<small class="flex items-center gap-sm">
+          <fa-icon [icon]="icons.volunteers" />
+          <label for="plan-assignments-filter">Assignment Status</label>
+        </small>-->
+        <xsb-input-multitoggle #assignmentStatus
+                               name="plan-assignments-filter"
+                               [formControl]="form.controls.assignmentStatus"
+                               [options]="statusOptions"
+                               [xsb-typed]="[assignmentStatus, form.controls.assignmentStatus]"
+        />
+      </div>
+
+      <p>
+        {{getStatusInfo(form.controls.assignmentStatus.value)}}
+      </p>
+
+      <hr>
+
+      <div class="grid grid-cols-[auto_auto_auto_auto] gap-lg gap-y-sm w-fit items-center">
+
+        @if ((assignments$ | async) ?? []; as assignments) {
+          @for (shift of assignments; track shift.shiftId) {
+
+            @if (shift.slots.length > 0){
+              <div class="badge col-start-1 w-fit hint">
+                <fa-icon [icon]="icons.shift" />
+                {{shift.slots[0].shiftContext.name}}
+              </div>
+
+              @for (context of shift.slots; track context.assignment.id) {
+
+                <div class="col-start-2">
+                  <a [routerLink]="'/shifts/' + shift.shiftId">{{context.positionSlotContext.name}}</a>
+                </div>
+
+                <div class="col-start-3">
+                  {{context.assignment.assignedVolunteer.firstName}}
+                  {{context.assignment.assignedVolunteer.lastName}}
+                </div>
+
+                <div class="col-start-4 flex flex-row gap-sm items-center">
+                  @switch (context.assignment.status){
+                    @case ("ACCEPTED") {
+                      <xsb-input-button size="text" content="Unassign" (xsbClick)="unassign(plan, context.assignment)" />
+                    }
+                    @case ("AUCTION") {
+                      <xsb-input-button size="text" content="Unassign" (xsbClick)="unassign(plan, context.assignment)" />
+                    }
+                    @case ("AUCTION_REQUEST_FOR_UNASSIGN") {
+                      <xsb-input-button size="text" content="Approve Unassign" (xsbClick)="acceptRequest(plan, context.assignment)" />
+                      <xsb-input-button size="text" content="Decline Request" (xsbClick)="declineRequest(plan, context.assignment)" />
+                    }
+                    @case ("REQUEST_FOR_ASSIGNMENT") {
+                      <xsb-input-button size="text" content="Approve Assign" (xsbClick)="acceptRequest(plan, context.assignment)" />
+                      <xsb-input-button size="text" content="Decline Request" (xsbClick)="declineRequest(plan, context.assignment)" />
+                    }
+                  }
+                </div>
+              }
+            }
+          }
+
+          @if (assignments.length === 0){
+            <div class="col-span-4">
+              No assignments found for the selected status.
+            </div>
+          }
+        }
+      </div>
+
+    </div>
+  </div>
+}

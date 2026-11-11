@@ -1,0 +1,6 @@
+<div class="grid w-full grid-cols-[auto_1fr_auto] items-center gap-md">
+  <span class="text-sm font-semibold transition-colors" [ngClass]="preference.value < -5 ? 'text-text-danger' : ''">Undesired</span>
+  <xsb-input-slider #preference [formControl]="form.controls.preference"
+                    [xsb-typed]="[preference, form.controls.preference]" [max]="10" [min]="-10" />
+  <span class="text-sm font-semibold transition-colors" [ngClass]="preference.value > 5 ? 'text-text-success' : ''">Preferred</span>
+</div>

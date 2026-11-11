@@ -1,0 +1,30 @@
+@if (shares$ | async; as shares) {
+
+  <div class="flex flex-row gap-lg flex-wrap">
+
+    <div class="card w-fit flex flex-col gap-md max-w-[30rem] h-fit">
+      <h1 class="signature-gradient-font">Share Reward Points</h1>
+      <p>
+        Volunteers collect Reward Points per event. ShiftControl allows third-party applications to fetch these points using share tokens.<br>
+        Apps can use Reward Points to send automated gift codes or as volunteer credit in custom stores.<br>
+        Share tokens grant access to fetch Reward Points for all events.<br>
+        You can also download a Excel file with all user's Reward Balances to handle them manually.
+      </p>
+
+      <xsb-input-button content="Download Reward Balances" size="minimal" class="w-fit" (xsbClick)="downloadBalances()" />
+    </div>
+
+    <div class="w-fit">
+      <app-manage-rewards-share-token [manageData]="{token: undefined}" (tokenChanged)="fetchTokens()" />
+    </div>
+
+    @for (share of shares; track share.id) {
+      <div class="w-fit">
+        <app-manage-rewards-share-token [manageData]="{token: share}" (tokenChanged)="fetchTokens()" />
+      </div>
+    }
+
+  </div>
+
+
+}

@@ -1,0 +1,9 @@
+@if (!disguise){
+  <input type="range"
+          [min]="min" [max]="max" [step]="step"
+         [disabled]="disabled" [name]="name" [id]="name"
+         [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0" (blur)="onTouched ? onTouched() : 0"
+  />
+} @else {
+  {{value}}
+}

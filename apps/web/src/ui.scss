@@ -1,0 +1,136 @@
+.card {
+  @apply bg-background-card border-framing-card border-ctr transition-colors px-8 py-6 bg-opacity-60;
+  border-radius: 1.5rem;
+
+  &.ghost {
+    @apply bg-transparent border-transparent shadow-none;
+  }
+
+  &.compact {
+    padding: 1rem;
+  }
+
+  &.success {
+    @apply border-framing-default_success bg-background-card_success;
+    background: linear-gradient(145deg, rgb(16 83 11 / 10%), rgb(39 89 26 / 14%) 40%, rgb(8 79 3 / 4%) 100%);
+
+    &:hover {
+      @apply border-framing-item_success;
+    }
+  }
+
+  &.spotlight {
+    @apply border-framing-default_hint bg-gradient_card_hint bg-transparent;
+
+    &:hover {
+      @apply border-framing-item_hint;
+    }
+  }
+
+  &.interaction:not(.ghost) {
+    @apply cursor-pointer border-framing-item bg-gradient_item bg-transparent;
+
+    &:hover {
+      box-shadow: 0px 0px 8px 2px rgb(25 28 43);
+      @apply border-framing-highlight;
+    }
+
+    &.spotlight {
+      @apply border-framing-item_hint bg-gradient_item_hint bg-transparent;
+
+      &:hover {
+        @apply border-framing-highlight_hint bg-opacity-80;
+      }
+    }
+
+    &.success {
+      @apply border-framing-item_success bg-gradient_item_success bg-transparent;
+
+      &:hover {
+        @apply border-framing-highlight_success;
+      }
+    }
+  }
+}
+
+h1 {
+  @apply text-xl font-bold mb-3;
+
+  .icon {
+    @apply pr-md opacity-60;
+  }
+
+  &.compact {
+    @apply mb-0;
+  }
+}
+
+h2 {
+  @apply text-lg font-semibold mb-2;
+
+  &.compact {
+    @apply mb-0;
+  }
+}
+
+b {
+  @apply font-semibold;
+}
+
+small {
+  @apply opacity-80 text-sm font-[500];
+}
+
+.badge {
+  @apply bg-gradient_badge py-xs px-sm rounded-xl text-sm font-semibold flex items-center gap-xs;
+
+  &.hint {
+    @apply bg-gradient_badge_hint;
+  }
+
+  &.success {
+    @apply bg-gradient_badge_success;
+  }
+
+  &.deaf {
+    @apply bg-framing-card;
+  }
+
+  &.padding-eq{
+    @apply py-xs px-xs;
+  }
+
+  &.big {
+    @apply text-sm py-sm px-md rounded-2xl;
+  }
+}
+
+.cdk-overlay-wrapper:has(+.cdk-overlay-backdrop.shiftcontrol-dialog) {
+  @apply p-sm desktop:p-0
+}
+
+.cdk-overlay-backdrop.shiftcontrol-dialog {
+  background-color: rgba(0, 0, 0, 0.52);
+}
+
+.cdk-overlay-pane.shiftcontrol-dialog {
+  @apply desktop:min-w-[500px] max-w-[calc(100vw-(2*theme(spacing.lg)))] max-h-[calc(100vh-(2*theme(spacing.lg)))];
+}
+
+.noise:before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url("data:image/svg+xml,%0A%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeBlend mode='screen'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 700px;
+  mix-blend-mode: soft-light;
+}
+
+a {
+  @apply underline cursor-pointer;
+}
+
+hr {
+  @apply h-0 border-0 border-b-ctr border-b-framing-card w-full;
+}

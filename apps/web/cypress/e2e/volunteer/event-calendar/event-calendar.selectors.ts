@@ -1,0 +1,3 @@
+const SELECTORS_EVENT_CALENDAR = {
+};
+export default SELECTORS_EVENT_CALENDAR;

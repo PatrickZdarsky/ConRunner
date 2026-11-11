@@ -1,0 +1,26 @@
+@if (configs$ | async; as config) {
+
+  <div class="flex flex-row gap-lg flex-wrap">
+
+    <div class="card w-fit flex flex-col gap-md max-w-[30rem] h-fit">
+      <h1 class="signature-gradient-font">Synchronize Events with Pretalx</h1>
+      <p>
+        Pretalx provides a management system for event schedules.<br>
+        ShiftControl is able to import and continuously sync Events, Locations, and Activities from Pretalx.<br>
+        Data imported from Pretalx is not editable in ShiftControl and synced every 5 minutes.
+      </p>
+      <xsb-input-button content="Sync Events Now" size="minimal" class="w-fit" (xsbClick)="syncNow()" />
+    </div>
+
+    <div class="w-fit">
+      <app-manage-pretalx-token [manageData]="{token: undefined}" (tokenChanged)="fetchConfigs()" />
+    </div>
+
+    @for (share of config; track share.apiKey) {
+      <div class="w-fit">
+        <app-manage-pretalx-token [manageData]="{token: share}" (tokenChanged)="fetchConfigs()" />
+      </div>
+    }
+
+  </div>
+}

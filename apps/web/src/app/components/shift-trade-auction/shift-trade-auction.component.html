@@ -1,0 +1,156 @@
+<!-- list of trades/auctions -->
+<div class="flex flex-col gap-md grow overflow-auto">
+
+  @for (trade of tradeData$ | async; track trade.trade.offeringAssignment.assignment.id) {
+
+    <!-- card for item: trade -->
+    <div class="card interaction compact flex flex-col gap-md"
+         tabindex="0" (keyup)="0"
+        (click)="previewTrade(trade.trade)"
+    >
+
+      <!-- badges -->
+      <div class="flex flex-wrap gap-sm gap-y-xxs items-center">
+
+        <!-- from user -->
+        <div class="badge hint h-full padding-eq aspect-square" [app-tooltip]="'Requested by \nPaul Spörker'">
+          {{trade.initials}}
+        </div>
+
+        <!-- caption-->
+        <span>{{trade.caption.pre}}<b>{{trade.caption.name}}</b>{{trade.caption.middle}}<b>{{trade.caption.shiftName}}</b></span>
+
+        <!-- action(s) -->
+        <div class="pl-lg grow flex flex-row justify-end gap-sm">
+          @if (trade.isOwnRequest){
+            <xsb-input-button size="text" content="Cancel" (xsbClick)="cancelTrade(trade.trade)" />
+          } @else {
+            <xsb-input-button size="text" content="Accept" (xsbClick)="acceptTrade(trade.trade)" />
+            <xsb-input-button size="text" content="Decline" (xsbClick)="declineTrade(trade.trade)" />
+          }
+        </div>
+      </div>
+
+      <!-- trade info badges -->
+      <div class="flex flex-wrap gap-sm gap-y-xxs items-center">
+
+        <!-- traded shift badge -->
+        <div class="badge" [app-tooltip]="'The shift plan\n of your shift'">
+          <fa-icon [icon]="icons.shift" />
+          {{trade.ownShift.name}}
+          <fa-icon [icon]="icons.trade" />
+          {{trade.otherShift.name}}
+        </div>
+
+        <!-- trade date badge -->
+        <div class="badge" [app-tooltip]="'The shift plan\n of your shift'">
+          <fa-icon [icon]="icons.date" />
+          {{trade.ownShift.startTime | date:"shortDate"}}
+          <fa-icon [icon]="icons.trade" />
+          {{trade.otherShift.startTime | date:"shortDate"}}
+        </div>
+      </div>
+
+    </div>
+  }
+
+  @for(auction of auctionData$ | async; track auction.auction.assignment.id) {
+
+    <!-- card for item: auction -->
+    <div class="card interaction spotlight compact flex flex-col gap-md"
+         tabindex="0" (keyup)="0"
+         (click)="previewAuction(auction.shift, auction.event)"
+    >
+
+      <!-- title -->
+      <div class="flex flex-wrap gap-sm gap-y-xxs items-center">
+
+        <!-- from user -->
+        <div class="badge hint h-full padding-eq aspect-square" [app-tooltip]="'Requested by \nPaul Spörker'">
+          {{auction.initials}}
+        </div>
+
+        <!-- caption-->
+        <span><b>{{auction.caption.name}}</b>{{auction.caption.middle}}<b>{{auction.caption.shiftName}}</b></span>
+
+        <!-- action(s) -->
+        <div class="pl-lg grow flex flex-row justify-end">
+          @if (auction.isOwnRequest){
+            <xsb-input-button size="text" content="Cancel" (xsbClick)="cancelAuction(auction.auction)" />
+          } @else {
+            <xsb-input-button size="text" content="Accept" (xsbClick)="acceptAuction(auction.auction)" />
+          }
+        </div>
+      </div>
+
+
+      <!-- auction info badges -->
+      <div class="flex flex-wrap gap-sm gap-y-xxs items-center">
+
+        <!-- traded shift badge -->
+        <div class="badge" [app-tooltip]="'The shift plan\n of your shift'">
+          <fa-icon [icon]="icons.shift" />
+          {{auction.shift.name}}
+        </div>
+
+        <!-- traded position badge -->
+        <div class="badge" [app-tooltip]="'The shift plan\n of your shift'">
+          <fa-icon [icon]="icons.position" />
+          {{auction.slot.name}}
+        </div>
+
+        <!-- auction date badge -->
+        <div class="badge" [app-tooltip]="'The shift plan\n of your shift'">
+          <fa-icon [icon]="icons.date" />
+          {{auction.shift.startTime | date:"shortDate"}}
+        </div>
+      </div>
+
+    </div>
+  }
+
+  @if ((auctions$ | async)?.length === 0 && (trades$ | async)?.length === 0) {
+    <p>There are no offers or requests yet.<br>
+      Explore the <a routerLink="../calendar">event calendar</a> and be the first!
+    </p>
+  }
+
+</div>
+
+<!-- preview shift -->
+@if (selectedShift$ | async; as shiftParams){
+  @if (shiftParams !== null && shiftParams !== undefined){
+
+    <xsb-dialog #dialog
+                (closeDialog)="selectedShift$.next(undefined)" [maxSize]="true"
+                [expandUrl]="shiftParams.shift?.id !== undefined ? '/shifts/' + shiftParams.shift?.id : undefined"
+    >
+
+      <ng-container dialog-header>
+        <h1 class="signature-gradient-font">
+          {{manage.title$ | async}}
+        </h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <app-manage-shift #manage
+                          [manageData]="shiftParams"
+                          (shiftChanged)="itemsChanged.next()"
+                          (navigateOut)="dialog.close()"
+        />
+      </ng-container>
+    </xsb-dialog>
+  }
+}
+
+<!-- manage trade-->
+@if (selectedTrade$ | async; as trade) {
+  <app-dialog-trade-details
+    class="contents"
+    [tradeInfo]="trade"
+    (dialogClosed)="selectedTrade$.next(undefined)"
+    (tradeChanged)="itemsChanged.next(); selectedTrade$.next(undefined)"
+  />
+}
+
+

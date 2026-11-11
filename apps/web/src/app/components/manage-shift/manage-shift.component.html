@@ -1,0 +1,236 @@
+<div class="flex flex-row gap-lg w-full">
+
+  @if(manageData$ | async; as data) {
+
+    <!-- manage card -->
+    @if ((mode$ | async) !== "view") {
+      <div class="card grid grid-cols-2 gap-x-xl gap-y-lg h-fit w-[min(100%,50rem)]">
+
+        <h1 class="signature-gradient-font">Shift Details</h1>
+        <div class="flex flex-row gap-sm justify-end">
+          @if(data.shift !== undefined) {
+            <xsb-input-button content="Cancel" size="text" (xsbClick)="requestedEditMode$.next(false)" />
+            <xsb-input-button content="Save" size="text" (xsbClick)="update(data.shift)" />
+            <xsb-input-button content="Delete" size="text" (xsbClick)="showShiftDeleteConfirm = true" />
+          }
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-2">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Shift Name</small>
+          <label for="shift-manage-name">Brief name that describes the shift context</label>
+          <xsb-input-text #name
+                          [formControl]="form.controls.name"
+                          [xsb-typed]="[name, form.controls.name]"
+                          name="shift-manage-name" placeholder="Shift name"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-2">
+          <small><fa-icon [icon]="icons.plan" class="pr-sm" />Shift Plan</small>
+          <label for="shift-manage-plan">Shift Plan which this shift is associated to</label>
+          <xsb-input-select #plan name="shift-manage-plan"
+                            nullName="Select Shift Plan"
+                            [formControl]="form.controls.plan"
+                            [options]="(shiftPlanOptions$ | async) ?? []"
+                            [comparatorFn]="idComparatorFn"
+                            [xsb-typed]="[plan, form.controls.plan]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-4">
+          <small><fa-icon [icon]="icons.startDate" class="pr-sm" />Shift Start</small>
+          <label for="shift-manage-from">Start time, in your timezone</label>
+
+          <div class="flex flex-row gap-sm">
+            <xsb-input-date #startDate name="shift-manage-from"
+                            [formControl]="form.controls.startDate"
+                            [xsb-typed]="[startDate, form.controls.startDate]" />
+            <xsb-input-time #startTime name="shift-manage-from-time"
+                            [formControl]="form.controls.startTime"
+                            [xsb-typed]="[startTime, form.controls.startTime]" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-4">
+          <small><fa-icon [icon]="icons.endDate" class="pr-sm" />Shift End</small>
+          <label for="shift-manage-to">End time, in your timezone </label>
+
+          <div class="flex flex-row gap-sm">
+            <xsb-input-date #endDate name="activity-manage-to"
+                            [formControl]="form.controls.endDate"
+                            [xsb-typed]="[endDate, form.controls.endDate]" />
+            <xsb-input-time #endTime name="activity-manage-to-time"
+                            [formControl]="form.controls.endTime"
+                            [xsb-typed]="[endTime, form.controls.endTime]" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-3">
+          <small><fa-icon [icon]="icons.activity" class="pr-sm" />Activity</small>
+          <label for="shift-manage-activity">Activity which this shift is associated to</label>
+          <xsb-input-select #activity name="shift-manage-activity"
+                            [nullable]="true" nullName="No Activity"
+                            [formControl]="form.controls.activity"
+                            [options]="(activityOptions$ | async) ?? []"
+                            [comparatorFn]="idComparatorFn"
+                            [xsb-typed]="[activity, form.controls.activity]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-3">
+          <small><fa-icon [icon]="icons.location" class="pr-sm" />Location</small>
+          <label for="shift-manage-location">Location where the shift takes place</label>
+          <xsb-input-select #location name="shift-manage-location"
+                            [nullable]="true" nullName="No Location"
+                            [formControl]="form.controls.location"
+                            [options]="(locationOptions$ | async) ?? []"
+                            [comparatorFn]="idComparatorFn"
+                            [xsb-typed]="[location, form.controls.location]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-5">
+          <small><fa-icon [icon]="icons.description" class="pr-sm" />Description</small>
+          <label for="shift-manage-description">Explanation what volunteers will expect at this shift</label>
+          <xsb-input-text #description
+                          [formControl]="form.controls.description"
+                          [xsb-typed]="[description, form.controls.description]"
+                          type="area"
+                          name="shift-manage-description" placeholder="Shift description"
+                          class="grow"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-5">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Bonus Points</small>
+          <label for="shift-manage-bonusPoints">Make this shift more attractive to sign up</label>
+          <xsb-input-number #bonusPoints
+                            [min]="0"
+                            [formControl]="form.controls.bonusPoints"
+                            [xsb-typed]="[bonusPoints, form.controls.bonusPoints]"
+                            name="shift-manage-bonusPoints" placeholder="Bonus Points"
+          />
+        </div>
+
+        @if (suggestedActivities$ | async; as suggestedActivities) {
+          <div class="flex flex-col gap-sm col-start-1 col-span-2 row-start-6">
+            <small><fa-icon [icon]="icons.location" class="pr-sm" />Suggestions</small>
+            <span>Auto-fill to link with a suggested activity</span>
+
+            <div class="flex flex-row flex-wrap gap-sm">
+              @for (activity of suggestedActivities; track activity.id) {
+                <xsb-input-button [content]="activity.name" size="text" (xsbClick)="linkAndFill(activity, data)" />
+              }
+
+              @if (suggestedActivities.length === 0) {
+                <small>No suggestions available.</small>
+              }
+            </div>
+
+          </div>
+        }
+
+        <div class="col-span-2 row-start-7 flex gap-x-lg items-center justify-center pt-md">
+          @if (data.shift === undefined){
+            <xsb-input-button content="Create Shift" action="success" (xsbClick)="create()" />
+          }
+        </div>
+      </div>
+
+      <!-- view mode -->
+    } @else if (data.shift !== undefined) {
+      <div class="card grid grid-cols-2 gap-x-xl gap-y-lg h-fit w-[30rem]">
+
+        <h1 class="signature-gradient-font row-start-1 col-start-1">Shift Details</h1>
+        <div class="flex flex-row gap-sm justify-end row-start-1 col-start-2">
+          @if (canManage$ | async) {
+            <xsb-input-button content="Edit" size="text" (xsbClick)="requestedEditMode$.next(true)" />
+            <xsb-input-button content="Delete" size="text" (xsbClick)="showShiftDeleteConfirm = true" />
+          }
+        </div>
+
+        <div class="col-start-1 row-start-2 col-span-2 whitespace-pre-wrap">{{data.shift.longDescription ?? "No description provided."}}</div>
+
+        <!-- badges -->
+        <div class="flex flex-row flex-wrap gap-sm items-center w-full row-start-3 col-start-1 col-span-2">
+          <div class="badge" [app-tooltip]="'The time this shift takes place'" tooltipMaxWidth="30ex">
+            <fa-icon [icon]="icons.date"/>
+            <span>{{getDateRange(data.shift)}}</span>
+          </div>
+
+          <div class="badge" [app-tooltip]="data.shift.lockStatus | lockStatus:'info'" tooltipMaxWidth="10rem" >
+            <fa-icon [icon]="icons.phase"/>
+            <span>{{data.shift.lockStatus | lockStatus}}</span>
+          </div>
+
+          <div class="badge" [app-tooltip]="'Only volunteers in \'' + data.shift.shiftPlan.name + '\' can view this shift'" tooltipMaxWidth="10rem" >
+            <fa-icon [icon]="icons.plan"/>
+            <span>{{data.shift.shiftPlan.name}}</span>
+          </div>
+
+          @if(data.shift.bonusRewardPoints > 0) {
+            <div class="badge hint" [app-tooltip]="'This shift has bonus reward points to make it more attractive to sign up. The points are already included in the position reward info.'">
+              <fa-icon [icon]="icons.rewards" />
+              <span>{{data.shift.bonusRewardPoints}} Bonus Points</span>
+            </div>
+          }
+
+          @if(data.shift.location !== undefined) {
+            <div class="badge hint" [app-tooltip]="data.shift.location.description ?? 'No location description'">
+              <fa-icon [icon]="icons.location" />
+              <span>{{data.shift.location.name}}</span>
+            </div>
+          }
+
+          @if(data.shift.relatedActivity !== undefined) {
+            <div class="badge hint" [app-tooltip]="data.shift.relatedActivity.description ?? 'No activity description'">
+              <fa-icon [icon]="icons.activity" />
+              <span>{{data.shift.relatedActivity.name}}</span>
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+
+    <!-- position slots -->
+    <div class="flex flex-row flex-wrap gap-lg">
+
+      <!-- manage data from observable for change detection issues -->
+      @if (positionManageData$ | async; as slotData) {
+        @for (slot of slotData; track slot){
+          <!--why contents necessary to make parent not wider than content??-->
+          <app-manage-position
+            class="contents"
+            [manageData]="slot"
+            (positionChanged)="refreshShift(slot.shift.id)"
+            />
+        }
+
+        @if (slotData.length === 0 && (mode$ | async) === "view") {
+          <div class="flex flex-col items-center justify-center h-full pl-xl">
+            <h1 class="signature-gradient-font">Nothing to do</h1>
+            <span>There are no positions to sign up for.</span>
+            <span>Check back later!</span>
+          </div>
+        }
+      }
+    </div>
+
+    @if (showShiftDeleteConfirm && data.shift !== undefined){
+      <xsb-dialog action="danger" danger="Delete Shift" (closeDialog)="showShiftDeleteConfirm = false; $event === 'danger' && delete(data.shift)">
+        <ng-container dialog-header>
+          <h1>Delete Shift</h1>
+        </ng-container>
+
+        <ng-container dialog-body>
+          <p>
+            Are you sure you want to delete this shift?<br>
+            This cannot be made undone.<br>
+            Positions will be removed.
+          </p>
+        </ng-container>
+      </xsb-dialog>
+    }
+  }
+</div>

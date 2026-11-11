@@ -1,0 +1,28 @@
+
+input[type=range] {
+  @apply w-full bg-background-item appearance-none rounded-xl outline-none;
+}
+
+input[type=range]:focus {
+  @apply outline-none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  @apply w-full h-2 cursor-pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  @apply appearance-none cursor-pointer w-5 h-5 rounded-full mt-[-6px] bg-framing-item;
+}
+
+input[type=range]:hover::-webkit-slider-thumb {
+  @apply bg-framing-highlight;
+}
+
+input[type=range]::-moz-range-thumb {
+  @apply appearance-none cursor-pointer w-4 h-4 rounded-full mt-[-4px] bg-framing-item;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+  @apply bg-framing-highlight;
+}

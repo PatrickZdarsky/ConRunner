@@ -1,0 +1,79 @@
+@if (manageData$ | async; as manageData) {
+
+  <div class="card flex flex-col gap-lg h-fit" [style.order]="getOrder(manageData.token)" [ngClass]="{
+    'success': manageData.token === undefined,
+  }">
+    <div class="flex flex-row gap-sm items-center">
+      @if (manageData.token === undefined){
+        <div class="badge success w-fit">
+          <fa-icon [icon]="icons.rewardShare" />
+          Create Reward Share Token
+        </div>
+      }
+      @else {
+        <div class="badge hint w-fit">
+          <fa-icon [icon]="icons.rewardShare" />
+          Reward Share Token
+        </div>
+      }
+
+      <span class="grow"></span>
+
+      @if (manageData.token === undefined) {
+        <xsb-input-button content="Create" size="text" (xsbClick)="create()" />
+      }
+      @else {
+        <xsb-input-button content="Copy Link" size="text" (xsbClick)="copyLink(manageData.token)" />
+        <xsb-input-button content="Delete" size="text" (xsbClick)="showDeleteConfirm = true" />
+      }
+
+    </div>
+
+    @if (manageData.token === undefined) {
+      <div class="flex flex-col gap-xs w-[20rem]">
+        <small><fa-icon [icon]="icons.name" class="pr-sm" />Share Token Name</small>
+        <xsb-input-text #name
+                        [formControl]="form.controls.name"
+                        [xsb-typed]="[name, form.controls.name]"
+                        name="rewards-share-manage-name" placeholder="Share Token Name"
+        />
+      </div>
+    }
+    @else {
+      <div class="grid grid-cols-[10rem_10rem] gap-md">
+
+        <div class="flex flex-col gap-xs ">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Share Token Name</small>
+          <span>{{manageData.token.name}}</span>
+        </div>
+
+        <div class="flex flex-col gap-xs ">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Created At</small>
+          <span>{{manageData.token.createdAt | date:"short"}}</span>
+        </div>
+
+        <div class="flex flex-col gap-xs col-span-2">
+          <small class="col-span-2"><fa-icon [icon]="icons.url" class="pr-sm" />Token</small>
+          <span>{{manageData.token.token}}</span>
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+  @if (showDeleteConfirm && manageData.token !== undefined){
+    <xsb-dialog action="danger" danger="Delete Share Token" (closeDialog)="showDeleteConfirm = false; $event === 'danger' && delete(manageData.token)">
+      <ng-container dialog-header>
+        <h1>Delete Share Token "{{manageData.token.name}}"</h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <p>
+          Are you sure you want to delete this share token?<br>
+          Applications using this token will no longer be able<br> to fetch volunteer reward points.
+        </p>
+      </ng-container>
+    </xsb-dialog>
+  }
+}

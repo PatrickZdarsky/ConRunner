@@ -1,0 +1,39 @@
+@keyframes pulseSize {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(.7);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.card {
+  @apply p-10;
+}
+
+img {
+  transition-duration: .5s;
+}
+
+.gradient-bg {
+  background-size: 25em 20em;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+
+  &.primary {
+    animation: pulseSize 5s infinite ease-in-out;
+    background: radial-gradient(ellipse, rgb(60 60 176 / 1%) 0%, rgba(48, 95, 255, 0.06) 15%, rgb(0 21 255 / 0%) 30%, rgba(0, 21, 255, 0) 100%)
+  }
+
+  &.secondary {
+    animation: pulseSize 5s infinite ease-in-out;
+    animation-delay: 2s;
+    background: radial-gradient(ellipse, rgb(122 81 177 / 1%) 0%, rgb(152 100 209 / 6%) 15%, rgba(0, 21, 255, 0) 30%, rgba(0, 21, 255, 0) 100%)
+  }
+}

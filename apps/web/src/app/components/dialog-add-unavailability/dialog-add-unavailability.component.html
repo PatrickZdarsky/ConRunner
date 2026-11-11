@@ -1,0 +1,63 @@
+@if (viewWhen === true) {
+    <xsb-dialog success="Add Absence" bodyStyle="card" (closeDialog)="closed($event)">
+
+    <ng-container dialog-header>
+      <h1>Add absence time</h1>
+    </ng-container>
+
+    <ng-container dialog-body>
+      <div class="grid grid-cols-2 gap-lg pb-lg">
+
+        <div class="max-w-[min(50vw,30rem)] col-span-2">
+          If you are not available at some time during the event, you can add times to prevent being assigned to shifts.
+        </div>
+
+        <!-- add unavailability from -->
+        <div class="grid grid-cols-[auto_1fr] gap-md gap-x-lg items-center">
+          <small class="col-span-2">Unavailable from</small>
+
+          <xsb-input-toggle #unavailabilityFromEventStart [formControl]="form.controls.unavailabilityFromEventStart"
+                            [xsb-typed]="[unavailabilityFromEventStart, form.controls.unavailabilityFromEventStart]" />
+          <label for="event-unavailability-from-start">From Event Start</label>
+
+          <div class="col-span-2">
+            <xsb-input-date #unavailabilityFrom name="event-unavailability-from"
+                            [formControl]="form.controls.unavailabilityFrom"
+                            [xsb-typed]="[unavailabilityFrom, form.controls.unavailabilityFrom]" />
+          </div>
+
+          <div class="col-span-2">
+            <xsb-input-time #unavailabilityFromTime name="event-unavailability-from-time"
+                            [formControl]="form.controls.unavailabilityFromTime"
+                            [xsb-typed]="[unavailabilityFromTime, form.controls.unavailabilityFromTime]" />
+          </div>
+        </div>
+
+        <!-- add unavailability until -->
+        <div class="grid grid-cols-[auto_1fr] gap-sm gap-x-md items-center">
+          <small class="col-span-2">Unavailable until</small>
+
+          <xsb-input-toggle #unavailabilityUntilEventEnd
+                            [formControl]="form.controls.unavailabilityUntilEventEnd"
+                            [xsb-typed]="[unavailabilityUntilEventEnd, form.controls.unavailabilityUntilEventEnd]"
+          />
+          <label for="event-unavailability-until-end">Until Event End</label>
+
+          <div class="col-span-2">
+            <xsb-input-date #unavailabilityUntil name="event-unavailability-until"
+                            [formControl]="form.controls.unavailabilityUntil"
+                            [xsb-typed]="[unavailabilityUntil, form.controls.unavailabilityUntil]" />
+          </div>
+
+          <div class="col-span-2">
+            <xsb-input-time #unavailabilityUntilTime name="event-unavailability-until-time"
+                            [formControl]="form.controls.unavailabilityUntilTime"
+                            [xsb-typed]="[unavailabilityUntilTime, form.controls.unavailabilityUntilTime]" />
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+
+  </xsb-dialog>
+}

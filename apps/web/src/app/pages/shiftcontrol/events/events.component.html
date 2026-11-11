@@ -1,0 +1,52 @@
+
+<!-- card list -->
+<div class="grid grid-cols-[repeat(auto-fit,min(100%,30rem))] gap-md">
+
+  @if (isPlatformAdmin$ | async) {
+      <div class="card spotlight interaction grid place-items-center p-lg"
+           [routerLink]="'/events/create'">
+        <h2 class="compact">
+          <fa-icon [icon]="icons.create" class="pr-sm" />
+          Create new event
+        </h2>
+      </div>
+  }
+
+  @for (event of (events$ | async); track event) {
+    <div class="card interaction grid grid-columns-2 gap-2" [routerLink]="'/events/' + event.id">
+      <h1>{{event.name}}</h1>
+      <div class="flex flex-row gap-sm items-center">
+        <div class="badge w-fit"
+             tooltipMaxWidth="30ex"
+             [app-tooltip]="'The event period of ' + event.name"
+        >
+          <fa-icon [icon]="icons.date" />
+          {{event.startTime | date:"mediumDate"}} - {{event.endTime | date:"mediumDate"}}
+        </div>
+
+        @if (event.active) {
+          <div class="badge hint w-fit"
+               tooltipMaxWidth="30ex"
+               [app-tooltip]="'This event is currently active'"
+          >
+            <fa-icon [icon]="icons.signedUp" />
+            Active
+          </div>
+        }
+      </div>
+      <p>
+        {{event.shortDescription ?? "No description provided."}}
+      </p>
+    </div>
+  }
+</div>
+
+@if ((events$ | async)?.length === 0) {
+  <div class="flex flex-col w-full items-center gap-md">
+    <h1 class="signature-gradient-font">
+      <fa-icon [icon]="icons.empty" class="pr-sm" />
+      Nothing to show here
+    </h1>
+    <span>You have not joined any events yet. Ask a planner for an invite code!</span>
+  </div>
+}

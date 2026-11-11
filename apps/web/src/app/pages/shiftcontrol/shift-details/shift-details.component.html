@@ -1,0 +1,4 @@
+@if (manageShiftParams$ | async; as data){
+  <app-manage-shift [manageData]="data" (shiftChanged)="refetchShift()" (navigateOut)="goToPlanDashboard(data.shift?.shiftPlan?.id)" />
+}
+

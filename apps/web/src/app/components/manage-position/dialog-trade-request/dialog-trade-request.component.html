@@ -1,0 +1,62 @@
+@if (requestOptions$ | async; as tradeRequestOptions){
+  <xsb-dialog (closeDialog)="submitted.emit(undefined)" bodyStyle="card">
+
+    <ng-container dialog-header>
+      <h2>Request Shift Trade</h2>
+    </ng-container>
+
+    <ng-container dialog-body>
+
+      <div class="flex flex-col gap-lg">
+        <div class="flex flex-col gap-sm">
+          <small>
+            <fa-icon [icon]="icons.signedUp" />
+            Requested Position
+          </small>
+          <span>You are requesting a position in "{{tradeRequestOptions.slot.name}}".</span>
+        </div>
+
+        @if (offerShiftOptions$ | async; as options) {
+          <div class="flex flex-col gap-sm">
+            <small>
+              <fa-icon [icon]="icons.trade" />
+              Your Shift Offer
+            </small>
+            <label for="trade-request-offering">Select one of your positions which will be offered in exchange</label>
+            <xsb-input-select #offeredPosition name="trade-request-offering"
+                              [nullable]="false" nullName="No positions to trade available"
+                              [formControl]="form.controls.offeredPosition"
+                              [options]="options"
+                              [comparatorFn]="candidateComparatorFn"
+                              [xsb-typed]="[offeredPosition, form.controls.offeredPosition]"
+            />
+          </div>
+        }
+
+        @if (partnerOptions$ | async; as options) {
+          <div class="flex flex-col gap-sm">
+            <small>
+              <fa-icon [icon]="icons.volunteers" />
+              Trade Partner
+            </small>
+            <label for="trade-request-offering">Select another volunteer who will receive the selected shift</label>
+            <xsb-input-select #tradePartner name="trade-request-receiving"
+                              [nullable]="false" nullName="No volunteer selected"
+                              [formControl]="form.controls.tradePartner"
+                              [options]="options"
+                              [comparatorFn]="volunteerComparatorFn"
+                              [xsb-typed]="[tradePartner, form.controls.tradePartner]"
+            />
+          </div>
+        }
+
+        <div class="grid place-content-center">
+          <xsb-input-button content="Submit Trade Request" action="success" (xsbClick)="selectVolunteer(tradeRequestOptions)" [lock]="form.invalid" [disableLockIcon]="true"/>
+        </div>
+      </div>
+
+
+    </ng-container>
+
+  </xsb-dialog>
+}

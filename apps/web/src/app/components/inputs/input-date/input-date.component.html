@@ -1,0 +1,76 @@
+<div #wrapper class="contents" [id]="name" [attr.value]="dateText">
+
+  <!-- select anchor -->
+  @if (!disguise) {
+
+    <div role="button" tabindex="0"
+         class="flex gap-lg items-center cursor-pointer transition-all py-xs px-sm rounded-md select-none
+         border-framing-item bg-background-item
+         hover:border-framing-highlight focus-within:border-framing-highlight active:border-framing-highlight"
+         [xsb-flyout]="optionsFlyout" [ngClass]="{
+      'border-ctr' : size !== 'minimal',
+      'pointer-events-none opacity-60' : ngControl?.disabled
+    }">
+
+      <!-- icon -->
+      <fa-icon [icon]="dateIcon" />
+
+      <!-- value and arrow -->
+      <div class="grow flex gap-lg items-center">
+        <div class="grow">{{dateText}}</div>
+        <fa-icon [icon]="caretDownIcon" class="opacity-50" />
+      </div>
+
+    </div>
+
+  } @else {
+    {{dateText}}
+  }
+
+  <!-- options flyout -->
+  <xsb-flyout #optionsFlyout title="Pick date" [closeOnClick]="false">
+
+    <!-- year -->
+    <div class="grid grid-cols-3 w-full place-items-center pb-sm select-none">
+      <fa-icon [icon]="chevronLeftIcon" (click)="navigateYear(false)" (keyup)="navigateYear(false)" tabindex="0"
+        role="button" aria-label="previous month" class="cursor-pointer" />
+      <div>{{currentYear}}</div>
+      <fa-icon [icon]="chevronRightIcon" (click)="navigateYear()" (keyup)="navigateYear()" tabindex="0" role="button"
+        aria-label="next month" class="cursor-pointer" />
+    </div>
+
+    <!-- month -->
+    <div class="grid grid-cols-3 w-full place-items-center pb-sm select-none">
+      <fa-icon [icon]="chevronLeftIcon" (click)="navigateMonth(false)" (keyup)="navigateMonth(false)" tabindex="0"
+        role="button" aria-label="previous year" class="cursor-pointer" />
+      <div>{{currentMonth}}</div>
+      <fa-icon [icon]="chevronRightIcon" (click)="navigateMonth()" (keyup)="navigateMonth()" tabindex="0" role="button"
+        aria-label="next year" class="cursor-pointer" />
+    </div>
+
+    <div class="gap-xs select-none grid grid-cols-7 place-items-center" role="grid">
+
+      <!-- date items -->
+      @for (day of createDateGrid(position); track day.date) {
+        <div (click)="pickDate(day.date); optionsFlyout.close()" role="gridcell"
+             (keyup)="pickDate(day.date); optionsFlyout.close()" tabindex="0"
+             class="grid place-items-center cursor-pointer hover:text-signature-300 w-full p-[4px] rounded-[4px] hover:bg-signature-400 hover:bg-opacity-40 transition-colors"
+             [ngClass]="{
+                'light:text-text-light_primary text-text-primary bg-signature-400 bg-opacity-40' : isChosen(day.date),
+                'light:text-text-light-secondary text-text-secondary' : !isChosen(day.date)
+              }"
+        >
+          {{day.dayOfMonth}}
+        </div>
+      }
+
+    </div>
+
+    <!-- reset -->
+    @if (nullable) {
+      <div class="cursor-pointer pt-sm text-center" (click)="pickDate(null); optionsFlyout.close()"
+           (keyup)="pickDate(null); optionsFlyout.close()" tabindex="0">Reset</div>
+    }
+  </xsb-flyout>
+
+</div>

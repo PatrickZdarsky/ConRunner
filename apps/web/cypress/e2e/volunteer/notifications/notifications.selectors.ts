@@ -1,0 +1,3 @@
+const SELECTORS_NOTIFICATIONS = {
+};
+export default SELECTORS_NOTIFICATIONS;

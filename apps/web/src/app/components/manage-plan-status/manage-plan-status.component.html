@@ -1,0 +1,100 @@
+@if (processedPage$ | async; as page) {
+
+  <div class="flex flex-row flex-wrap gap-lg w-full">
+
+    <!-- status widget -->
+    <div
+      class="card flex flex-col gap-lg w-[30rem]"
+      [ngClass]="{
+        'success': page.total === 0,
+        'spotlight': page.total > 0
+      }"
+    >
+
+      <div class="flex flex-row gap-md items-center">
+        <div
+          [ngClass]="{
+            'success': page.total === 0,
+            'hint': page.total > 0
+          }"
+          class="badge success h-ft self-end flex items-center gap-sm">
+          <fa-icon [icon]="icons.phase" class="pr-sm" />
+          Signup Evaluation
+        </div>
+      </div>
+
+      @if (page.total === 0) {
+        <b>
+          All shifts are fully staffed!
+        </b>
+      } @else {
+        <b>
+          There {{page.total === 1 ? "is" : "are"}} {{page.total}} {{page.total === 1 ? "shift" : "shifts"}} that {{page.total === 1 ? "needs" : "need"}} volunteer signups.
+        </b>
+      }
+
+      <hr />
+
+      <span>
+        @if (page.total === 0) {
+          <p>
+            You can lock assignments now in the "Assignments" tab.<br>
+            This will prevent that volunteers can sign off without approval, so that fully staffed shifts are guaranteed.
+          </p>
+        } @else {
+          <p>
+            To make sure all shifts are fully staffed, consider making them more attractive by increasing their Reward Points.<br>
+            Planners can also manually assign volunteers to open positions in the "Assignments" tab.
+          </p>
+        }
+      </span>
+    </div>
+
+    <div class="card grid grid-cols-[auto_auto_auto] gap-y-xs gap-x-xl flex-1 min-w-[40rem] h-fit items-center">
+
+      <!-- header -->
+      <div class="flex flex-row gap-md items-center col-span-3 mb-lg">
+        <div class="badge h-ft w-fit self-end flex items-center gap-sm">
+          <fa-icon [icon]="icons.signedUp" class="pr-sm" />
+          Shifts with open positions
+        </div>
+      </div>
+
+      <small class="pb-sm self-end">Shift</small>
+      <small class="pb-sm self-end">Open Positions</small>
+      <small class="pb-sm self-end">Total Filled Capacity</small>
+
+      <hr class="col-span-3 mb-sm" />
+
+      @if(page.items.length === 0) {
+        <span class="col-span-3">
+          All shifts are fully staffed!
+        </span>
+      } @else {
+        @for (shift of page.items; track shift.id) {
+          <a routerLink="/shifts/{{shift.id}}">{{shift.name}}</a>
+          <span>{{shift.openSlotsCount}}/{{shift.slotCount}}</span>
+          <span>{{shift.openAssignmentsCount}}/{{shift.requiredCapacityCount}}</span>
+        }
+      }
+
+      <hr class="col-span-3 mt-sm" />
+
+      <div class="col-span-2 flex flex-row gap-md items-center pt-sm">
+        <xsb-input-button size="text" content="Previous"
+                          (xsbClick)="form.controls.paginationIndex.setValue(page.page - 1)"
+                          [lock]="page.page <= 0"
+        />
+
+        <span>Page {{page.page + 1}}/{{page.pages | min:1}}</span>
+
+        <xsb-input-button size="text" content="Next"
+                          (xsbClick)="form.controls.paginationIndex.setValue(page.page + 1)"
+                          [lock]="page.page >= page.pages - 1"
+        />
+      </div>
+      <small class="justify-self-end">Viewing {{page.items.length}} of {{page.total}} Shifts</small>
+
+    </div>
+  </div>
+}
