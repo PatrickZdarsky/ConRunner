@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.positionslot.impl;
 
 import java.util.UUID;
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -54,6 +55,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @RequiredArgsConstructor
 @Service
 public class PositionSlotServiceImpl implements PositionSlotService {
+    private final AssignmentAudit audit;
     private final PositionSlotDao positionSlotDao;
     private final ShiftDao shiftDao;
     private final RoleDao roleDao;
@@ -130,6 +132,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         }
         Assignment joinRequest = Assignment.of(positionSlot, volunteer, AssignmentStatus.REQUEST_FOR_ASSIGNMENT);
         joinRequest = assignmentDao.save(joinRequest);
+        audit.requestCreated(joinRequest);
 
         notifyPlanners(positionSlot, NotificationTypes.ASSIGNMENT_JOIN_REQUESTED);
 
@@ -152,8 +155,10 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         LockStatusHelper.assertIsSupervisedWithMessage(assignment, "leave request");
 
         // update assignment
+        var before = audit.snapshot(assignment);
         assignment.setStatus(AssignmentStatus.AUCTION_REQUEST_FOR_UNASSIGN);
         assignmentDao.save(assignment);
+        audit.leaveRequested(assignment, before);
 
         notifyPlanners(assignment.getPositionSlot(), NotificationTypes.ASSIGNMENT_LEAVE_REQUESTED);
 
@@ -162,6 +167,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public void joinRequestWithdraw(@NonNull Long positionSlotId, @NonNull UUID currentUserId) {
         // get assignment
         Optional<Assignment> existingAssignment = assignmentDao.findAssignmentForPositionSlotAndUser(positionSlotId, currentUserId);
@@ -176,9 +182,11 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestWithdrawn(assignment.getPositionSlot(), currentUserId.toString()));
         // delete assignment
         assignmentDao.delete(assignment);
+        audit.requestWithdrawn(assignment);
     }
 
     @Override
+    @Transactional
     public void leaveRequestWithdraw(@NonNull Long positionSlotId, @NonNull UUID currentUserId) {
         // get assignment
         Optional<Assignment> existingAssignment = assignmentDao.findAssignmentForPositionSlotAndUser(positionSlotId, currentUserId);
@@ -189,10 +197,12 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         Assignment assignment = existingAssignment.get();
         LockStatusHelper.assertIsSupervisedWithMessage(assignment, "withdraw leave request");
         // change back to signed-up state
+        var before = audit.snapshot(assignment);
         assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignmentDao.save(assignment);
 
         // publish event
+        audit.leaveWithdrawn(assignment, before);
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeaveRequestWithdrawn(assignment.getPositionSlot(), currentUserId.toString()));
     }
 
@@ -228,6 +238,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public AssignmentDto createAuction(@NonNull Long positionSlotId, @NonNull UUID currentUserId) {
         Assignment assignment = assignmentDao.getAssignmentForPositionSlotAndUser(positionSlotId, currentUserId);
         securityHelper.assertVolunteerIsNotLockedInPlan(assignment);
@@ -244,9 +255,11 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         LockStatusHelper.assertIsSupervisedWithMessage(assignment, "auction");
 
         // create auction
+        var before = audit.snapshot(assignment);
         assignment.setStatus(AssignmentStatus.AUCTION);
         assignment = assignmentDao.save(assignment);
 
+        audit.auctionCreated(assignment, before);
         publisher.publishEvent(AssignmentEvent.auctionCreated(assignment));
         return assignmentAssemblingMapper.assemble(assignment);
     }
@@ -277,6 +290,7 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public AssignmentDto cancelAuction(@NonNull Long positionSlotId, @NonNull UUID userId) {
         Assignment assignment = assignmentDao.getAssignmentForPositionSlotAndUser(positionSlotId, userId);
         if (!assignment.getAssignedVolunteer().getId().equals(userId)) {
@@ -287,8 +301,10 @@ public class PositionSlotServiceImpl implements PositionSlotService {
         if (!AssignmentStatus.ACTIVE_AUCTION_STATES.contains(assignment.getStatus())) {
             throw new BadRequestException("Assignment is not up for auction");
         }
+        var before = audit.snapshot(assignment);
         assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignment = assignmentDao.save(assignment);
+        audit.auctionCancelled(assignment, before);
         publisher.publishEvent(AssignmentEvent.auctionCanceled(assignment));
         return assignmentAssemblingMapper.assemble(assignment);
     }
@@ -386,10 +402,12 @@ public class PositionSlotServiceImpl implements PositionSlotService {
     }
 
     @Override
+    @Transactional
     public void deletePositionSlot(@NonNull Long positionSlotId) {
         var positionSlot = positionSlotDao.getById(positionSlotId);
         securityHelper.assertUserIsPlanner(positionSlot);
 
+        audit.removedWithSlot(positionSlot, "Assignment removed when position was deleted");
         var positionSlotEvent = PositionSlotEvent.positionSlotDeleted(positionSlot);
         positionSlotDao.delete(positionSlot);
         publisher.publishEvent(positionSlotEvent);

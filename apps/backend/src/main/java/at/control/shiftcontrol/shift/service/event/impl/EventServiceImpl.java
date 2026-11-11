@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.event.impl;
 
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ import at.control.shiftcontrol.shift.util.SocialLinksParser;
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+    private final AssignmentAudit audit;
     private final EventDao eventDao;
     private final VolunteerDao volunteerDao;
     private final RewardPointsTransactionDao rewardPointsTransactionDao;
@@ -254,9 +257,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void deleteEvent(long eventId) {
         var event = eventDao.getById(eventId);
 
+        if (event.getShiftPlans() != null) event.getShiftPlans().forEach(plan -> audit.removedWithPlan(plan, "Assignment removed when event was deleted"));
         var eventEvent = EventEvent.eventDeleted(event);
         eventDao.delete(event);
         publisher.publishEvent(eventEvent);

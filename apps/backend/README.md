@@ -140,3 +140,34 @@ temporary machine-client entries should disappear as callers move into this appl
 The generated dependencies and application/test bootstrap are intentionally unchanged. `HELP.md`
 contains the original Initializr reference links. Add configuration and implementation only as the
 corresponding migration phase begins.
+
+## Audit history
+
+`GET /api/v1/audit` returns a bounded, newest-first audit timeline for platform administrators
+and principals with `audit.read`. Parameters are `page` (zero-based), `size` (1–100), optional
+`from` (inclusive) and `until` (exclusive) ISO instants, `actorUserId`, `module`, `action`,
+`subjectType`, and `subjectId`. Text filters are exact. The response contains actor and subject
+labels, a readable summary, stable identifiers, and approved before/after field changes. The UUID
+tie-breaker makes ordering deterministic; page offsets can still shift when new records arrive.
+
+New entries are written through `audit::api` in the caller's transaction. Audit input is trusted
+internal code, not a generic event or request serializer: producers must explicitly select safe
+fields, and must not include credentials, bearer links, raw payloads, or unnecessary personal data.
+Changes use scalar snapshots and a schema version to support later interpretation. There is no
+rollback endpoint or general-purpose restoration guarantee. Assignment records currently cover
+join/leave, requests and their decisions, auction and trade changes, and removals when their
+containing slot, shift, plan, or event is deleted. Other business features are not yet instrumented.
+Bulk operations can produce one entry per affected assignment.
+
+Entries expire at startup after two years by default. Configure an ISO-8601 period such as
+`shiftcontrol.audit.retention=P3Y`; configuration changes apply on the next startup. Startup cleanup
+is performed in batches, and a failure stops startup. Ordinary application APIs cannot edit or delete
+entries, although database privileges should be restricted separately in production. The legacy
+RabbitMQ `log_entry` archive is not imported: it may contain bearer tokens and must be inventoried
+and sanitized before any historical migration.
+
+Audit producers can use `AuditRecorder` to add authenticated actor and trace context automatically.
+Feature helpers own action identifiers, summaries, and approved fields; assignment callers use named
+methods such as `joined(assignment)` or `leaveRequested(assignment, before)`. Take the immutable
+`before` snapshot before mutating the entity. Missing authentication is rejected rather than silently
+attributed to a system actor; background producers can use `recordAs` with an explicit system identity.

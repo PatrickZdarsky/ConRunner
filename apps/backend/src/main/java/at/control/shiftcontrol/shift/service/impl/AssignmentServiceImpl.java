@@ -1,5 +1,6 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -38,6 +39,7 @@ import at.control.shiftcontrol.shift.service.rewardpoints.RewardPointsService;
 @Service
 @RequiredArgsConstructor
 public class AssignmentServiceImpl implements AssignmentService {
+    private final AssignmentAudit audit;
     private final RewardPointsService rewardPointsService;
     private final AssignmentDao assignmentDao;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
@@ -47,6 +49,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public @NonNull Assignment claimAuction(@NonNull Assignment auction, @NonNull Volunteer newVolunteer, @NonNull PositionSlotRequestDto requestDto) {
+        var before = audit.snapshot(auction);
         var oldVolunteerId = auction.getAssignedVolunteer().getId();
         Assignment oldAuction = AssignmentAssemblingMapper.shallowCopy(auction);
         // execute auction
@@ -54,6 +57,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         // update reward points
         rewardPointsService.onAssignmentReassignedAuction(oldAuction, auction, requestDto.getAcceptedRewardPointsConfigHash());
+        audit.auctionClaimed(auction, before);
 
         notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(), oldVolunteerId,
             NotificationTypes.AUCTION_CLAIMED, NotificationContext.encode(String.valueOf(auction.getPositionSlot().getShift().getShiftPlan().getEvent().getId()), auction.getPositionSlot().getName(), null)));
@@ -63,6 +67,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Transactional
     public @NonNull AssignmentSwitchRequest executeTrade(@NonNull AssignmentSwitchRequest trade) {
         // delete inverse trade if exists
         List<AssignmentSwitchRequest> inverse = assignmentSwitchRequestDao.findInverseTrade(trade)
@@ -79,6 +84,8 @@ public class AssignmentServiceImpl implements AssignmentService {
         cancelOtherTrades(trade);
 
         // update fields and id of assignments
+        var offeringBefore = audit.snapshot(trade.getOfferingAssignment());
+        var requestedBefore = audit.snapshot(trade.getRequestedAssignment());
         AssignmentSwitchRequest oldTrade = TradeMapper.shallowCopy(trade);
         reassign(trade.getOfferingAssignment(), oldTrade.getRequestedAssignment().getAssignedVolunteer());
         reassign(trade.getRequestedAssignment(), oldTrade.getOfferingAssignment().getAssignedVolunteer());
@@ -87,6 +94,8 @@ public class AssignmentServiceImpl implements AssignmentService {
 
 
         rewardPointsService.onAssignmentReassignedTrade(trade.getOfferingAssignment(), trade.getRequestedAssignment());
+        audit.traded(trade.getOfferingAssignment(), offeringBefore);
+        audit.traded(trade.getRequestedAssignment(), requestedBefore);
 
         publisher.publishEvent(AssignmentSwitchEvent.assignmentSwitched(oldTrade.getRequestedAssignment(), oldTrade.getOfferingAssignment()));
 
@@ -117,22 +126,26 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Transactional
     public @NonNull Assignment accept(@NonNull Assignment assignment) {
         if (assignment.getStatus() != AssignmentStatus.REQUEST_FOR_ASSIGNMENT) {
             throw new IllegalArgumentException("Assignment must be an assignment request");
         }
 
+        var before = audit.snapshot(assignment);
         // update reward points
         rewardPointsService.onAssignmentAccepted(assignment);
 
         assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignment = assignmentDao.save(assignment);
 
+        audit.accepted(assignment, before);
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId().toString()));
         return assignment;
     }
 
     @Override
+    @Transactional
     public @NonNull Assignment assign(@NonNull PositionSlot positionSlot, @NonNull Volunteer volunteer, @NonNull PositionSlotRequestDto requestDto) {
         // create assignment
         Assignment assignment = Assignment.of(positionSlot, volunteer, AssignmentStatus.ACCEPTED);
@@ -147,6 +160,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment = assignmentDao.save(assignment);
 
 
+        audit.joined(assignment);
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoined(assignment.getPositionSlot(), volunteer.getId().toString()));
         return assignment;
     }
@@ -154,6 +168,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public void unassignInternal(@NonNull Assignment assignment) {
+        var before = audit.snapshot(assignment);
         //ACT: update reward points
         rewardPointsService.onAssignmentRemoved(
             assignment
@@ -163,6 +178,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentSwitchRequestDao.cancelTradesForAssignment(assignment);
         assignmentDao.delete(assignment);
 
+        audit.left(assignment, before);
         //NOTIFY: publish event
         publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(assignment.getPositionSlot(), assignment.getAssignedVolunteer().getId().toString()));
     }
@@ -173,11 +189,13 @@ public class AssignmentServiceImpl implements AssignmentService {
         Collection<Assignment> auctions = assignmentDao.findAuctionsByShiftPlanId(shiftPlan.getId());
 
         auctions.forEach(auction -> {
+            var before = audit.snapshot(auction);
             // update reward points
             rewardPointsService.onAssignmentRemoved(
                 auction
             );
 
+            audit.auctionClosed(auction, before);
             // publish event
             publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotLeft(auction.getPositionSlot(), auction.getAssignedVolunteer().getId().toString()));
         });
@@ -195,6 +213,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             notificationRequests.request(new NotificationRequest(java.util.UUID.randomUUID(),
                 request.getAssignedVolunteer().getId(), NotificationTypes.ASSIGNMENT_JOIN_DECLINED,
                 NotificationContext.encode(String.valueOf(shiftPlan.getEvent().getId()), request.getPositionSlot().getName(), null)));
+            audit.requestDeclined(request);
             publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDenied(request.getPositionSlot(), request.getAssignedVolunteer().getId().toString()));
         });
 

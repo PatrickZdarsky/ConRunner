@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
 import java.util.UUID;
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -92,6 +93,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     private static final String INVITE_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     private static final int INVITE_CODE_LENGTH = 8;
     private static final int MAX_INVITE_CODE_GENERATION_ATTEMPTS = 10;
+    private final AssignmentAudit audit;
     private final AssignmentDao assignmentDao;
     private final VolunteerService volunteerService;
 
@@ -179,6 +181,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
     @Override
     @AdminOnly
+    @Transactional
     public void delete(long shiftPlanId) {
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
 
@@ -189,6 +192,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             publisher.publishEvent(inviteEvent);
         }
 
+        audit.removedWithPlan(shiftPlan, "Assignment removed when plan was deleted");
         var shiftPlanEvent = ShiftPlanEvent.planDeleted(shiftPlan);
         shiftPlanDao.delete(shiftPlan);
         publisher.publishEvent(shiftPlanEvent);
@@ -479,6 +483,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, actor.requireUserId());
         if (!existingAssignments.isEmpty()) {
+            existingAssignments.forEach(a -> audit.planLeft(a));
             assignmentDao.deleteAll(existingAssignments);
         }
 

@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
+
 import java.util.UUID;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
@@ -42,6 +44,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TimeConstraintServiceImpl implements TimeConstraintService {
     private final TimeConstraintDao timeConstraintDao;
+    private final AssignmentAudit audit;
     private final AssignmentDao assignmentDao;
     private final EventDao eventDao;
     private final VolunteerDao volunteerDao;
@@ -125,8 +128,10 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
                 log.info("Setting assignment id={} to AUCTION_REQUEST_FOR_UNASSIGN due to conflicting EMERGENCY time constraint id={}",
                     assignment.getId(), emergencyConstraint.getId());
 
+                var before = audit.snapshot(assignment);
                 assignment.setStatus(AssignmentStatus.AUCTION_REQUEST_FOR_UNASSIGN);
                 assignment = assignmentDao.save(assignment);
+                audit.emergencyLeaveRequested(assignment, before);
 
                 var plan = assignment.getPositionSlot().getShift().getShiftPlan();
                 var trigger = java.util.UUID.randomUUID();

@@ -1,5 +1,7 @@
 package at.control.shiftcontrol.shift.service.impl;
 
+import org.springframework.transaction.annotation.Transactional;
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import java.util.UUID;
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +36,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class ShiftServiceImpl implements ShiftService {
+    private final AssignmentAudit audit;
     private final ShiftDao shiftDao;
     private final ShiftPlanDao shiftPlanDao;
     private final ActivityDao activityDao;
@@ -165,10 +168,12 @@ public class ShiftServiceImpl implements ShiftService {
     }
 
     @Override
+    @Transactional
     public void deleteShift(long shiftId) {
         var shift = shiftDao.getById(shiftId);
         securityHelper.assertUserIsPlanner(shift);
 
+        audit.removedWithShift(shift, "Assignment removed when shift was deleted");
         var shiftEvent = ShiftEvent.shiftDeleted(shift);
         shiftDao.delete(shift);
         publisher.publishEvent(shiftEvent);

@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.shift.service.positionslot.impl;
 
 import java.util.UUID;
+import at.control.shiftcontrol.shift.audit.AssignmentAudit;
 import at.control.shiftcontrol.communications.api.NotificationTypes;
 import at.control.shiftcontrol.communications.api.NotificationContext;
 
@@ -46,6 +47,7 @@ import at.control.shiftcontrol.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotService {
+    private final AssignmentAudit audit;
     private final SecurityHelper securityHelper;
     private final AssignmentService assignmentService;
     private final ShiftPlanDao shiftPlanDao;
@@ -109,6 +111,7 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
             }
             case REQUEST_FOR_ASSIGNMENT -> {
                 assignmentDao.delete(assignment);
+                audit.requestDeclined(assignment);
                 notifyVolunteer(assignment.getPositionSlot(), userId, NotificationTypes.ASSIGNMENT_JOIN_DECLINED);
                 publisher.publishEvent(PositionSlotVolunteerEvent.positionSlotJoinRequestDeclined(assignment.getPositionSlot(), userId.toString()));
             }
@@ -213,7 +216,9 @@ public class PlannerPositionSlotServiceImpl implements PlannerPositionSlotServic
     }
 
     private void acceptAssignment(Assignment assignment) {
+        var before = audit.snapshot(assignment);
         assignment.setStatus(AssignmentStatus.ACCEPTED);
         assignmentDao.save(assignment);
+        audit.leaveDeclined(assignment, before);
     }
 }
