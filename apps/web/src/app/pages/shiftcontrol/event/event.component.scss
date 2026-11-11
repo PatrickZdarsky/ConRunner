@@ -1,0 +1,7 @@
+.unavailability-remove {
+  @apply cursor-pointer transition-opacity opacity-50;
+
+  &:hover {
+    @apply opacity-100 ;
+  }
+}

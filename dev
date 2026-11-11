@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+root=$(cd "$(dirname "$0")" && pwd)
+cd "$root"
+case "${1:-help}" in
+  client)
+    exec "$root/scripts/generate-client.sh"
+    ;;
+  up)
+    if [[ ! -x apps/web/node_modules/.bin/ng ]]; then (cd apps/web && CYPRESS_INSTALL_BINARY=0 npm ci --no-audit --no-fund); fi
+    if [[ ! -f apps/web/src/api-client/index.ts ]]; then "$root/scripts/generate-client.sh"; fi
+    docker compose -f ops/compose/compose.yaml up -d --wait
+    cleanup() {
+      trap - EXIT INT TERM
+      [[ -z "${backend_pid:-}" ]] || kill -- "-$backend_pid" 2>/dev/null || true
+      [[ -z "${web_pid:-}" ]] || kill -- "-$web_pid" 2>/dev/null || true
+      wait 2>/dev/null || true
+    }
+    trap cleanup EXIT INT TERM
+    echo 'Starting backend on http://localhost:8081 and web on http://localhost:4200'
+    setsid ./mvnw -q -pl apps/backend spring-boot:run -Dspring-boot.run.profiles=local &
+    backend_pid=$!
+    (cd apps/web && exec setsid npm start) &
+    web_pid=$!
+    wait -n "$backend_pid" "$web_pid"
+    ;;
+  down)
+    docker compose -f ops/compose/compose.yaml down
+    ;;
+  *)
+    echo 'Usage: ./dev client | up | down'
+    [[ "${1:-help}" == help ]]
+    ;;
+esac

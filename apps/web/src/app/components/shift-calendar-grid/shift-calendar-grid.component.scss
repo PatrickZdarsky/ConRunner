@@ -1,0 +1,111 @@
+
+.date {
+  @apply sticky left-0 top-0 h-full border-r-2 border-framing-card bg-background-card z-50 font-semibold border-b-2 pb-xs flex flex-row gap-sm items-center justify-center;
+}
+
+.filter {
+  @apply sticky right-0 top-0 h-full bg-background-card z-50 font-semibold pb-xs flex flex-row items-center justify-center;
+}
+
+.timestamp {
+  @apply sticky left-0 h-full border-r-2 border-framing-card bg-background-card z-40;
+
+  > .hour {
+    @apply absolute w-full grid items-start justify-center align-top text-sm opacity-50;
+
+    &.new-day {
+      @apply opacity-100 items-center;
+    }
+  }
+}
+
+.hour-marker {
+  @apply border-b-framing-default border-opacity-70 border-b-ctr absolute w-full z-0;
+
+  &.new-day {
+    @apply border-b-framing-card border-opacity-100 border-b-2;
+  }
+}
+
+.start-marker, .end-marker {
+  @apply border-framing-default_success from-transparent to-background-card_success  absolute w-full z-0 grid place-content-center;
+
+  &.start-marker {
+    @apply border-b-ctr bg-gradient-to-b;
+  }
+
+  &.end-marker {
+    @apply border-t-ctr bg-gradient-to-t;
+  }
+}
+
+.venue {
+  @apply sticky top-0 z-40 flex flex-row gap-sm items-center justify-center font-semibold border-b-2 border-framing-card pb-xs;
+
+  span {
+    @apply whitespace-nowrap overflow-hidden overflow-ellipsis;
+  }
+}
+
+.venue-flow {
+  @apply cursor-crosshair;
+}
+
+.venue-gap {
+  @apply bg-framing-default w-[2px] justify-self-center;
+}
+
+.venue-bg {
+  @apply bg-background-card z-30 sticky top-0;
+}
+
+.item-secondary {
+  @apply absolute w-full grid justify-start font-semibold border-ctr border-framing-card bg-background-item bg-opacity-30 rounded-lg;
+  @apply font-semibold text-sm text-opacity-50 text-center z-10 pointer-events-none;
+  container-type: size;
+
+  span {
+    writing-mode: vertical-rl;
+    @apply rotate-180 opacity-50;
+  }
+
+  > .tag, > .time {
+    @apply hidden;
+  }
+
+  .label {
+    @apply overflow-hidden overflow-ellipsis;
+  }
+}
+
+.item-primary {
+  @apply absolute w-full grid place-content-center font-semibold border-ctr border-framing-item bg-background-item rounded-lg;
+  @apply hover:border-framing-highlight cursor-pointer transition-colors;
+  @apply font-semibold text-sm text-opacity-40 text-center z-20;
+  container-type: size;
+
+  &.signed-up {
+    @apply border-framing-item_success bg-background-item_success hover:border-framing-highlight_success;
+  }
+
+  &.eligible {
+    @apply border-framing-item_hint bg-background-item_hint hover:border-framing-highlight_hint;
+  }
+
+  .label {
+    @apply overflow-hidden overflow-ellipsis;
+  }
+
+  > .tag, > .time {
+    @apply hidden;
+  }
+
+  @container (min-height: 4rem) {
+    > .tag {
+      @apply block absolute top-[.5rem] left-[.5rem] text-xs opacity-50 font-normal;
+    }
+    > .time {
+      @apply block absolute bottom-[.5rem] left-[.5rem] text-xs opacity-50 font-normal;
+    }
+  }
+}

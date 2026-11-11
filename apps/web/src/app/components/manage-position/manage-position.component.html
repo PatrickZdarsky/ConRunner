@@ -1,0 +1,262 @@
+
+@if(manageData$ | async; as data) {
+
+  @if(mode$ | async; as mode) {
+
+    <!-- manage card -->
+    @if (mode !== "view") {
+      <div
+        class="card grid grid-cols-2 gap-x-xl gap-y-lg h-fit w-[min(100%,50rem)]"
+        [style.order]="getOrder(data.position)"
+        [ngClass]="mode === 'create' ? 'success' : ''"
+      >
+
+        @if(mode === "create"){
+          <div class="badge success w-fit">
+            <fa-icon [icon]="icons.signUp"/>
+            Create Position
+          </div>
+        } @else {
+          <div class="badge w-fit">
+            <fa-icon [icon]="icons.signUp"/>
+            Position
+          </div>
+        }
+
+        <div class="flex flex-row gap-sm justify-end">
+          @if(data.position !== undefined) {
+            <xsb-input-button content="Cancel" size="text" (xsbClick)="requestedEditMode$.next(false)" />
+            <xsb-input-button content="Save" size="text" (xsbClick)="update(data.position)" />
+            <xsb-input-button content="Delete" size="text" (xsbClick)="showSlotDeleteConfirm = true" />
+          } @else {
+            <xsb-input-button content="Create" size="text" (xsbClick)="create(data.shift.id)" />
+          }
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-2">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Position Name</small>
+          <label for="position-manage-name">Brief name that describes the task</label>
+          <xsb-input-text #name
+                          [formControl]="form.controls.name"
+                          [xsb-typed]="[name, form.controls.name]"
+                          name="position-manage-name" placeholder="Position name"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-2 row-span-3">
+          <small><fa-icon [icon]="icons.description" class="pr-sm" />Description</small>
+          <label for="position-manage-description">Explanation of specific requirements of volunteer tasks</label>
+          <xsb-input-text #description
+                          type="area"
+                          [formControl]="form.controls.description"
+                          [xsb-typed]="[description, form.controls.description]"
+                          name="position-manage-description" placeholder="Position description"
+                          class="grow"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-3">
+          <small><fa-icon [icon]="icons.volunteers" class="pr-sm" />Volunteer Count</small>
+          <label for="position-manage-count">The required amount of volunteers</label>
+          <xsb-input-number #count
+                            [min]="1"
+                            [formControl]="form.controls.desiredVolunteerCount"
+                            [xsb-typed]="[count, form.controls.desiredVolunteerCount]"
+                            name="position-manage-count" placeholder="Volunteer Count"
+                            class="grow"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-4">
+          <small><fa-icon [icon]="icons.rewards" class="pr-sm" />Reward Points</small>
+          <span>If no custom points are set, Reward Points are calculated by role and shift bonus</span>
+
+          <div class="grid grid-cols-[auto_1fr_auto] gap-sm items-center">
+            <xsb-input-toggle #enableCustomPoints
+                              [formControl]="form.controls.enableCustomPoints"
+                              [xsb-typed]="[enableCustomPoints, form.controls.enableCustomPoints]"
+                              name="position-manage-enableCustomPoints"
+            />
+            <label for="position-manage-enableCustomPoints" class="pr-sm whitespace-nowrap">Custom Points</label>
+            <xsb-input-number #rewardPoints
+                              [min]="0"
+                              [formControl]="form.controls.rewardPoints"
+                              [xsb-typed]="[rewardPoints, form.controls.rewardPoints]"
+                              name="position-manage-points" placeholder="Reward Points"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-5">
+          <small><fa-icon [icon]="icons.activity" class="pr-sm" />Required Role</small>
+          <label for="position-manage-role">Allow sign-up only for volunteers with a role</label>
+          <xsb-input-select #role name="position-manage-role"
+                            [nullable]="true" nullName="No Role Required"
+                            [formControl]="form.controls.role"
+                            [options]="data.availableRoles"
+                            [comparatorFn]="idComparatorFn"
+                            [xsb-typed]="[role, form.controls.role]"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-5">
+          <small><fa-icon [icon]="icons.location" class="pr-sm" />Optional Position</small>
+          <label for="shift-manage-skipAutoassign">Optional positions are skipped during auto-assignment</label>
+
+          <div class="flex flex-row gap-sm">
+            <xsb-input-toggle #skipAutoAssign name="shift-manage-skipAutoassign"
+                              [formControl]="form.controls.skipAutoAssignment"
+                              [xsb-typed]="[skipAutoAssign, form.controls.skipAutoAssignment]"
+            />
+            <label for="shift-manage-skipAutoassign">Optional position</label>
+          </div>
+        </div>
+      </div>
+    } @else if (data.position !== undefined) {
+      <div
+        class="card grid grid-cols-2 gap-x-xl gap-y-lg w-[25rem] grid-rows-[auto_auto_auto_auto_1fr_auto]"
+        [style.order]="getOrder(data.position)"
+        [ngClass]="{
+        'success' : isSignedUp(data.position),
+        'cursor-not-allowed opacity-60' : !isSignedUp(data.position) && !isEligible(data.position) && (canManage$ | async) === false
+        }"
+      >
+
+        <div class="flex flex-row gap-sm col-span-2">
+          <!--<div class="badge w-fit">
+            <fa-icon [icon]="icons.signUp"/>
+            Position
+          </div>-->
+
+          @if (isSignedUp(data.position)) {
+            <div class="badge success w-fit">
+              <fa-icon [icon]="icons.signedUp"/>
+              Signed Up Position
+            </div>
+          } @else if (hasTimeConflict(data.position)) {
+            <div class="badge w-fit">
+              <fa-icon [icon]="icons.timeConflict"/>
+              Time-Conflicting Position
+            </div>
+          } @else if (isEligible(data.position)) {
+            <div class="badge w-fit">
+              <fa-icon [icon]="icons.signUp"/>
+              Eligible Position
+            </div>
+          }  @else {
+            <div class="badge deaf w-fit">
+              <fa-icon [icon]="icons.ineligible"/>
+              Ineligible Position
+            </div>
+          }
+
+          <div class="grow"></div>
+
+          @if(canManage$ | async) {
+            <xsb-input-button content="Edit" size="text" (xsbClick)="requestedEditMode$.next(true)" />
+            <xsb-input-button content="Delete" size="text" (xsbClick)="showSlotDeleteConfirm = true" />
+          }
+        </div>
+
+        <h1 class="signature-gradient-font compact row-start-2 col-start-1 col-span-2">
+          {{data.position.name}}
+        </h1>
+
+        <div class="col-start-1 row-start-3 col-span-2 whitespace-pre-wrap">{{
+            (data.position.description?.length ?? 0) > 0 ? data.position.description : "No description provided."
+          }}</div>
+
+        <!-- badges -->
+        <div class="flex flex-row flex-wrap gap-sm items-center w-full row-start-4 col-start-1 col-span-2">
+
+          <!-- reward points -->
+          <div class="badge hint" [app-tooltip]="'Every volunteer participating in this position receives ' + data.position.rewardPointsDto.currentRewardPoints + ' points as reward'">
+            <fa-icon [icon]="icons.rewards" />
+            <span>{{data.position.rewardPointsDto.currentRewardPoints}} Points</span>
+          </div>
+
+          <!-- role -->
+          @if(data.position.role !== undefined) {
+            <div class="badge hint" [app-tooltip]="data.position.role.description ?? 'No role description'">
+              <fa-icon [icon]="icons.role" />
+              <span>{{data.position.role.name}}</span>
+            </div>
+          }
+          @else {
+            <div class="badge hint" [app-tooltip]="'Anyone can sign up for this position'">
+              <fa-icon [icon]="icons.role" />
+              <span>No Requirements</span>
+            </div>
+          }
+
+          <!-- attending volunteers -->
+          <div class="badge hint"
+               [app-tooltip]="data.position.assignments.length + ' of ' + data.position.desiredVolunteerCount + ' needed volunteers have signed up'"
+          >
+            <fa-icon [icon]="icons.role" />
+            <span>{{data.position.assignments.length}} / {{data.position.desiredVolunteerCount}} taken</span>
+          </div>
+        </div>
+
+        <div class="assigned-volunteers-section col-span-2">
+          <div class="assigned-volunteers-header">
+            <span>Assigned Volunteers</span>
+            <small>{{data.position.assignments.length}} total</small>
+          </div>
+
+          @if (data.position.assignments.length > 0) {
+            <div class="assigned-volunteers-list">
+              @for (assignment of data.position.assignments; track assignment.id) {
+                <div class="assigned-volunteer" [title]="getVolunteerUsername(assignment.assignedVolunteer)">
+                  @if (assignment.assignedVolunteer.profile) {
+                    <img
+                      class="assigned-volunteer-avatar"
+                      [src]="assignment.assignedVolunteer.profile"
+                      [alt]="getVolunteerUsername(assignment.assignedVolunteer)"
+                    >
+                  } @else {
+                    <div class="assigned-volunteer-avatar assigned-volunteer-avatar-fallback">
+                      {{getVolunteerInitials(assignment.assignedVolunteer.username)}}
+                    </div>
+                  }
+
+                  <div class="assigned-volunteer-copy">
+                    <span class="assigned-volunteer-username">{{getVolunteerUsername(assignment.assignedVolunteer)}}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="assigned-volunteers-empty">
+              No volunteers assigned yet.
+            </div>
+          }
+        </div>
+
+        <div class="border-t-ctr border-framing-card w-full col-span-2 self-end"></div>
+
+        <div class="col-span-2">
+          <app-position-signup [positionSlot]="(positionSignupData$ | async) ?? undefined" (positionSignupChanged)="positionChanged.emit(data.position)" />
+        </div>
+      </div>
+    }
+  }
+
+  @if (showSlotDeleteConfirm && data.position !== undefined){
+    <xsb-dialog action="danger" danger="Delete Position"
+                (closeDialog)="showSlotDeleteConfirm = false; $event === 'danger' && delete(data.position)"
+    >
+      <ng-container dialog-header>
+        <h1>Delete Position</h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <p>
+          Are you sure you want to delete this shift?<br>
+          This cannot be made undone.<br>
+          Assignments will be removed.
+        </p>
+      </ng-container>
+    </xsb-dialog>
+  }
+}

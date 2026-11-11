@@ -1,0 +1,174 @@
+@if (canParticipate$ | async) {
+
+  <!-- list of available trades -->
+  @if (position$ | async; as options){
+    @if (options.slot.requestedTrades.length > 0 || options.slot.offeredTrades.length > 0) {
+      <div class="flex flex-col gap-md">
+        @if (user$ | async; as user){
+          @for (requestedTrade of options.slot.requestedTrades; track requestedTrade.createdAt) {
+            @if (requestedTrade.status === "OPEN") {
+              <div class="grid grid-cols-[auto_1fr] gap-md items-center">
+                <div class="badge h-fit">
+                  <fa-icon [icon]="icons.trade" />
+                  Trade Request
+                </div>
+                <div class="flex flex-row flex-wrap gap-x-xs items-center">
+                  @if (requestedTrade.requestedAssignment.assignment.assignedVolunteer.id === user.account.volunteer.id) {
+                    <span>{{requestedTrade.requestedAssignment.assignment.assignedVolunteer.name}} requested</span>
+                    <xsb-input-button size="text" content="this position" (xsbClick)="dialogTradeInfo$.next(requestedTrade)" />
+                    <span>
+                      from you.
+                    </span>
+                  }
+                  @else {
+                    <span>You requested</span>
+                    <xsb-input-button size="text" content="a trade" (xsbClick)="dialogTradeInfo$.next(requestedTrade)" />
+                    <span>
+                      with {{requestedTrade.requestedAssignment.assignment.assignedVolunteer.name}}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          @for (offeredTrade of options.slot.offeredTrades; track offeredTrade.createdAt) {
+            @if (offeredTrade.status === "OPEN") {
+              <div class="grid grid-cols-[auto_1fr] gap-md items-center">
+                <div class="badge hint">
+                  <fa-icon [icon]="icons.trade" />
+                  Trade Offer
+                </div>
+                <div class="flex flex-row flex-wrap gap-x-xs items-center">
+                  @if (offeredTrade.offeringAssignment.assignment.assignedVolunteer.id === user.account.volunteer.id) {
+                    <span>
+                      You offered
+                    </span>
+                    <xsb-input-button size="text" content="this position" (xsbClick)="dialogTradeInfo$.next(offeredTrade)" />
+                    to <span>
+                      {{offeredTrade.requestedAssignment.assignment.assignedVolunteer.name}}
+                    </span>
+                  }
+                  @else {
+                    <span>
+                      {{offeredTrade.offeringAssignment.assignment.assignedVolunteer.name}} offers
+                    </span>
+                    <xsb-input-button size="text" content="their position" (xsbClick)="dialogTradeInfo$.next(offeredTrade)" />
+                  }
+                </div>
+
+              </div>
+            }
+          }
+        }
+      </div>
+
+      <div class="mb-lg mt-lg border-b-ctr border-framing-card w-full"></div>
+    }
+  }
+
+  <div class="flex flex-col gap-md">
+
+    <!-- action title -->
+    @if (header$ | async; as header) {
+      <b>{{header}}</b>
+    }
+
+    <!-- longer description of actions the user can take -->
+    @if (body$ | async; as body) {
+      <p class="whitespace-pre-line">{{body}}</p>
+    }
+
+    <!-- action buttons -->
+    @if (position$ | async; as position){
+      @if (actions$ | async; as actions) {
+
+        @if (actions.includes("REQUEST_UNASSIGN_ATTENTION")) {
+          <span>
+            If your request is urgent, you can
+            <xsb-input-button class="inline" size="text" content="request planner attention."
+                              (xsbClick)="requestSignOut(position.slot, position.shift, position.currentUserAssignment)"
+            />
+          </span>
+        }
+
+        <div class="flex flex-col gap-sm">
+          @for (action of actions; track action) {
+            <div class="empty:hidden">
+              @switch(action) {
+                @case("SIGN_UP") {
+                  <xsb-input-button content="Sign Up" action="success" (xsbClick)="signUp(position.slot, position.shift)" />
+                }
+
+                @case("SIGN_OUT") {
+                  <xsb-input-button content="Leave Position" action="normal" (xsbClick)="signOut(position.slot)" />
+                }
+
+                @case("REQUEST_SIGN_UP") {
+                  <xsb-input-button content="Request Sign Up" action="success" (xsbClick)="requestSignUp(position.slot, position.shift)"  />
+                }
+
+                @case("REQUEST_SIGN_OUT") {
+                  <xsb-input-button content="Request Leave" action="normal"
+                                    (xsbClick)="requestSignOut(position.slot, position.shift, position.currentUserAssignment)"
+                  />
+                }
+
+                @case("REQUEST_TRADE") {
+                  <xsb-input-button content="Request Trade" action="normal" (xsbClick)="requestTrade(position.slot)"  />
+                }
+
+                @case("CANCEL_REQUEST_SIGN_UP") {
+                  <xsb-input-button content="Cancel Sign Up Request" action="normal"
+                                    (xsbClick)="cancelSignUpRequest(position.slot, position.shift, position.currentUserAssignment)"
+                  />
+                }
+
+                @case("CANCEL_REQUEST_SIGN_OUT") {
+                  <xsb-input-button content="Cancel Leave Request" action="normal"
+                                    (xsbClick)="cancelSignOutRequest(position.slot, position.shift, position.currentUserAssignment)"
+                  />
+                }
+
+                @case("DISABLED_SIGN_UP") {
+                  <xsb-input-button content="Sign Up" action="success" [lock]="true" [disableLockIcon]="true" />
+                }
+              }
+            </div>
+          }
+
+          @if (canManage$ | async) {
+            <xsb-input-button content="Manage Assignments" action="normal" (xsbClick)="manageAssignments(position.slot)" />
+          }
+
+        </div>
+
+        <app-dialog-trade-request
+          class="absolute"
+          [requestOptions]="(tradeRequestOptions$ | async) ?? undefined"
+          (submitted)="$event !== undefined ? submitTradeRequest(position.slot, $event.partner, $event.slot) : 0; tradeRequestOptions$.next(undefined)"
+        />
+
+        <app-dialog-trade-details
+          class="absolute"
+          [tradeInfo]="(dialogTradeInfo$ | async) ?? undefined"
+          (dialogClosed)="dialogTradeInfo$.next(undefined)"
+          (tradeChanged)="positionSignupChanged.emit(undefined); dialogTradeInfo$.next(undefined)"
+        />
+      }
+    }
+
+  </div>
+} @else {
+  @if (canManage$ | async) {
+    @if (position$ | async; as position){
+      <xsb-input-button content="Manage Assignments" action="normal" (xsbClick)="manageAssignments(position.slot)" />
+    }
+  }
+}
+
+<app-dialog-manage-assignments
+  [params]="(dialogAssignmentsParams$ | async) ?? undefined"
+  (assignmentChanged)="dialogAssignmentsParams$.next(undefined); $event ? positionSignupChanged.emit(undefined) : 0"
+  class="absolute"
+/>

@@ -1,0 +1,98 @@
+@if (manageData$ | async; as manageData) {
+
+  <!-- manage details -->
+  <div class="card grid grid-cols-1 gap-lg h-fit" [style.order]="getOrder(manageData.plan)" [ngClass]="{
+    'success': manageData.plan === undefined,
+  }">
+    <div class="flex flex-row gap-sm items-center">
+      @if (manageData.plan === undefined){
+        <div class="badge success w-fit">
+          <fa-icon [icon]="icons.plan" />
+          Create Shift Plan
+        </div>
+      }
+      @else {
+        <div class="badge hint w-fit">
+          <fa-icon [icon]="icons.plan" />
+          Shift Plan
+        </div>
+      }
+
+      <span class="grow"></span>
+
+      @if (manageData.plan === undefined) {
+        <xsb-input-button content="Create" size="text" (xsbClick)="create(manageData.eventId)" />
+      }
+      @else {
+        <xsb-input-button content="Delete" size="text" (xsbClick)="showPlanDeleteConfirm = true" />
+        <xsb-input-button content="Save" size="text" (xsbClick)="update(manageData.plan)" />
+      }
+    </div>
+
+    <div class="grid grid-cols-[20rem_20rem] gap-lg">
+
+      <div class="flex flex-col gap-xs col-start-1 row-start-1">
+        <small><fa-icon [icon]="icons.name" class="pr-sm" />Plan Name</small>
+        <label for="plan-manage-name">Name describing the shift plan purpose</label>
+        <xsb-input-text #name
+                        [formControl]="form.controls.name"
+                        [xsb-typed]="[name, form.controls.name]"
+                        name="plan-manage-name" placeholder="Plan name"
+        />
+      </div>
+
+      <div class="flex flex-col gap-xs col-start-2 row-start-1">
+        <small><fa-icon [icon]="icons.rewards" class="pr-sm" />Reward Points</small>
+        <label for="plan-manage-points">Default Reward Points per minute</label>
+        <xsb-input-number #defaultRewardPointsPerMinute
+                          [min]="0"
+                          [formControl]="form.controls.defaultRewardPointsPerMinute"
+                          [xsb-typed]="[defaultRewardPointsPerMinute, form.controls.defaultRewardPointsPerMinute]"
+                          name="plan-manage-points" placeholder="Default points per minute"
+        />
+      </div>
+
+      <!--<div class="flex flex-col gap-xs col-start-1 row-start-2 col-span-2">
+        <small><fa-icon [icon]="icons.shortDescription" class="pr-sm" />Caption</small>
+        <label for="plan-manage-caption">Short description, shown in the plan preview</label>
+        <xsb-input-text #shortDescription
+                        [formControl]="form.controls.shortDescription"
+                        [xsb-typed]="[shortDescription, form.controls.shortDescription]"
+                        name="plan-manage-caption" placeholder="Plan caption"
+        />
+      </div>-->
+
+      <div class="flex flex-col gap-xs col-start-1 row-start-2 col-span-2">
+        <small><fa-icon [icon]="icons.longDescription" class="pr-sm" />Description</small>
+        <label for="plan-manage-description">Description about the tasks and requirements that volunteers can expect</label>
+        <xsb-input-text #longDescription
+                        [formControl]="form.controls.longDescription"
+                        type="area"
+                        [xsb-typed]="[longDescription, form.controls.longDescription]"
+                        name="plan-manage-description" placeholder="Plan description"
+        />
+      </div>
+
+    </div>
+
+    @if (showPlanDeleteConfirm && manageData.plan !== undefined){
+      <xsb-dialog action="danger" danger="Delete Plan" (closeDialog)="showPlanDeleteConfirm = false; $event === 'danger' && delete(manageData.plan)">
+        <ng-container dialog-header>
+          <h1>Delete Shift Plan</h1>
+        </ng-container>
+
+        <ng-container dialog-body>
+          <p>
+            Are you sure you want to delete this shift plan?<br>
+            This cannot be made undone.<br>
+            All associated data (roles, shifts, positions, signups) will be deleted.
+          </p>
+        </ng-container>
+      </xsb-dialog>
+    }
+  </div>
+
+
+
+
+}

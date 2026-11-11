@@ -29,6 +29,10 @@ disagree, apply this order:
 3. The responsibility sheet for product intent.
 4. The old `shiftservice` code and tests as behavioral evidence only.
 
+For the current shift migration, [ADR-0002](../adr/0002-compatibility-first-shift-migration.md)
+elevates the old shift behavior and tests to the default baseline. Only an explicit requirement or
+ADR may authorize a divergence.
+
 In particular, legacy package/entity ownership and implementation shortcuts are not requirements.
 
 ## Requirement IDs and status

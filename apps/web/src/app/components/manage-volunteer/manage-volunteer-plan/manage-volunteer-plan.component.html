@@ -1,0 +1,63 @@
+
+
+@if (manageData$ | async; as data) {
+
+  @if (data.plan === undefined) {
+
+    <div class="w-fit">
+      <xsb-input-select #plan
+                             [formControl]="form.controls.plan"
+                             [options]="(newPlanOptions$ | async) ?? []"
+                             name="user-manage-plans-plan-new"
+                              [comparatorFn]="idComparator"
+                             [xsb-typed]="[plan, form.controls.plan]"
+      />
+    </div>
+
+    <div class="w-fit">
+      <xsb-input-multitoggle #accessLevel
+                             [formControl]="form.controls.accessLevel"
+                             [options]="levelOptions"
+                             size="minimal"
+                             name="user-manage-plans-level-new"
+                             [xsb-typed]="[accessLevel, form.controls.accessLevel]"
+      />
+    </div>
+
+    <div></div>
+
+    <div class="justify-self-end">
+      <xsb-input-button size="text" content="Add Plan Access" (xsbClick)="addAccess(data.volunteer)" />
+    </div>
+
+  } @else {
+    <span>{{data.plan.name}}</span>
+
+    <div class="w-fit">
+      <xsb-input-multitoggle #accessLevel
+                             [formControl]="form.controls.accessLevel"
+                             [options]="levelOptions"
+                             size="minimal"
+                             name="user-manage-plans-level-{{data.plan.id}}"
+                             [xsb-typed]="[accessLevel, form.controls.accessLevel]"
+      />
+    </div>
+
+    <div class="w-fit flex flex-row gap-sm items-center">
+      <xsb-input-toggle #locked
+                             [formControl]="form.controls.locked"
+                             name="user-manage-plans-locked-{{data.plan.id}}"
+                             [xsb-typed]="[locked, form.controls.locked]"
+      />
+      <label for="user-manage-plans-locked-{{data.plan.id}}">
+        {{ form.controls.locked.value ? "Locked" : "Not Locked" }}
+      </label>
+    </div>
+
+    <div class="justify-self-end flex flex-row gap-md">
+      <xsb-input-button size="text" content="Reset Assignments" (xsbClick)="resetAssignments(data.volunteer, data.plan)" />
+      <xsb-input-button size="text" content="Revoke Access" (xsbClick)="revokeAccess(data.volunteer, data.plan)" />
+    </div>
+  }
+
+}

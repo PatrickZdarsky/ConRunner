@@ -1,52 +1,42 @@
 package at.control.shiftcontrol.shift.plan;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import at.control.shiftcontrol.identity.AuthenticatedActor;
+import at.control.shiftcontrol.shift.auth.CurrentShiftActor;
+import at.control.shiftcontrol.shift.auth.UserAttributeProvider;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-import at.control.shiftcontrol.shift.error.ShiftAccessDeniedException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class PlanAccessServiceTest {
-    @Mock
-    private CurrentShiftActor currentShiftActor;
-
-    @Mock
-    private PlanMembershipRepository membershipRepository;
-
-    @InjectMocks
-    private PlanAccessService access;
-
-    @Test
-    void grantsScopeOnlyWhenTheActorHasTheRequiredMembership() {
-        UUID planId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        when(currentShiftActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(userId, false));
-        when(membershipRepository.existsByPlanIdAndUserId(planId, userId)).thenReturn(true);
-        when(membershipRepository.existsByPlanIdAndUserIdAndPlannerTrue(planId, userId)).thenReturn(false);
-
-        assertDoesNotThrow(() -> access.requireMember(planId));
-        assertThrows(ShiftAccessDeniedException.class, () -> access.requirePlanner(planId));
-        verify(membershipRepository).existsByPlanIdAndUserId(planId, userId);
-        verify(membershipRepository).existsByPlanIdAndUserIdAndPlannerTrue(planId, userId);
+    @AfterEach
+    void clearContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    void platformAdministratorIsAnExplicitScopedOverride() {
-        when(currentShiftActor.current()).thenReturn(new CurrentShiftActor.ShiftActor(UUID.randomUUID(), true));
+    void membershipAndPlannerStatusRemainScopedToEachPlan() {
+        var userId = UUID.randomUUID();
+        var principal = mock(AuthenticatedActor.class);
+        var attributes = mock(UserAttributeProvider.class);
+        when(principal.userId()).thenReturn(Optional.of(userId));
+        when(attributes.getPlansWhereUserIsVolunteer(userId)).thenReturn(Set.of(42L));
+        when(attributes.getPlansWhereUserIsPlanner(userId)).thenReturn(Set.of(43L));
+        SecurityContextHolder.getContext().setAuthentication(
+            UsernamePasswordAuthenticationToken.authenticated(principal, null, List.of()));
 
-        assertDoesNotThrow(() -> access.requireMember(UUID.randomUUID()));
-        assertDoesNotThrow(() -> access.requirePlanner(UUID.randomUUID()));
-        assertDoesNotThrow(access::requirePlatformAdmin);
-        verify(membershipRepository, never()).existsByPlanIdAndUserId(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        var actor = new CurrentShiftActor(attributes).get();
+        assertTrue(actor.isVolunteerInPlan(42L));
+        assertFalse(actor.isPlannerInPlan(42L));
+        assertTrue(actor.isPlannerInPlan(43L));
+        assertFalse(actor.isVolunteerInPlan(43L));
     }
 }

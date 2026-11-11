@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.identity.auth;
 
 import at.control.shiftcontrol.identity.config.props.OidcProviderProps;
+import at.control.shiftcontrol.identity.AuthenticatedActor;
 import at.control.shiftcontrol.identity.service.ApplicationUserSyncService;
 import at.control.shiftcontrol.platform.NonDevTestCondition;
 import lombok.RequiredArgsConstructor;
@@ -42,8 +43,7 @@ public class JwtSecurityConfig {
         return jwt -> {
             var machineAuthentication = machineClientAuthorizer.authenticate(jwt);
             if (machineAuthentication.isPresent()) {
-                var machine = machineAuthentication.get();
-                return authenticatedToken(machine.principal(), jwt, machine.authorities());
+                return authenticatedToken(machineAuthentication.get(), jwt);
             }
 
             var decodedToken = JwtTokenDecoder.decode(jwt, oidcProviderProps.usernameClaim());
@@ -51,16 +51,15 @@ public class JwtSecurityConfig {
             if (!applicationUser.isEnabled()) {
                 throw new DisabledException("User account is suspended");
             }
-            return authenticatedToken(applicationUser, jwt, applicationUser.getAuthorities());
+            return authenticatedToken(applicationUser, jwt);
         };
     }
 
     private UserAuthenticationToken authenticatedToken(
-        Object principal,
-        Jwt jwt,
-        java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> authorities
+        AuthenticatedActor principal,
+        Jwt jwt
     ) {
-        var token = new UserAuthenticationToken(principal, jwt.getTokenValue(), authorities);
+        var token = new UserAuthenticationToken(principal, jwt.getTokenValue());
         token.setDetails(jwt);
         return token;
     }
@@ -100,6 +99,8 @@ public class JwtSecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/swagger-ui/**")
                 .permitAll()
+                .requestMatchers("/swagger-ui.html")
+                .permitAll()
                 .requestMatchers("/swagger")
                 .permitAll()
                 .requestMatchers("/v3/api-docs*/**")
@@ -109,6 +110,8 @@ public class JwtSecurityConfig {
                 .requestMatchers("/api/v1/reward-points/share/**") // permit access to reward points share endpoint via token
                 .permitAll()
                 .requestMatchers("/api/v1/invites/{inviteCode}")
+                .permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/realtime/ws")
                 .permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**")
                 .permitAll() // Permit all OPTIONS requests (preflight))

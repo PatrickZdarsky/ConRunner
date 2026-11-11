@@ -1,0 +1,138 @@
+@if (event$ | async; as event) {
+
+  <div class="grid grid-cols-[auto_1fr] w-full gap-lg">
+
+    <div class="card grid grid-cols-2 gap-lg gap-x-xl h-fit w-fit">
+
+      <!-- info caption -->
+      <h1 class="compact signature-gradient-font">Planner Dashboard</h1>
+
+      <div
+        tooltipMaxWidth="30ex"
+        [app-tooltip]="'You can manage ' + event.shiftPlans.length + ' shift plan' + (event.shiftPlans.length !== 1 ? 's' : '') + ' in this event.'"
+        class="badge w-fit place-self-end"
+      >
+        <fa-icon [icon]="icons.plan" />
+        {{ event.shiftPlans.length }} Shift Plan{{event.shiftPlans.length > 1 ? 's' : ''}}
+      </div>
+
+      <span class="col-span-2">
+        Shift plans organize volunteers for different responsibilities.<br>Each plan has its own set of roles and shift configurations.
+      </span>
+
+      <hr class="col-span-2" />
+
+      <div class="flex flex-col gap-sm gap-y-xs">
+        <small><fa-icon [icon]="icons.plan" class="pr-sm" />Shift Plan</small>
+        <!--<label for="event-plans-plan">Select a shift plan to manage</label>-->
+        <xsb-input-select #shiftPlan
+                        [formControl]="form.controls.shiftPlan"
+                        [xsb-typed]="[shiftPlan, form.controls.shiftPlan]"
+                        [options]="(shiftPlanOptions$ | async) ?? []"
+                        [comparatorFn]="idComparatorFn"
+                        name="event-plans-plan"
+        />
+      </div>
+
+      <div class="flex flex-col gap-sm gap-y-xs">
+        <small><fa-icon [icon]="icons.manage" class="pr-sm" />Topic</small>
+        <!--<label for="event-plans-topic">Select a topic to manage</label>-->
+        <xsb-input-multitoggle #managementMode
+                          [formControl]="form.controls.managementMode"
+                          [xsb-typed]="[managementMode, form.controls.managementMode]"
+                          [options]="modeOptions"
+                          name="event-plans-topic"
+        />
+      </div>
+
+    </div>
+
+    <div class="card spotlight w-fit h-fit justify-self-start self-end empty:hidden max-w-[30rem]">
+      @switch (mode$ | async) {
+        @case ("invites") {
+          <h2>
+            <fa-icon class="pr-sm opacity-50" [icon]="icons.info" />
+            About Invites
+          </h2>
+          <p>
+            Volunteers can be invited to join a shift plan via invite links.<br>
+            Invite links determine the access level: Planners have access to this management page, volunteers only to sign-up features.<br>
+            If an invite has roles assigned, the volunteer will automatically get these roles when accepting the invite.
+          </p>
+        }
+        @case ("roles") {
+          <h2>
+            <fa-icon class="pr-sm opacity-50" [icon]="icons.info" />
+            About Roles
+          </h2>
+          <p>
+            Roles define the qualifications of volunteers in a shift plan.<br>
+            When a volunteer signs up for a position, the reward points are calculated based on the role's reward rate.<br>
+            Volunteers can only sign up for positions that match their roles.
+          </p>
+        }
+        @case ("assignments") {
+          <h2>
+            <fa-icon class="pr-sm opacity-50" [icon]="icons.info" />
+            About Assignments
+          </h2>
+          <p>
+            There are three assignment phases for planning an event:<br>
+            Self-signup, supervised, and locked.<br>
+            Phases should be switched depending on the organizational needs and the event timeline.<br>
+            Assignments can always be managed and overridden here by planners.<br>
+          </p>
+        }
+        @case ("users") {
+          <h2>
+            <fa-icon class="pr-sm opacity-50" [icon]="icons.info" />
+            About Plan Volunteers
+          </h2>
+          <p>
+            After a volunteer joined a plan via an invite, they can sign up to shifts and can be managed by planners.<br>
+            For moderation purposes, planners may change assigned roles, reset a user in the selected shift plan, or remove them from the plan entirely.
+          </p>
+        }
+      }
+    </div>
+
+    @if (planManageData$ | async; as plan){
+
+      <div class="card flex flex-col gap-lg w-fit col-span-2">
+
+        <h1 class="compact signature-gradient-font">{{ plan.plan?.name }}: {{selectedMode$ | async}}</h1>
+
+        <div class="flex flex-row flex-wrap gap-md">
+          @switch (mode$ | async){
+            @case ("invites") {
+              @if (invitesManageData$ | async; as manageData) {
+                @for (inviteManageData of manageData; track inviteManageData.invite?.id){
+                  <app-manage-invite [manageData]="inviteManageData ?? undefined" (inviteChanged)="refreshData()" />
+                }
+              }
+            }
+            @case ("roles") {
+              @if (rolesManageData$ | async; as manageData) {
+                @for (roleManageData of manageData; track roleManageData.role?.id){
+                  <app-manage-role [manageData]="roleManageData ?? undefined" (roleChanged)="refreshData()" />
+                }
+              }
+            }
+            @case ("assignments") {
+              <app-manage-assignments [plan]="plan.plan" (planChanged)="refreshData()" />
+            }
+            @case ("status") {
+              <app-manage-plan-status [manageData]="(volunteersManageData$ | async) ?? undefined" />
+            }
+            @case ("users") {
+              <div class="grow">
+                <app-manage-plan-volunteers [manageData]="(volunteersManageData$ | async) ?? undefined" />
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+    }
+  </div>
+}

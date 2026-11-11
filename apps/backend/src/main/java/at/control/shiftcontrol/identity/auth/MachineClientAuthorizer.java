@@ -1,6 +1,8 @@
 package at.control.shiftcontrol.identity.auth;
 
+import at.control.shiftcontrol.identity.ActorType;
 import at.control.shiftcontrol.identity.config.props.MachineClientRegistration;
+import at.control.shiftcontrol.identity.AuthenticatedActor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class MachineClientAuthorizer {
@@ -28,7 +31,7 @@ public final class MachineClientAuthorizer {
         ));
     }
 
-    public Optional<MachineAuthentication> authenticate(Jwt jwt) {
+    public Optional<AuthenticatedActor> authenticate(Jwt jwt) {
         String clientId = firstNonBlank(jwt.getClaimAsString("client_id"), jwt.getClaimAsString("azp"));
         if (clientId == null || !authoritiesByClientId.containsKey(clientId)) {
             return Optional.empty();
@@ -45,7 +48,7 @@ public final class MachineClientAuthorizer {
             .map(SimpleGrantedAuthority::new)
             .map(GrantedAuthority.class::cast)
             .toList();
-        return Optional.of(new MachineAuthentication(new MachinePrincipal(clientId), authorities));
+        return Optional.of(new MachinePrincipal(clientId, authorities));
     }
 
     private Set<String> extractScopes(Jwt jwt) {
@@ -76,9 +79,24 @@ public final class MachineClientAuthorizer {
             .orElse(null);
     }
 
-    public record MachineAuthentication(MachinePrincipal principal, List<GrantedAuthority> authorities) {
-    }
+    public record MachinePrincipal(String clientId, List<GrantedAuthority> authorities) implements AuthenticatedActor {
+        public MachinePrincipal {
+            authorities = List.copyOf(authorities);
+        }
 
-    public record MachinePrincipal(String clientId) {
+        @Override
+        public ActorType type() {
+            return ActorType.MACHINE;
+        }
+
+        @Override
+        public String name() {
+            return clientId;
+        }
+
+        @Override
+        public Optional<UUID> userId() {
+            return Optional.empty();
+        }
     }
 }

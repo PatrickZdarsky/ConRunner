@@ -50,6 +50,20 @@ class ApplicationUserSyncServiceImplTest {
     }
 
     @Test
+    void emailVerificationFollowsTheCurrentTokenAndAddress() {
+        var account = UserAccountEntity.builder().id(USER_ID).status(UserAccountStatus.ACTIVE)
+            .username("pat").email("old@example.com").emailVerified(true).build();
+        var externalIdentity = ExternalIdentityEntity.builder().userAccount(account).build();
+        var token = new JwtTokenDecoder.DecodedJwtToken("https://identity.example", "subject-1", "pat",
+            "new@example.com", null, false);
+        when(externalIdentityRepository.findByIssuerAndSubject(token.issuer(), token.subject())).thenReturn(Optional.of(externalIdentity));
+        when(userAccountRepository.save(any(UserAccountEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        service.constructUserForLogin(token);
+        assertEquals("new@example.com", account.getEmail());
+        assertFalse(account.isEmailVerified());
+    }
+
+    @Test
     void createsAnActiveAccountAndExternalIdentityForANewSubject() {
         JwtTokenDecoder.DecodedJwtToken token = new JwtTokenDecoder.DecodedJwtToken(
             "https://identity.example", "subject-1", "pat", "pat@example.com", "https://example.com/pat.png");

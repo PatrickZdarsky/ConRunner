@@ -119,3 +119,15 @@ databaseChangeLog:
             referencedTableName: identity_user_account
             referencedColumnNames: id
             onDelete: CASCADE
+  - changeSet:
+      id: identity-002-email-verification
+      author: shiftcontrol
+      changes:
+        - addColumn:
+            tableName: identity_user_account
+            columns:
+              - column:
+                  name: email_verified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints: {nullable: false}

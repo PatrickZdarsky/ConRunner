@@ -1,0 +1,159 @@
+@if (manageData$ | async; as manageData) {
+
+  <div class="card grid grid-cols-1 gap-lg h-fit" [style.order]="getOrder(manageData.invite)" [ngClass]="{
+  'success': manageData.invite === undefined,
+}">
+    <div class="flex flex-row gap-sm items-center">
+      @if (manageData.invite === undefined){
+        <div class="badge success w-fit">
+          <fa-icon [icon]="icons.invite" />
+          Create Plan Invite
+        </div>
+      }
+      @else {
+        <div class="badge hint w-fit">
+          <fa-icon [icon]="icons.invite" />
+          Plan Invite
+        </div>
+      }
+
+      <span class="grow"></span>
+
+      @if (manageData.invite === undefined) {
+        <xsb-input-button content="Create" size="text" (xsbClick)="create(manageData.plan)" />
+      }
+      @else if(manageData.invite.active) {
+        <xsb-input-button content="Revoke" size="text" (xsbClick)="revoke(manageData.invite)" />
+      }
+      @else {
+        <xsb-input-button content="Remove" size="text" (xsbClick)="remove(manageData.invite)" />
+      }
+
+    </div>
+
+    <div class="grid grid-cols-[10rem_10rem] gap-lg">
+
+      <!-- show details -->
+      @if (manageData.invite !== undefined) {
+
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.userType" class="pr-sm" />Invite Type</small> {{getInviteName(manageData.invite)}}
+        </div>
+
+        <div class="flex flex-col gap-sm">
+          <small><fa-icon [icon]="icons.role" class="pr-sm" />Assigned Roles</small> {{getAssignedRolesList(manageData.invite)}}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.expiry" class="pr-sm" />Expiry</small> {{
+            manageData.invite.expiresAt ? (manageData.invite.expiresAt | date:'mediumDate') : 'No Expiry'
+          }}
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.limit" class="pr-sm" />Usage Count Limit</small> {{
+            manageData.invite.maxUses ? (manageData.invite.maxUses + " Uses") : 'No Usage Count limit'
+          }}
+        </div>
+
+        <div class="flex flex-col gap-xs col-span-2">
+          <small><fa-icon [icon]="icons.url" class="pr-sm" />Invite Link</small> {{ getInviteLink(manageData.invite) }}
+          <xsb-input-button content="Copy Link" size="text" (xsbClick)="copyInviteLinkToClipboard(manageData.invite)" />
+        </div>
+
+      }
+      @else {
+
+        <span class="col-span-2">Create a new invite to let other users join as planner or volunteer to this shift plan.</span>
+
+        <!--show form-->
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.userType" class="pr-sm" />Invite Type</small>
+          <xsb-input-select #type
+                            [options]="inviteOptions"
+                            [formControl]="form.controls.type"
+                            [xsb-typed]="[type, form.controls.type]"
+                            name="invite-manage-type"
+          />
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.role" class="pr-sm" />Assigned Roles</small>
+          @if (roleOptions$ | async; as roleOptions) {
+            <xsb-input-multiselect #roles
+                                   [options]="roleOptions" naming="Roles" [previewWholeSelection]="true"
+                                   [formControl]="form.controls.roles"
+                                   [xsb-typed]="[roles, form.controls.roles]"
+                                   name="invite-manage-roles"
+            />
+          }
+        </div>
+
+        <div class="flex flex-col gap-xs col-span-2">
+          <small><fa-icon [icon]="icons.expiry" class="pr-sm" />Expiry</small>
+          <div class="flex flex-row gap-sm items-center">
+
+            <xsb-input-toggle #enableExpiry
+                              [formControl]="form.controls.enableExpiry"
+                              [xsb-typed]="[enableExpiry, form.controls.enableExpiry]"
+                              name="invite-manage-enableExpiry"
+            />
+            <label class="grow" for="invite-manage-enableExpiry">Enable Expiry</label>
+
+            <xsb-input-date #expiry name="invite-manage-expiry"
+                            [formControl]="form.controls.expiry"
+                            [xsb-typed]="[expiry, form.controls.expiry]" />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-xs col-span-2">
+          <small><fa-icon [icon]="icons.limit" class="pr-sm" />Usage Count Limit</small>
+          <div class="flex flex-row gap-sm items-center">
+
+            <xsb-input-toggle #enableMaxUses
+                              [formControl]="form.controls.enableMaxUses"
+                              [xsb-typed]="[enableMaxUses, form.controls.enableMaxUses]"
+                              name="invite-manage-enableMaxUses"
+            />
+            <label class="grow" for="invite-manage-enableMaxUses">Enable Limit</label>
+
+            <xsb-input-number #maxUses name="invite-manage-maxUses"
+                              [min]="0"
+                              [formControl]="form.controls.maxUses"
+                              [xsb-typed]="[maxUses, form.controls.maxUses]" />
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- badges-->
+    @if (manageData.invite !== undefined){
+      <div class="h-full flex gap-sm items-end">
+        @if (manageData.invite.active) {
+          <div class="badge w-fit">
+            <fa-icon [icon]="icons.inviteActive" />
+            Active
+          </div>
+        }
+        @else {
+          <div class="badge w-fit">
+            <fa-icon [icon]="icons.inviteInactive" />
+            Expired
+          </div>
+        }
+        <div class="badge w-fit">
+          <fa-icon [icon]="icons.date" />
+          {{manageData.invite.createdAt | date:'shortDate'}}
+        </div>
+        <div class="badge w-fit">
+          <fa-icon [icon]="icons.count" />
+          {{manageData.invite.usedCount}} Uses
+        </div>
+      </div>
+    }
+
+
+
+  </div>
+}

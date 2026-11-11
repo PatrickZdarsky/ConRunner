@@ -1,0 +1,36 @@
+@if (!disguise) {
+  <div class="w-full relative h-full" [ngClass]="{
+  'pointer-events-none opacity-60' : disabled
+}">
+    @if(type === "area") {
+      <textarea tabindex="0" class="w-full h-full resize-none active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight" [name]="name" [id]="name"
+                [placeholder]="placeholder" [ngClass]="{
+      'focus:border-signature-300' : valid || disabled,
+      'focus:border-framing-level_2_danger' : !valid && !disabled,
+      'rounded-md text-sm' : size === 'minimal',
+      'rounded-lg border-ctr' : size === 'regular',
+    }" rows="4" [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0"
+                (blur)="onTouched ? onTouched() : 0"></textarea>
+    } @else {
+      <input tabindex="0" class="w-full active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight" [name]="name" [id]="name"
+             [placeholder]="placeholder" [ngClass]="{
+      'focus:border-signature-300' : valid || disabled,
+      'focus:border-framing-level_2_danger' : !valid && !disabled,
+      'rounded-md text-sm' : size === 'minimal',
+      'rounded-lg border-ctr' : size === 'regular',
+    }" [type]="type" [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0"
+             (blur)="onTouched ? onTouched() : 0">
+    }
+
+
+    <div [ngClass]="{
+    'opacity-100' : !valid && !disabled,
+    'opacity-0' : valid || disabled
+  }"
+         class="absolute right-md top-0 bottom-0 grid place-content-center  text-text-danger transition-opacity pointer-events-none">
+      <fa-icon [icon]="errorIcon"></fa-icon>
+    </div>
+  </div>
+} @else {
+  {{value}}
+}

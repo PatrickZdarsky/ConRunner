@@ -429,3 +429,340 @@ databaseChangeLog:
         - sql:
             sql: CREATE UNIQUE INDEX uk_shift_position_slot_name_ci ON shift_position_slot (staffing_shift_id, lower(name))
             splitStatements: false
+  - changeSet:
+      id: shift-003-create-availability-assignments-and-transition-history
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: shift_availability
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_time
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: note
+                  type: VARCHAR(1024)
+              - column:
+                  name: created_by_user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: authorized_override_reason
+                  type: VARCHAR(1024)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: ALTER TABLE shift_availability ADD CONSTRAINT ck_shift_availability_time CHECK (end_time > start_time)
+            splitStatements: false
+        - createIndex:
+            tableName: shift_availability
+            indexName: idx_shift_availability_event_user_time
+            columns:
+              - column:
+                  name: event_id
+              - column:
+                  name: user_id
+              - column:
+                  name: start_time
+        - createTable:
+            tableName: shift_assignment
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: position_slot_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: authorized_override_reason
+                  type: VARCHAR(1024)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_assignment
+            baseColumnNames: position_slot_id
+            constraintName: fk_shift_assignment_position_slot
+            referencedTableName: shift_position_slot
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: shift_assignment
+            columnNames: position_slot_id, user_id
+            constraintName: uk_shift_assignment_slot_user
+        - createIndex:
+            tableName: shift_assignment
+            indexName: idx_shift_assignment_user_state
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: state
+        - createTable:
+            tableName: shift_assignment_transition
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: assignment_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: from_state
+                  type: VARCHAR(32)
+              - column:
+                  name: to_state
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reason
+                  type: VARCHAR(1024)
+              - column:
+                  name: occurred_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_assignment_transition
+            baseColumnNames: assignment_id
+            constraintName: fk_shift_assignment_transition_assignment
+            referencedTableName: shift_assignment
+            referencedColumnNames: id
+        - createIndex:
+            tableName: shift_assignment_transition
+            indexName: idx_shift_assignment_transition_assignment_time
+            columns:
+              - column:
+                  name: assignment_id
+              - column:
+                  name: occurred_at
+        - createTable:
+            tableName: shift_plan_mode_transition
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: plan_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: old_mode
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_mode
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: application_policy
+                  type: VARCHAR(96)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resolved_join_request_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resolved_leave_request_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurred_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_plan_mode_transition
+            baseColumnNames: plan_id
+            constraintName: fk_shift_plan_mode_transition_plan
+            referencedTableName: shift_plan
+            referencedColumnNames: id
+        - createIndex:
+            tableName: shift_plan_mode_transition
+            indexName: idx_shift_plan_mode_transition_plan_time
+            columns:
+              - column:
+                  name: plan_id
+              - column:
+                  name: occurred_at
+  - changeSet:
+      id: shift-004-restore-legacy-live-assignment-shape
+      author: shiftcontrol
+      changes:
+        - renameTable:
+            oldTableName: shift_staffing_shift
+            newTableName: shift_shift
+        - renameColumn:
+            tableName: shift_position_slot
+            oldColumnName: staffing_shift_id
+            newColumnName: shift_id
+            columnDataType: UUID
+        - sql:
+            sql: ALTER INDEX uk_shift_position_slot_name_ci RENAME TO uk_shift_position_slot_shift_name_ci
+            splitStatements: false
+        - renameTable:
+            oldTableName: shift_availability
+            newTableName: shift_time_constraint
+        - addColumn:
+            tableName: shift_time_constraint
+            columns:
+              - column:
+                  name: type
+                  type: VARCHAR(32)
+        - update:
+            tableName: shift_time_constraint
+            columns:
+              - column:
+                  name: type
+                  value: UNAVAILABLE
+        - addNotNullConstraint:
+            tableName: shift_time_constraint
+            columnName: type
+            columnDataType: VARCHAR(32)
+        - dropColumn:
+            tableName: shift_time_constraint
+            columnName: created_by_user_id
+        - dropColumn:
+            tableName: shift_time_constraint
+            columnName: authorized_override_reason
+        - delete:
+            tableName: shift_assignment
+            where: state IN ('DECLINED', 'WITHDRAWN', 'UNASSIGNED')
+        - update:
+            tableName: shift_assignment
+            columns:
+              - column:
+                  name: state
+                  value: REQUEST_FOR_ASSIGNMENT
+            where: state = 'JOIN_REQUESTED'
+        - update:
+            tableName: shift_assignment
+            columns:
+              - column:
+                  name: state
+                  value: AUCTION_REQUEST_FOR_UNASSIGN
+            where: state = 'LEAVE_REQUESTED'
+        - dropIndex:
+            tableName: shift_assignment
+            indexName: idx_shift_assignment_user_state
+        - renameColumn:
+            tableName: shift_assignment
+            oldColumnName: state
+            newColumnName: status
+            columnDataType: VARCHAR(32)
+        - dropColumn:
+            tableName: shift_assignment
+            columnName: authorized_override_reason
+        - createIndex:
+            tableName: shift_assignment
+            indexName: idx_shift_assignment_user_status
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: status
+        - dropTable:
+            tableName: shift_assignment_transition
+        - dropTable:
+            tableName: shift_plan_mode_transition
+  - changeSet:
+      id: shift-legacy-volunteer
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: volunteer
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: calendar_share_id
+                  type: VARCHAR(64)
+                  constraints:
+                    unique: true

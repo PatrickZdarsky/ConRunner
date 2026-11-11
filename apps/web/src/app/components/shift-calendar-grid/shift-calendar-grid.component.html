@@ -1,0 +1,167 @@
+<div class="h-full w-full overflow-auto no-scrollbar" #calendarParent
+     (scroll)="scrolled$.next($event); setScrolling(true)"
+     (scrollend)="setScrolling(false)"
+>
+  @if (config$ | async; as config) {
+    @if(config.showNoContentHint === true) {
+      <div class="flex flex-col items-center justify-center w-full h-full">
+        <h1 class="flex gap-md signature-gradient-font"><fa-icon [icon]="icons.empty" />No data available.</h1>
+        <span>Create a shift plan in the <a routerLink="../manage">event settings</a> to start!</span>
+      </div>
+    } @else {
+      <div
+        class="relative grid gap-md gap-y-0"
+        [style.grid-template-columns]="getGridColumns(config)"
+        [style.grid-template-rows]="'auto ' + getMinuteHeight(getHours(config).length * 60)"
+      >
+        <div style="grid-row: 1 / 1; grid-column: time-start / time-end" class="date">
+          <fa-icon [icon]="icons.day" class="text-sm" />
+          <span>{{ headDay$ | async | date:"shortDate" }}</span>
+        </div>
+
+        <div style="grid-row: 1 / 1; grid-column: filter-start / filter-end" class="filter">
+          @if(config.hideFilterToggle !== true) {
+            <xsb-input-button [icon]="icons.filter" size="minimal" content="Filter" (xsbClick)="filterToggleClicked()" />
+          }
+        </div>
+
+        <div class="absolute hidden">
+          {{bodyInitialized$.next(true)}}
+        </div>
+
+        <div style="grid-row: 2 / 2; grid-column: time-start / time-end" class="timestamp">
+          @for (hour of getHours(config); track hour) {
+            <div
+              class="hour"
+              [ngClass]="{ 'new-day': hour % 24 === 0 }"
+              [style.top]="getMinuteHeight(hour * 60)"
+              [style.height]="getMinuteHeight(60)"
+            >
+              @if (hour % 24 === 0){
+                {{ getDayOfHour(hour, config) | date:"shortDate" }}
+              } @else {
+                {{ (hour % 24).toString().padStart(2, "0") }}:00
+              }
+            </div>
+          }
+        </div>
+
+        <div class="venue-bg" style="grid-column: 1 / -1; grid-row: 1"></div>
+
+        @for (hour of getHours(config); track hour) {
+          <div
+            class="hour-marker"
+            [ngClass]="{ 'new-day': hour !== 0 && hour % 24 === 0 }"
+            style="grid-column: 1 / -1; grid-row: 2 / 2"
+            [style.top]="getMinuteHeight(hour * 60)"
+          ></div>
+        }
+
+        @if (getDateMinutesFromStart(config.eventStartTime, config) >= 60) {
+          <div
+            class="start-marker"
+            style="grid-column: 1 / -1; grid-row: 2 / 2"
+            [style.top]="getMinuteHeight(getDateMinutesFromStart(config.eventStartTime, config) - 60)"
+            [style.height]="getMinuteHeight(60)"
+          >
+            <small>Event Start</small>
+          </div>
+        }
+
+        @if (getDateMinutesFromStart(config.adjustedEndDate, config) - getDateMinutesFromStart(config.eventEndTime, config) >= 60) {
+          <div
+            class="end-marker"
+            style="grid-column: 1 / -1; grid-row: 2 / 2"
+            [style.top]="getMinuteHeight(getDateMinutesFromStart(config.eventEndTime, config))"
+            [style.height]="getMinuteHeight(60)"
+          >
+            <small>Event End</small>
+          </div>
+        }
+
+        @for (venue of config.locationLayouts; track venue.location.id) {
+          <div class="venue" style="grid-row: 1/1; grid-column: venue-{{venue.location.id}}-start / venue-{{venue.location.id}}-end">
+            <fa-icon [icon]="icons.location" class="text-sm" />
+            <span>{{venue.location.name}}</span>
+          </div>
+
+          <div
+            class="venue-gap"
+            style="grid-column: venue-{{venue.location.id}}-gap-start / venue-{{venue.location.id}}-gap-end; grid-row: 1/-1;"
+          ></div>
+
+          @if (config.emptySpaceClickCallback !== undefined) {
+            <div
+              tabindex="0"
+              #flow
+              class="venue-flow"
+              (keydown)="flow.click()"
+              (click)="config.emptySpaceClickCallback(getDateOfClickY(flow, $event, config), venue.location)"
+              style="grid-row: 2/2; grid-column: venue-{{venue.location.id}}-start / venue-{{venue.location.id}}-end"
+            ></div>
+          }
+        }
+
+        @if (config.noLocationLayout !== undefined) {
+          <div class="venue" style="grid-row: 1/1; grid-column: venue-none-start / venue-none-end">
+            <fa-icon [icon]="icons.location" class="text-sm" />
+            <span>Without Location</span>
+          </div>
+
+          <div
+            class="venue-gap"
+            style="grid-column: venue-none-gap-start / venue-none-gap-end; grid-row: 1/-1;"
+          ></div>
+
+          @if (config.emptySpaceClickCallback !== undefined) {
+            <div
+              tabindex="0"
+              #flow
+              class="venue-flow"
+              (keydown)="flow.click()"
+              (click)="config.emptySpaceClickCallback(getDateOfClickY(flow, $event, config), undefined)"
+              style="grid-row: 2/2; grid-column: venue-none-start / venue-none-end"
+            ></div>
+          }
+        }
+
+        @if (schedule$ | async; as schedule) {
+          @for (shiftItem of schedule.shifts; track shiftItem.shift.shiftDto.id) {
+            <div
+              (click)="config.shiftClickCallback !== undefined ? config.shiftClickCallback(shiftItem.shift.shiftDto) : 0"
+              (keydown)="0"
+              tabindex="0"
+              [ngClass]="[getShiftDisplayCategory(shiftItem.shift.shiftDto), config.shiftClickCallback !== undefined ? 'item-primary' : 'item-secondary']"
+              style="grid-row: 2/2; grid-column: venue-{{shiftItem.location?.id ?? 'none'}}-shift-col-{{shiftItem.shift.columnIndex + 1}}-start / venue-{{shiftItem.location?.id ?? 'none'}}-shift-col-{{shiftItem.shift.columnIndex +  1}}-end"
+              [style.height]="getMinuteHeight(getItemMinutesDuration(shiftItem.shift.shiftDto))"
+              [style.top]="getMinuteHeight(getItemMinutesFromStart(shiftItem.shift.shiftDto, config))"
+            >
+              <span class="tag">{{getShiftDisplayTag(shiftItem.shift.shiftDto)}}</span>
+              <span class="time">
+                {{shiftItem.shift.shiftDto.startTime | date:"shortTime"}} - {{shiftItem.shift.shiftDto.endTime | date:"shortTime"}}
+              </span>
+              <span class="label">{{shiftItem.shift.shiftDto.name}}</span>
+            </div>
+          }
+
+          @for (activityItem of schedule.activities; track activityItem.activity.id) {
+            <div
+              tabindex="-1"
+              (keydown)="0"
+              [ngClass]="config.activityClickCallback !== undefined ? 'item-primary' : 'item-secondary'"
+              (click)="config.activityClickCallback !== undefined ? config.activityClickCallback(activityItem.activity) : 0"
+              style="grid-row: 2/2; grid-column: venue-{{activityItem.location?.id ?? 'none'}}-activity-start / venue-{{activityItem.location?.id ?? 'none'}}-end"
+              [style.height]="getMinuteHeight(getItemMinutesDuration(activityItem.activity))"
+              [style.top]="getMinuteHeight(getItemMinutesFromStart(activityItem.activity, config))"
+            >
+              <span class="time">
+                {{activityItem.activity.startTime | date:"shortTime"}} - {{activityItem.activity.endTime | date:"shortTime"}}
+              </span>
+              <span class="label">{{activityItem.activity.name}}</span>
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+</div>

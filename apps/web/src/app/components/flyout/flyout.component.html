@@ -1,0 +1,21 @@
+<ng-template>
+
+  <!-- flyout container -->
+  <div class="border rounded-md shadow-[0_8px_24px_#010409] bg-background-card border-framing-card" (click)="closeOnClick && closed.next()"
+    (keyup)="closeOnClick && closed.next()" tabindex="0">
+
+    <!-- title -->
+    @if(title !== undefined) {
+
+      <div class="border-b border-inherit px-md py-xs font-semibold flex gap-md justify-between">
+        <div>{{title}}</div>
+        <fa-icon [icon]="xmarkIcon" class="cursor-pointer opacity-50 hover:opacity-100" (click)="closed.next()" />
+      </div>
+    }
+
+    <!-- content -->
+    <div class="p-md">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</ng-template>

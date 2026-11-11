@@ -1,0 +1,86 @@
+@if (manageData$ | async; as manageData) {
+
+  <div class="card grid grid-cols-[20rem] gap-lg h-fit" [style.order]="getOrder(manageData.location)" [ngClass]="{
+    'success': manageData.location === undefined,
+  }">
+    <div class="flex flex-row gap-sm items-center">
+      @if (manageData.location === undefined){
+        <div class="badge success w-fit">
+          <fa-icon [icon]="icons.location" />
+          Create Event Location
+        </div>
+      }
+      @else {
+        <div class="badge hint w-fit">
+          <fa-icon [icon]="icons.location" />
+          Event Location
+        </div>
+
+        @if (isPretalxManaged$ | async) {
+          <div class="badge w-fit">
+            <fa-icon [icon]="icons.noEdit" />
+            PreTalx Sync
+          </div>
+        }
+      }
+
+      <span class="grow"></span>
+
+      @if (manageData.location === undefined) {
+        <xsb-input-button content="Create" size="text" (xsbClick)="save(manageData.location, manageData.event)" />
+      }
+      @else if((isPretalxManaged$ | async) === false) {
+        <xsb-input-button content="Delete" size="text" (xsbClick)="showDeleteConfirm = true" />
+        <xsb-input-button content="Save" size="text" (xsbClick)="save(manageData.location, manageData.event)" />
+      }
+
+    </div>
+
+    <!--@if(manageData.location === undefined) {
+      <span>Create a new location to organize activities and shifts of this event.</span>
+    }-->
+
+    <div class="flex flex-col gap-xs">
+      <small><fa-icon [icon]="icons.name" class="pr-sm" />Location Name</small>
+      <xsb-input-text #name [disguise]="(isPretalxManaged$ | async) ?? false"
+                      [formControl]="form.controls.name"
+                      [xsb-typed]="[name, form.controls.name]"
+                      name="location-manage-name" placeholder="Location name"
+      />
+    </div>
+
+    <div class="flex flex-col gap-xs">
+      <small><fa-icon [icon]="icons.description" class="pr-sm" />Description</small>
+      <xsb-input-text #description [disguise]="(isPretalxManaged$ | async) ?? false"
+                      [formControl]="form.controls.description"
+                      [xsb-typed]="[description, form.controls.description]"
+                      name="location-manage-name" placeholder="Location description"
+      />
+    </div>
+
+    <div class="flex flex-col gap-xs">
+      <small><fa-icon [icon]="icons.url" class="pr-sm" />Map URL</small>
+      <xsb-input-text #url [disguise]="(isPretalxManaged$ | async) ?? false"
+                      [formControl]="form.controls.url"
+                      [xsb-typed]="[url, form.controls.url]"
+                      name="location-manage-url" placeholder="URL to location map"
+      />
+    </div>
+
+  </div>
+
+  @if (showDeleteConfirm && manageData.location !== undefined){
+    <xsb-dialog action="danger" danger="Delete Location" (closeDialog)="showDeleteConfirm = false; $event === 'danger' && delete(manageData.location)">
+      <ng-container dialog-header>
+        <h1>Delete Location "{{manageData.location.name}}"</h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <p>
+          Are you sure you want to delete this location?<br>
+          This cannot be made undone.
+        </p>
+      </ng-container>
+    </xsb-dialog>
+  }
+}

@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.eventcatalog.location;
 
 import java.util.List;
+import at.control.shiftcontrol.eventcatalog.audit.CatalogAudit;
 import java.util.UUID;
 
 import at.control.shiftcontrol.eventcatalog.event.EventRepository;
@@ -13,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class LocationService {
+    private final CatalogAudit audit;
     private final EventRepository eventRepository;
     private final LocationRepository locationRepository;
 
-    public LocationService(EventRepository eventRepository, LocationRepository locationRepository) {
+    public LocationService(EventRepository eventRepository, LocationRepository locationRepository, CatalogAudit audit) {
+        this.audit = audit;
         this.eventRepository = eventRepository;
         this.locationRepository = locationRepository;
     }
@@ -33,7 +36,9 @@ public class LocationService {
         location.setEventId(eventId);
         location.setReadOnly(false);
         apply(location, data);
-        return toDetails(locationRepository.save(location));
+        location = locationRepository.save(location);
+        audit.record("location", "created", location.getId(), null, snapshot(location));
+        return toDetails(location);
     }
 
     @Transactional
@@ -44,8 +49,11 @@ public class LocationService {
             throw new EventCatalogValidationException("Location data is required");
         }
         assertNameAvailable(location.getEventId(), data.name(), location);
+        var before = snapshot(location);
         apply(location, data);
-        return toDetails(locationRepository.save(location));
+        location = locationRepository.save(location);
+        audit.record("location", "updated", location.getId(), before, snapshot(location));
+        return toDetails(location);
     }
 
     public LocationDetails get(UUID locationId) {
@@ -61,6 +69,7 @@ public class LocationService {
     public void delete(UUID locationId) {
         LocationEntity location = getEntity(locationId);
         assertMutable(location);
+        audit.record("location", "deleted", location.getId(), snapshot(location), null);
         locationRepository.delete(location);
     }
 
@@ -85,6 +94,10 @@ public class LocationService {
         if (locationRepository.existsByEventIdAndNameIgnoreCase(eventId, name)) {
             throw new EventCatalogConflictException("Location name must be unique within an event");
         }
+    }
+
+    private static CatalogAudit.Snapshot snapshot(LocationEntity e) {
+        return new CatalogAudit.Snapshot(e.getName(), null, null, CatalogAudit.value(e.getEventId()), null);
     }
 
     private static void apply(LocationEntity location, LocationData data) {

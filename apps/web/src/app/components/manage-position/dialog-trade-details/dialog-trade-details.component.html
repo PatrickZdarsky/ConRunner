@@ -1,0 +1,72 @@
+@if (mappedInfo$ | async; as mappedInfo) {
+  <xsb-dialog
+    bodyStyle="card"
+    [danger]="mappedInfo.isOwnRequest ? 'Cancel Trade Offer' : 'Decline Trade'"
+    [success]="mappedInfo.isOwnRequest ? undefined : 'Accept Trade'"
+    (closeDialog)="processResult($event, mappedInfo)"
+  >
+
+    <ng-container dialog-header>
+      <h1 class="signature-gradient-font">Trade Details</h1>
+    </ng-container>
+
+
+    <ng-container dialog-body>
+
+      <div class="grid grid-cols-[auto_auto_auto] gap-x-lg gap-y-xs">
+
+        <!-- info caption -->
+        <span class="col-span-3 mb-md">
+          @if (mappedInfo.isOwnRequest) {
+            You requested to trade one of your positions in exchange with {{mappedInfo.otherVolunteer.name}}
+          } @else {
+            {{mappedInfo.otherVolunteer.name}} offered to trade a position in exchange for yours.
+          }
+        </span>
+
+        <!-- own info -->
+        <div class="badge w-fit success col-start-2 mb-md">
+          <fa-icon [icon]="icons.signedUp" />
+          Your position
+        </div>
+
+        <!-- other info -->
+        <div class="badge w-fit col-start-3 mb-md">
+          <fa-icon [icon]="icons.trade" />
+          @if (mappedInfo.isOwnRequest) {
+            Requested from {{mappedInfo.otherVolunteer.name}}
+          } @else {
+            Offered by {{mappedInfo.otherVolunteer.name}}
+          }
+        </div>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.shift"/>Shift</small>
+        <a [routerLink]="'/shifts/' + mappedInfo.ownShift.id">{{mappedInfo.ownShift.name}}</a>
+        <a [routerLink]="'/shifts/' + mappedInfo.otherShift.id">{{mappedInfo.otherShift.name}}</a>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.rewards"/>Reward</small>
+        <span>{{mappedInfo.ownRewardPoints}} Points</span>
+        <span>{{mappedInfo.otherRewardPoints}} Points</span>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.location"/>Location</small>
+        <span>{{mappedInfo.ownShift.location?.name ?? "No Location"}}</span>
+        <span>{{mappedInfo.otherShift.location?.name ?? "No Location"}}</span>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.position"/>Position</small>
+        <span>{{mappedInfo.ownSlot.name}}</span>
+        <span>{{mappedInfo.otherSlot.name}}</span>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.startDate"/>Start</small>
+        <span>{{mappedInfo.ownShift.startTime | date:"short"}}</span>
+        <span>{{mappedInfo.otherShift.startTime | date:"short"}}</span>
+
+        <small class="flex flex-row gap-sm"><fa-icon [icon]="icons.startDate"/>End</small>
+        <span>{{mappedInfo.ownShift.endTime | date:"short"}}</span>
+        <span>{{mappedInfo.otherShift.endTime | date:"short"}}</span>
+
+
+      </div>
+    </ng-container>
+
+  </xsb-dialog>
+}

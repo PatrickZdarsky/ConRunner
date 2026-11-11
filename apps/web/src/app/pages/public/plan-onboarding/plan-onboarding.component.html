@@ -1,0 +1,143 @@
+<div class="grid w-full h-full place-content-center">
+
+  @if(invite$ | async; as invite) {
+
+    @if(invite !== null && invite !== "INVALID") {
+      <div class="card flex flex-col gap-md">
+        <div class="flex gap-sm">
+          <h1 class="signature-gradient-font grow pr-lg">{{invite.eventDto.name}}</h1>
+          <div class="badge h-fit" [app-tooltip]="'Start & end date\n of the event'">
+            <fa-icon [icon]="icons.date" />
+            {{ invite.eventDto.startTime | date:"shortDate" }} - {{ invite.eventDto.endTime | date:"shortDate" }}
+          </div>
+
+          <div class="badge hint h-fit" [app-tooltip]="'The shift plan\n that you\'re about to join'">
+            <fa-icon [icon]="icons.plan" />
+            {{invite.inviteDto.shiftPlanDto.name}}
+          </div>
+        </div>
+
+        <p class="max-w-[30rem]">
+          <small>About the event</small><br>
+          {{invite.inviteDto.shiftPlanDto.longDescription ?? invite.eventDto.shortDescription ?? "No Description provided"}}<br>
+        </p>
+
+        @if (invite.inviteDto.autoAssignedRoles.length > 0) {
+          <div class="max-w-[30rem] flex flex-col gap-xs">
+            <small>Your Qualifications</small>
+            <div class="flex flex-row gap-sm items-center">
+              @for (role of invite.inviteDto.autoAssignedRoles; track role.id) {
+                  <div class="badge w-fit success"><fa-icon [icon]="icons.role" /> {{role.name}}</div>
+              }
+            </div>
+          </div>
+        }
+
+
+        @if (inviteMode$ | async; as mode){
+          @switch (mode) {
+
+            @case ("UPGRADE_ACCESS") {
+              <div class="max-w-[30rem]">
+                @if (invite.attendingVolunteerCount === 0) {
+                  You are the first volunteer to join this plan on ShiftControl - welcome!
+                } @else {
+                  <b>
+                    {{invite.attendingVolunteerCount}}
+                    {{invite.attendingVolunteerCount > 1 ? "people have" : "person has"}}
+                    joined
+                  </b> this plan on ShiftControl.
+                }
+              </div>
+
+              <div class="flex flex-col gap-sm justify-center items-center pt-lg">
+                <small>You have already joined this plan, but this invite makes you a shift planner.</small>
+                <xsb-input-button class="w-fit" action="success" content="Upgrade Access" (xsbClick)="joinShiftPlan(invite)" name="onboarding-upgrade" />
+              </div>
+            }
+
+            @case ("UPGRADE_ROLES") {
+              <div class="max-w-[30rem]">
+                @if (invite.attendingVolunteerCount === 0) {
+                  You are the first volunteer to join this plan on ShiftControl - welcome!
+                } @else {
+                  <b>
+                    {{invite.attendingVolunteerCount}}
+                    {{invite.attendingVolunteerCount > 1 ? "people have" : "person has"}}
+                    joined
+                  </b> this plan on ShiftControl.
+                }
+              </div>
+
+              <div class="flex flex-col gap-sm justify-center items-center pt-lg">
+                <small>You have already joined this plan, but this invite grants you extra shift qualifications.</small>
+                <xsb-input-button class="w-fit" action="success" content="Unlock Qualificatins" (xsbClick)="joinShiftPlan(invite)" name="onboarding-extend" />
+              </div>
+            }
+
+            @case ("JOINED") {
+              <div class="max-w-[30rem]">
+                @if (invite.attendingVolunteerCount === 0) {
+                  You are the first volunteer to join this plan on ShiftControl - welcome!
+                } @else {
+                  <b>
+                    {{invite.attendingVolunteerCount}}
+                    {{invite.attendingVolunteerCount > 1 ? "people have" : "person has"}}
+                    joined
+                  </b> this plan on ShiftControl.
+                }
+              </div>
+
+              <div class="flex flex-col gap-sm justify-center items-center pt-lg">
+                <small>You have already joined this plan.</small>
+                <xsb-input-button class="w-fit" action="success" content="View Event" [preventDefault]="false" [routerLink]="'/events/' + invite.eventDto.id" name="onboarding-view" />
+              </div>
+            }
+
+            @case ("JOIN") {
+              <div class="max-w-[30rem]">
+
+                @if (invite.attendingVolunteerCount === 0) {
+                  You are the first volunteer to join this plan on ShiftControl - welcome!
+                } @else {
+                  <b>
+                    {{invite.attendingVolunteerCount}}
+                    {{invite.attendingVolunteerCount > 1 ? "people have" : "person has"}}
+                    joined
+                  </b> this plan on ShiftControl.<br>
+                  Be one of them and make the event happen!
+                }
+              </div>
+
+              <div class="flex flex-col gap-sm justify-center items-center pt-lg">
+                @if (invite.inviteDto.type === "VOLUNTEER_JOIN") {
+                  <xsb-input-button action="success" content="Join Event as Volunteer" (xsbClick)="joinShiftPlan(invite)" name="onboarding-join-planner" />
+                } @else {
+                  <xsb-input-button action="success" content="Join Event as Planner" (xsbClick)="joinShiftPlan(invite)" name="onboarding-join-planner" />
+                }
+              </div>
+            }
+          }
+        }
+      </div>
+    }
+    @else if(invite === "INVALID") {
+      <div class="card flex flex-col gap-md">
+        <div class="flex gap-sm">
+          <h1 class="signature-gradient-font grow pr-lg">Invalid Invite</h1>
+        </div>
+
+        <div class="max-w-[30rem]">
+          The invite link you used is invalid.<br> Please ask for a new invite from an event organizer.
+        </div>
+
+        <div class="flex flex-col gap-sm justify-center items-center pt-lg">
+            <xsb-input-button class="w-fit" action="normal" content="Go Home" [preventDefault]="false" routerLink="/" name="onboarding-home" />
+        </div>
+
+      </div>
+    }
+  }
+
+
+</div>

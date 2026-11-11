@@ -25,6 +25,7 @@ class EventServiceTest {
     private static final Instant START = Instant.parse("2026-05-12T07:00:00Z");
     private static final Instant END = Instant.parse("2026-05-12T22:00:00Z");
 
+    @Mock at.control.shiftcontrol.eventcatalog.audit.CatalogAudit audit;
     @Mock
     private EventRepository eventRepository;
 

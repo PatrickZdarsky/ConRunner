@@ -1,0 +1,69 @@
+<div class="page">
+
+  <div class="page-bg noise">
+
+  </div>
+
+  <!-- header area with title, profile link and breadcrumbs -->
+  <div class="header">
+
+    <!-- breadcrumb navigation items -->
+    <div class="breadcrumbs">
+
+      @for (crumb of (breadcrumbs$ | async); track crumb; let i = $index) {
+        <div class="breadcrumb" [routerLink]="crumb.getFullHref()">
+          {{crumb.name}}
+        </div>
+      }
+
+    </div>
+
+    <!-- header in the middle -->
+    <div class="title signature-gradient-font">
+      <h1 class="compact">{{pageName$ | async}}</h1>
+    </div>
+
+    <!-- quick links at the right side -->
+    <div class="links">
+
+      <!-- calendar -->
+      @if (calendarLink$ | async; as link) {
+        <div class="calendar" [routerLink]="link">
+          <fa-icon [icon]="icons.calendar" />
+        </div>
+      }
+
+      <!-- notifications -->
+      @if (unseenNotificationCount$ | async; as unseen) {
+        <div class="notifications" routerLink="notifications" [ngClass]="unseen.count > 0 ? 'unseen' : 'idle'">
+          <span class="icon"><fa-icon [icon]="icons.notification" /></span>
+          <span class="count">{{unseen.count}}</span>
+        </div>
+      }
+
+      <!-- user acc display -->
+      @if (profile$ | async; as profile) {
+        @if(profile !== null) {
+          <div
+            class="profile"
+            routerLink="/me"
+            [attr.aria-label]="profile.displayName"
+            [title]="profile.displayName"
+          >
+            @if (profile.imageUrl) {
+              <img class="profile-image" [src]="profile.imageUrl" [alt]="profile.displayName">
+            } @else {
+              <span class="font-bold uppercase text-white">{{profile.initials}}</span>
+            }
+          </div>
+        }
+      }
+
+    </div>
+  </div>
+
+  <!-- content area to be projected -->
+  <div class="content overflow-auto">
+    <ng-content></ng-content>
+  </div>
+</div>

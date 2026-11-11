@@ -1,0 +1,17 @@
+<div class="card flex flex-col gap-md">
+  <h1 class="signature-gradient-font">Audit Log</h1>
+  <div class="flex gap-md">
+    <xsb-input-text #module placeholder="Module" [formControl]="form.controls.module" [xsb-typed]="[module, form.controls.module]" />
+    <xsb-input-text #action placeholder="Action" [formControl]="form.controls.action" [xsb-typed]="[action, form.controls.action]" />
+  </div>
+  @if (page$ | async; as page) {
+    @for (event of page.items ?? []; track event.id) {
+      <div class="border-b py-sm"><small>{{event.occurredAt | date:'short'}} · {{event.module}} · {{event.action}}</small><p>{{event.summary}}</p><small>{{event.actorLabel}}</small></div>
+    } @empty { <p>No audit entries found.</p> }
+    <div class="flex gap-md">
+      <xsb-input-button content="Previous" size="text" [lock]="form.controls.page.value <= 0" (xsbClick)="form.controls.page.setValue(form.controls.page.value - 1)" />
+      <span>Page {{form.controls.page.value + 1}}</span>
+      <xsb-input-button content="Next" size="text" [lock]="(form.controls.page.value + 1) * 50 >= (page.total ?? 0)" (xsbClick)="form.controls.page.setValue(form.controls.page.value + 1)" />
+    </div>
+  }
+</div>

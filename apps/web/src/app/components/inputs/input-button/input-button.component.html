@@ -1,0 +1,54 @@
+@if (size === "text") {
+  <div class="flex flex-row items-center gap-sm ">
+    @if (icon && !lock) {
+      <fa-icon [icon]="icon" class="opacity-50" [ngClass]="{
+      'text-text-danger' : action === 'danger',
+      'text-text-success' : action === 'success',
+      'text-default' : action === 'normal',
+    }" />
+    }
+    <input [type]="type" class="" [ngClass]="{
+    'cursor-not-allowed opacity-60' : lock,
+
+    'text-framing-default_danger' : action === 'danger',
+    'text-text-success' : action === 'success',
+    'text-default' : action === 'normal',
+
+    'cursor-pointer transition-all opacity-100 hover:opacity-80 underline' : !lock
+  }" (click)="clicked($event)" [name]="name" tabindex="0" [value]="content" />
+  </div>
+}
+
+@else {
+  <div class="w-full flex flex-row items-center cursor-pointer --hover:scale-95 --active:scale-[98%] transition-all
+   border-ctr rounded-[1rem]" (click)="clicked($event)" tabindex="0" (keydown)="button.click()" [ngClass]="{
+      'pointer-events-none opacity-60' : lock,
+
+      'border-framing-default_danger bg-gradient_item_danger hover:border-framing-highlight_danger' : action === 'danger',
+      'border-framing-default_success bg-gradient_item_success hover:border-framing-highlight_success' : action === 'success',
+      'border-framing-item bg-gradient_item focus-within:border-framing-highlight hover:border-framing-highlight' : action === 'normal',
+
+      'py-[.6rem] px-[1.2rem] gap-md font-semibold' : size === 'regular',
+      'py-[.4rem] px-[1rem] gap-sm hover:bg-background-card active:brightness-125' : size === 'minimal',
+      'gap-[0px]' : content.length === 0
+    }">
+
+    @if (icon && !lock) {
+      <fa-icon [icon]="icon" [ngClass]="{
+      'text-text-danger' : action === 'danger',
+      'text-text-success' : action === 'success',
+      'text-default' : action === 'normal',
+    }" />
+    }
+
+    @if (lock && !disableLockIcon) {
+      <fa-icon class="animate-spin" [icon]="lockIcon" />
+    }
+
+    <input class="grow cursor-pointer" #button (click)="clicked($event)" [ngClass]="{
+    'w-0' : content.length === 0
+  }"
+           [type]="type" [name]="name" tabindex="0" [value]="content">
+  </div>
+}
+

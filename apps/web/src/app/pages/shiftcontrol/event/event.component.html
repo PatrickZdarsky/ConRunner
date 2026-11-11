@@ -1,0 +1,236 @@
+@if (event$ | async; as event) {
+
+  <!-- card grid -->
+  <div class="flex flex-row gap-lg">
+
+    <!-- event cards -->
+    <div class="flex flex-col gap-lg w-[min(100%,35rem)]">
+
+      <!-- overview card -->
+      <div class="card col-start-1 col-span-2 row-span-2 grid grid-columns-2 gap-lg h-fit">
+
+        <!-- info caption -->
+        <h1 class="col-start-1 row-start-1 compact signature-gradient-font">About the Event</h1>
+
+        <div class="col-start-2 row-start-1 row-span-2 flex flex-col gap-sm justify-self-end items-end">
+
+          <div class="badge w-fit"
+               tooltipMaxWidth="30ex"
+               [app-tooltip]="'Event period of ' + event.eventOverview.name"
+          >
+            <fa-icon [icon]="icons.date" />
+            {{event.eventOverview.startTime | date:"shortDate"}} - {{event.eventOverview.endTime | date:"shortDate"}}
+          </div>
+
+          <div class="badge"
+               tooltipMaxWidth="30ex"
+               [app-tooltip]="'Amount of Volunteers participating in this event'"
+          >
+            <fa-icon [icon]="icons.volunteers" />
+            {{event.overallEventStatistics.volunteerCount}} Volunteers
+          </div>
+          <div class="badge"
+               tooltipMaxWidth="30ex"
+               [app-tooltip]="'Total duration of shifts during this event'"
+          >
+            <fa-icon [icon]="icons.hour" />
+            {{event.overallEventStatistics.totalHours | number:"1.0-0"}} Shift Hours
+          </div>
+
+        </div>
+
+        <!-- properties -->
+        <p class="col-start-1 row-start-2 whitespace-pre-wrap">{{event.eventOverview.longDescription}}</p>
+
+        <!-- socials -->
+        @if (event.eventOverview.socialMediaLinks.length > 0) {
+
+          <div class="flex flex-row gap-md flex-wrap col-span-2 col-start-1 items-center">
+            @for(link of event.eventOverview.socialMediaLinks; track link.url) {
+              <a class="badge hint flex flex-row items-center gap-sm cursor-pointer no-underline" target="_blank" href="{{link.url}}">
+                <fa-icon class="text-lg leading-[.9]" [icon]="getSocialIcon(link)" />
+                <span>{{getSocialName(link)}}</span>
+              </a>
+            }
+          </div>
+        }
+
+        <!-- own role -->
+        <div class="col-span-2 min-w-0 flex flex-col gap-lg">
+          <hr>
+          <div class="flex flex-row flex-wrap gap-sm min-w-0">
+
+            @if (isPlatformAdmin$ | async) {
+              <div class="badge max-w-full"
+                   tooltipMaxWidth="30ex"
+                   [app-tooltip]="'As admin, you have platform-wide management access'"
+              >
+                <fa-icon [icon]="icons.userType" />
+                <span class="break-words">Administrator</span>
+              </div>
+            }
+
+            @if ((isPlannerInEvent$ | async) === true) {
+              <div class="badge max-w-full"
+                   tooltipMaxWidth="30ex"
+                   [app-tooltip]="'You are a planner and can manage some plans of this event'"
+              >
+                <fa-icon [icon]="icons.userType" />
+                <span class="break-words">Planner</span>
+              </div>
+            }
+            @else if ((isParticipantInEvent$ | async) === true) {
+              <div class="badge max-w-full"
+                   tooltipMaxWidth="30ex"
+                   [app-tooltip]="'You are volunteering for this event. Sign up to shifts in the calendar!'"
+              >
+                <fa-icon [icon]="icons.userType" />
+                <span class="break-words">Volunteer</span>
+              </div>
+            }
+
+            <!-- roles -->
+            @for (role of event.roles; track role.id) {
+              <div class="badge max-w-full"
+                   tooltipMaxWidth="30ex"
+                   [app-tooltip]="'You can sign up to positions that require the role ' + role.name"
+              >
+                <fa-icon [icon]="icons.role" />
+                <span class="break-words">{{role.name}}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (isPlatformAdmin$ | async) {
+        <!-- manage event -->
+        <div class="card interaction" routerLink="manage">
+
+          <!-- info -->
+          <h1>
+            <fa-icon [icon]="icons.event" class="icon" />
+            Manage Event
+          </h1>
+          <p>
+            Manage event details, locations and shift plans.
+          </p>
+
+        </div>
+      }
+
+      @if (isPlatformAdmin$ | async) {
+        @if (currentUserProfile$ | async; as profile) {
+          @if ((canJoinEventAsPlanner$ | async) === true || (canLeaveEventMembership$ | async) === true) {
+            <div class="card flex flex-col gap-md">
+              <h1>
+                <fa-icon [icon]="icons.userType" class="icon" />
+                Admin Participation
+              </h1>
+              <p>
+                Join this event as a planner to appear in planner and volunteer flows, or remove your event membership again afterwards.
+              </p>
+
+              <div class="flex flex-row flex-wrap gap-sm">
+                @if ((canJoinEventAsPlanner$ | async) === true) {
+                  <xsb-input-button
+                    action="success"
+                    content="Join Event as Planner"
+                    (xsbClick)="joinEventAsPlanner(event, profile)"
+                  />
+                }
+
+                @if ((canLeaveEventMembership$ | async) === true) {
+                  <xsb-input-button
+                    action="normal"
+                    content="Leave Event Membership"
+                    (xsbClick)="leaveEventMembership(event, profile)"
+                  />
+                }
+              </div>
+            </div>
+          }
+        }
+      }
+
+      @if ((canManageInEvent$ | async) === true) {
+        <!-- manage plans -->
+        <div class="card interaction" routerLink="plans">
+
+          <!-- info -->
+          <h1>
+            <fa-icon [icon]="icons.plan" class="icon" />
+            Planner Dashboard
+          </h1>
+          <p>
+            Manage shift plan invites, roles, shifts, and assignments.
+          </p>
+
+        </div>
+      }
+
+      @if ((isParticipantInEvent$ | async) === true) {
+        <!-- help page -->
+        <div class="card interaction" routerLink="volunteer">
+
+          <!-- info -->
+          <h1>
+            <fa-icon [icon]="icons.signedUp" class="icon" />
+            Volunteer Dashboard
+          </h1>
+          <p>
+            View your shifts and trade with other volunteers.
+          </p>
+
+        </div>
+      }
+
+      @if ((isParticipantInEvent$ | async) === true) {
+        <!-- help page -->
+        <div class="card interaction" routerLink="help">
+
+          <!-- info -->
+          <h1>
+            <fa-icon [icon]="icons.help" class="icon" />
+            Are you lost?
+          </h1>
+          <p>
+            View contact info and help.
+          </p>
+
+        </div>
+      }
+    </div>
+
+    <!-- volunteer cards -->
+    <div class="flex flex-col gap-lg">
+
+      <!-- rewards -->
+      @if ((isParticipantInEvent$ | async) === true){
+        <app-event-rewards [eventDashboard]="event" />
+      }
+
+      <!-- leaderboard -->
+      @if (leaderboard$ | async; as leaderboard) {
+        <app-event-leaderboard [leaderboard]="leaderboard ?? undefined"  />
+      }
+
+      <!-- calendar link card -->
+      <div class="card interaction spotlight" routerLink="calendar">
+        <h1>
+          <fa-icon [icon]="icons.calendar" class="icon" />
+          View Event Calendar
+        </h1>
+        <p>
+          @if ((canManageInEvent$ | async) === true){
+            Manage and explore the shifts of the event.
+          }
+          @else {
+            Explore your shifts in the event.
+          }
+        </p>
+      </div>
+
+    </div>
+  </div>
+}

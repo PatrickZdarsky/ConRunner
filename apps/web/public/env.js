@@ -1,0 +1,6 @@
+window.__SHIFTCONTROL_ENV__ = {
+  keycloakUrl: "KEYCLOAK_URL_PLACEHOLDER",
+  keycloakRealm: "KEYCLOAK_REALM_PLACEHOLDER",
+  keycloakClientId: "KEYCLOAK_CLIENT_ID_PLACEHOLDER",
+  apiBasePath: "API_BASE_PATH_PLACEHOLDER"
+};

@@ -1,0 +1,99 @@
+databaseChangeLog:
+  - changeSet:
+      id: audit-001-create-audit-entry
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: audit_entry
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: occurred_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: module
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: action
+                  type: VARCHAR(96)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject_type
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: previous_state
+                  type: VARCHAR(64)
+              - column:
+                  name: new_state
+                  type: VARCHAR(64)
+              - column:
+                  name: reason
+                  type: VARCHAR(1024)
+        - createIndex:
+            tableName: audit_entry
+            indexName: idx_audit_entry_subject_time
+            columns:
+              - column:
+                  name: subject_type
+              - column:
+                  name: subject_id
+              - column:
+                  name: occurred_at
+  - changeSet:
+      id: audit-002-history-contract
+      author: shiftcontrol
+      changes:
+        - sql:
+            sql: |
+              ALTER TABLE audit_entry ALTER COLUMN actor_user_id DROP NOT NULL;
+              ALTER TABLE audit_entry ALTER COLUMN subject_id DROP NOT NULL;
+              ALTER TABLE audit_entry ADD COLUMN actor_kind VARCHAR(16) NOT NULL DEFAULT 'HUMAN';
+              ALTER TABLE audit_entry ADD COLUMN actor_identifier VARCHAR(128);
+              ALTER TABLE audit_entry ADD COLUMN actor_label VARCHAR(255);
+              ALTER TABLE audit_entry ADD COLUMN subject_ref VARCHAR(128);
+              ALTER TABLE audit_entry ADD COLUMN subject_label VARCHAR(255);
+              ALTER TABLE audit_entry ADD COLUMN summary VARCHAR(512);
+              ALTER TABLE audit_entry ADD COLUMN correlation_id VARCHAR(128);
+              ALTER TABLE audit_entry ADD COLUMN result VARCHAR(32) NOT NULL DEFAULT 'SUCCESS';
+              ALTER TABLE audit_entry ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1;
+              UPDATE audit_entry SET subject_ref = subject_id::text, summary = action WHERE subject_ref IS NULL;
+              ALTER TABLE audit_entry ALTER COLUMN subject_ref SET NOT NULL;
+              ALTER TABLE audit_entry ALTER COLUMN summary SET NOT NULL;
+              ALTER TABLE audit_entry ADD CONSTRAINT audit_actor_check CHECK
+                ((actor_kind = 'HUMAN' AND actor_user_id IS NOT NULL) OR
+                 (actor_kind IN ('MACHINE', 'SYSTEM') AND actor_user_id IS NULL AND actor_identifier IS NOT NULL));
+              CREATE TABLE audit_entry_change (
+                entry_id UUID NOT NULL REFERENCES audit_entry(id) ON DELETE CASCADE,
+                ordinal INTEGER NOT NULL,
+                field_name VARCHAR(64) NOT NULL,
+                before_value VARCHAR(1024),
+                after_value VARCHAR(1024),
+                PRIMARY KEY (entry_id, ordinal)
+              );
+              CREATE INDEX idx_audit_entry_time ON audit_entry (occurred_at DESC, id DESC);
+              CREATE INDEX idx_audit_entry_actor_time ON audit_entry (actor_user_id, occurred_at DESC, id DESC);
+              CREATE INDEX idx_audit_entry_action_time ON audit_entry (action, occurred_at DESC, id DESC);
+              CREATE INDEX idx_audit_entry_module_time ON audit_entry (module, occurred_at DESC, id DESC);
+              CREATE INDEX idx_audit_entry_subject_ref_time ON audit_entry (subject_type, subject_ref, occurred_at DESC, id DESC);

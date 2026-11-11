@@ -1,0 +1,64 @@
+<div class="contents" [id]="name" [attr.value]="value?.toString()">
+
+  <!-- select anchor -->
+  @if (!disguise) {
+    <div tabindex="0" role="button"
+         class="flex gap-lg items-center cursor-pointer transition-all py-xs px-sm rounded-md select-none
+         border-framing-item bg-background-item active:border-framing-highlight
+    hover:border-framing-highlight focus-within:border-framing-highlight"
+         [xsb-flyout]="optionsFlyout" [ngClass]="{
+      'border-ctr' : border,
+      'pointer-events-none opacity-60' : disabled
+    }">
+
+      <!-- icon -->
+      @if (icon !== undefined) {
+        <fa-icon [icon]="icon" />
+      }
+
+      <!-- value and arrow -->
+      <div class="grow flex gap-lg items-center">
+        <div class="grow">{{currentValueName}}</div>
+        @if (!valid) {
+          <fa-icon [icon]="errorIcon" class="text-text-danger" />
+        }
+        <fa-icon [icon]="caretDownIcon" class="opacity-50" />
+      </div>
+
+    </div>
+  } @else {
+    {{currentValueName}}
+  }
+
+  <!-- options flyout -->
+  <xsb-flyout #optionsFlyout>
+    <div class="flex flex-col gap-xs max-h-56 overflow-y-auto select-none" role="list">
+
+      <!-- option items -->
+      @for (option of allOptions; track option) {
+        <div role="option" [attr.aria-selected]="comparatorFn(value,option.value)"
+               (click)="selectValue(option.value)" (keyup)="selectValue(option.value)" tabindex="0"
+               class="flex gap-md items-center cursor-pointer hover:opacity-100" [ngClass]="{
+          'opacity-100' : comparatorFn(value,option.value),
+          'opacity-50' : !comparatorFn(value,option.value)
+        }">
+
+          <!-- active icon -->
+          <fa-icon [icon]="circleCheckIcon" class="text-sm"
+                   [ngClass]="{'opacity-0' : !comparatorFn(value,option.value), 'opacity-50' : comparatorFn(value,option.value)}" />
+
+          <!-- display name -->
+          <div>
+            {{option.name}}
+          </div>
+
+        </div>
+      }
+
+      @if (allOptions.length === 0) {
+        <span>No options available</span>
+      }
+    </div>
+  </xsb-flyout>
+
+</div>

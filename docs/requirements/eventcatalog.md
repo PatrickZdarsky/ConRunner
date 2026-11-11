@@ -65,7 +65,7 @@ than take over their catalogue identity.
   the event catalogue permanently owns editable schedule placement.
 - The current `rewardPointsRedeemUrl` event field is legacy descriptive compatibility metadata. It
   is not a reward redemption workflow, balance authority, or authorization mechanism. Future
-  redemption rules and history are owned by `shift.reward` under ADR-0001.
+  redemption rules and history remain within the cohesive `shift` module under ADR-0001.
 
 ## Open questions
 

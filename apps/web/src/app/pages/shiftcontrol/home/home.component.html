@@ -1,0 +1,26 @@
+<!-- intro and event card list -->
+<div class="w-[min(100%,70rem)] flex flex-row gap-md flex-wrap">
+
+  <div class="basis-full">
+    <div class="card w-fit flex flex-col gap-md" >
+      <h1 class="signature-gradient-font">Welcome to ShiftControl, {{name$ | async}}!</h1>
+      <span>
+        @if (isAdmin$ | async) {
+          You are an Administrator and have full management access, but cannot sign up to shifts.<br>
+          Choose an event or one of the features to get started!
+        } @else {
+          Thank you for volunteering!<br>
+          Upcoming events will be listed here - meanwhile, you can explore all your events in the list.<br>
+          To join an event, ask an event planner for an invitation link!
+        }
+      </span>
+    </div>
+  </div>
+
+  @for (card of cards$ | async; track card) {
+    <div class="card interaction" [ngClass]="card.spotlight ? 'spotlight' : ''" [routerLink]="card.href">
+      <h1>{{card.title}}</h1>
+      <span>{{card.content}}</span>
+    </div>
+  }
+</div>

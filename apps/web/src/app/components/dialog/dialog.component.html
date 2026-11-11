@@ -1,0 +1,60 @@
+<ng-template cdkPortal>
+  <div [ngClass]="{
+    'border-framing-card bg-[linear-gradient(180deg,_rgb(13_13_20)_0%,rgb(13_14_22)_100%)]' : action === 'normal',
+    'border-framing-default_danger shadow-inner shadow-framing-item_danger bg-background-card_danger' : action === 'danger',
+    'border-framing-default_success shadow-inner shadow-shadow-item_success bg-background-card_success' : action === 'success',
+    'h-[calc(90vh-(2*21px))] w-[calc(95vw-(2*21px))]' : maxSize
+  }"
+    class="border-ctr rounded-lg p-lg flex flex-col gap-md
+">
+
+    <!-- header -->
+    <div class="grid grid-cols-[5rem_1fr__2rem_2rem] place-content-center justify-between  border-framing-card" [ngClass]="{
+      'border-b-ctr': bodyStyle === 'plain'
+    }">
+
+      <span></span>
+
+      <!-- title -->
+      <div class="text-lg font-bold grow text-center">
+        <ng-content select="[dialog-header]"></ng-content>
+      </div>
+
+      <!-- expand -->
+      @if (expandUrl !== undefined) {
+        <a [routerLink]="expandUrl" class="opacity-60 hover:opacity-100">
+          <fa-icon [icon]="icons.expand" />
+        </a>
+      }
+
+      <!-- close -->
+      <div class="opacity-60 hover:opacity-100 cursor-pointer justify-self-end text-[1.4rem] leading-4 col-start-4" tabindex="0"
+        (keydown)="closeDialog.next('close')" (click)="closeDialog.next('close')">
+        <fa-icon [icon]="icons.close" />
+      </div>
+    </div>
+
+    <!-- body -->
+    <div class="grow overflow-auto" [ngClass]="{
+      'card': bodyStyle === 'card'
+    }">
+      <ng-content select="[dialog-body]"></ng-content>
+    </div>
+
+    <!-- confirmation -->
+    @if (success !== undefined || danger !== undefined) {
+
+      <div class="flex flex-row justify-center gap-xl">
+
+        @if(success !== undefined) {
+          <xsb-input-button action="success" (xsbClick)="closeDialog.next('success')" [content]="success" />
+        }
+        @if(danger !== undefined) {
+          <xsb-input-button action="danger" (xsbClick)="closeDialog.next('danger')"  [content]="danger" />
+        }
+      </div>
+
+    }
+
+  </div>
+</ng-template>

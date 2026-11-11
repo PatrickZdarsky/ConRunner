@@ -1,0 +1,3 @@
+const SELECTORS_EVENTS_LIST = {
+};
+export default SELECTORS_EVENTS_LIST;

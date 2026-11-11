@@ -38,6 +38,19 @@ entities, or recompute domain authorization from raw tables.
 - External email/push work is an outbox job. A request is committed atomically with the domain
   change that requires it.
 
+## Notification language
+
+Notification text is stored in resource bundles owned by communications. The notification language
+preference is available at `GET` and `PUT /api/v1/me/notification-preferences/language`; the PUT
+body is `{"language":"en"}`, `{"language":"de"}`, or `{"language":"en-x-uwu"}` for the
+furry convention variant. Users without a preference receive English.
+Requests are rendered using the recipient's language when the worker processes them; the resulting
+history entry and any queued email retain that language even if the preference later changes.
+Existing history remains unchanged, and old queued requests still render with their available context.
+Preference labels use the same language setting. Adding a language requires a complete
+`notification-messages_<language>.properties` bundle and adding it to the supported-language set;
+the `en-x-uwu` variant uses `notification-messages-uwu.properties`.
+
 ## Open questions
 
 | ID | Question                                                                                                                                                                                                                                                                                                | Decision needed by |

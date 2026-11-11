@@ -2,6 +2,7 @@ package at.control.shiftcontrol.eventcatalog.event;
 
 import java.time.Instant;
 import java.util.List;
+import at.control.shiftcontrol.eventcatalog.audit.CatalogAudit;
 import java.util.UUID;
 
 import at.control.shiftcontrol.eventcatalog.error.EventCatalogConflictException;
@@ -13,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 public class EventService {
+    private final CatalogAudit audit;
     private final EventRepository eventRepository;
 
-    public EventService(EventRepository eventRepository) {
+    public EventService(EventRepository eventRepository, CatalogAudit audit) {
+        this.audit = audit;
         this.eventRepository = eventRepository;
     }
 
@@ -30,7 +33,9 @@ public class EventService {
 
         CatalogEventEntity event = new CatalogEventEntity();
         apply(event, data);
-        return toDetails(eventRepository.save(event));
+        event = eventRepository.save(event);
+        audit.record("event", "created", event.getId(), null, snapshot(event));
+        return toDetails(event);
     }
 
     @Transactional
@@ -42,8 +47,11 @@ public class EventService {
         if (!event.getName().equalsIgnoreCase(data.name()) && eventRepository.existsByNameIgnoreCase(data.name())) {
             throw new EventCatalogConflictException("An event with this name already exists");
         }
+        var before = snapshot(event);
         apply(event, data);
-        return toDetails(eventRepository.save(event));
+        event = eventRepository.save(event);
+        audit.record("event", "updated", event.getId(), before, snapshot(event));
+        return toDetails(event);
     }
 
     public EventDetails get(UUID eventId) {
@@ -70,7 +78,9 @@ public class EventService {
 
     @Transactional
     public void delete(UUID eventId) {
-        eventRepository.delete(getEntity(eventId));
+        var event = getEntity(eventId);
+        audit.record("event", "deleted", event.getId(), snapshot(event), null);
+        eventRepository.delete(event);
     }
 
     private CatalogEventEntity getEntity(UUID eventId) {
@@ -79,6 +89,10 @@ public class EventService {
         }
         return eventRepository.findById(eventId)
             .orElseThrow(() -> new EventCatalogNotFoundException("Event not found: " + eventId));
+    }
+
+    private static CatalogAudit.Snapshot snapshot(CatalogEventEntity e) {
+        return new CatalogAudit.Snapshot(e.getName(), CatalogAudit.value(e.getStartTime()), CatalogAudit.value(e.getEndTime()), null, null);
     }
 
     private static void apply(CatalogEventEntity event, EventData data) {

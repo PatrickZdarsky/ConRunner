@@ -1,0 +1,21 @@
+@if (text !== undefined && text.length > 0) {
+  <div
+    @tooltip
+    style="box-shadow: 0px 0px 10px 3px rgba(0,0,0,0.75);"
+    [style.max-width]="maxWidth"
+    class="block pointer-events-none px-sm py-xs bg-background-base bg-gradient_item_hint border-framing-highlight_hint text-white text-sm rounded-lg
+    border-ctr relative whitespace-pre-line text-center"
+  >
+
+    <!-- content -->
+    {{text}}
+
+    <!-- arrow -->
+    <div class="top-full absolute left-[50%] translate-x-[-50%]
+    w-0 h-0 border-t-[6px] border-framing-highlight_hint border-l-transparent border-r-transparent border-l-[6px] border-r-[6px]"></div>
+
+    <!-- arrow "fill" -->
+    <div class="top-full absolute -translate-y-[1.2px] left-[50%] translate-x-[-50%]
+    w-0 h-0 border-t-[6px] border-background-item_hint border-l-transparent border-r-transparent border-l-[6px] border-r-[6px]"></div>
+  </div>
+}

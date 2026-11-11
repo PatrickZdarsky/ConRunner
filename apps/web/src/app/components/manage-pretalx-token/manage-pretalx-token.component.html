@@ -1,0 +1,89 @@
+@if (manageData$ | async; as manageData) {
+
+  <div class="card flex flex-col gap-lg h-fit" [ngClass]="{
+    'success': manageData.token === undefined,
+  }">
+    <div class="flex flex-row gap-sm items-center">
+      @if (manageData.token === undefined){
+        <div class="badge success w-fit">
+          <fa-icon [icon]="icons.rewardShare" />
+          Add Pretalx Sync Config
+        </div>
+      }
+      @else {
+        <div class="badge hint w-fit">
+          <fa-icon [icon]="icons.rewardShare" />
+          Pretalx Sync Config
+        </div>
+      }
+
+      <span class="grow"></span>
+
+      @if (manageData.token === undefined) {
+        <xsb-input-button content="Add" size="text" (xsbClick)="create()" />
+      }
+      @else {
+        <xsb-input-button content="Delete" size="text" (xsbClick)="showDeleteConfirm = true" />
+      }
+
+    </div>
+
+    <div class="grid grid-cols-[20rem] gap-md">
+      @if (manageData.token === undefined) {
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.pretalxKey" class="pr-sm" />Pretalx API Key</small>
+          <label for="pretalx-sync-manage-key">An API Key obtained from the pretalx instance with desired event scope</label>
+          <xsb-input-text #token
+                          [formControl]="form.controls.token"
+                          [xsb-typed]="[token, form.controls.token]"
+                          name="pretalx-sync-manage-key" placeholder="API Key"
+          />
+        </div>
+        <div class="flex flex-col gap-xs">
+          <small><fa-icon [icon]="icons.pretalxHost" class="pr-sm" />Pretalx Host</small>
+          <label for="pretalx-sync-manage-host">Host of the pretalx instance, eg. https://pretalx.com</label>
+          <xsb-input-text #host
+                          [formControl]="form.controls.host"
+                          [xsb-typed]="[host, form.controls.host]"
+                          name="pretalx-sync-manage-host" placeholder="Pretalx Host"
+          />
+        </div>
+      }
+      @else {
+
+        <div class="flex flex-col gap-xs ">
+          <small><fa-icon [icon]="icons.pretalxKey" class="pr-sm" />API Key</small>
+          <span class="break-all">{{manageData.token.apiKey}}</span>
+        </div>
+
+        <div class="flex flex-col gap-xs ">
+          <small><fa-icon [icon]="icons.pretalxHost" class="pr-sm" />Pretalx Host</small>
+          <span>{{manageData.token.pretalxHost}}</span>
+        </div>
+
+        <div class="flex flex-col gap-xs">
+          <small class="col-span-2"><fa-icon [icon]="icons.event" class="pr-sm" />Synced Events</small>
+          <span>{{manageData.token.accessibleEvents.join(", ")}}</span>
+        </div>
+      }
+    </div>
+
+
+  </div>
+
+  @if (showDeleteConfirm && manageData.token !== undefined){
+    <xsb-dialog action="danger" danger="Delete API Key" (closeDialog)="showDeleteConfirm = false; $event === 'danger' && delete(manageData.token)">
+      <ng-container dialog-header>
+        <h1>Delete Pretalx API Key</h1>
+      </ng-container>
+
+      <ng-container dialog-body>
+        <p>
+          Are you sure you want to delete this API Key?<br>
+          All synced data is retained and kept in read-only state. When another key for<br>
+          the same event is added, it will start synchronization again.
+        </p>
+      </ng-container>
+    </xsb-dialog>
+  }
+}

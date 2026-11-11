@@ -1,0 +1,74 @@
+
+<!-- schedules by day -->
+<div class="flex flex-col gap-md grow overflow-auto">
+
+  @if(shifts$ | async; as shifts) {
+    @for (day of shifts.entries(); track day[0]) {
+
+      <!-- date separator -->
+      <small class="col-span-2">{{day[0] | date:"longDate"}}</small>
+
+      @for (shift of day[1]; track shift.shift.id) {
+        <div
+          class="card compact interaction grid grid-cols-2 gap-sm"
+          [ngClass]="{
+             'spotlight' : isRequested(shift.shift)
+          }" [routerLink]="'/shifts/' + shift.shift.id"
+        >
+          <b>{{shift.shift.name}}</b>
+          <small class="justify-self-end" >{{shift.shift.startTime | date:"shortTime"}} - {{shift.shift.endTime | date:"shortTime"}}</small>
+
+          @if (showShiftDescription && shift.shift.shortDescription !== undefined && shift.shift.shortDescription.length > 0) {
+            <p class="col-span-2">
+              {{shift.shift.shortDescription}}
+            </p>
+          }
+
+          <!-- origin badges -->
+          @if (showShiftOrigin) {
+            <div class="flex gap-md col-span-2">
+              <div class="badge hint" [app-tooltip]="'The associated event\n of this shift'">
+                <fa-icon [icon]="icons.event" />
+                {{shift.originEvent.name}}
+              </div>
+              <div class="badge hint" [app-tooltip]="'The associated plan\n of this shift'">
+                <fa-icon [icon]="icons.plan" />
+                {{shift.originPlan.name}}
+              </div>
+            </div>
+          }
+
+          <!-- personal details badges -->
+          @if (showShiftPersonalDetails) {
+            <div class="flex gap-md col-span-2">
+              @if(isRequested(shift.shift)) {
+                <div class="badge hint" [app-tooltip]="'You have requested to be assigned.\nYou are not yet signed up!'">
+                  <fa-icon [icon]="icons.signupRequested" />
+                  Requested
+                </div>
+              }
+
+              @for(slot of getAssignedPositionSlots(shift.shift); track slot.id) {
+                <div class="badge" [app-tooltip]="'Your task in this shift'">
+                  <fa-icon [icon]="icons.position" />
+                  {{slot.name}}
+                </div>
+              }
+              @if (shift.shift.location !== undefined) {
+                <div class="badge" [app-tooltip]="'The location where this shift takes place'">
+                  <fa-icon [icon]="icons.location" />
+                  {{shift.shift.location.name}}
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if(shifts.size === 0) {
+      <span>Sign up to shifts to see them in your schedule.</span>
+    }
+  }
+
+</div>

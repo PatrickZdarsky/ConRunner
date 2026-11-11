@@ -1,0 +1,39 @@
+<div class="contents" [id]="name" [attr.value]="value?.toString()">
+
+  <!-- select anchor -->
+  @if (!disguise) {
+    <div tabindex="0" role="button"
+         class="flex items-center cursor-pointer transition-all select-none
+         border-framing-item bg-gradient_item active:border-framing-highlight
+    hover:border-framing-highlight focus-within:border-framing-highlight"
+         [ngClass]="{
+      'border-ctr' : border,
+      'pointer-events-none opacity-60' : disabled,
+            'rounded-2xl' : size === 'regular',
+            'rounded-lg' : size === 'minimal',
+    }">
+
+      @for (option of allOptions; track option.value) {
+
+        <button
+          [id]="name + '-option-' + option.value"
+          class=" transition-all"
+          (click)="selectValue(option.value)"
+          [ngClass]="{
+            'bg-gradient_badge' : option.value === value,
+            'hover:bg-framing-card' : option.value !== value,
+            'py-[.3rem] px-[.6rem] first:rounded-l-2xl last:rounded-r-2xl' : size === 'regular',
+            'py-[.1rem] px-[.4rem] first:rounded-l-lg last:rounded-r-lg' : size === 'minimal',
+          }"
+        >
+          {{option.name}}
+        </button>
+
+      }
+
+    </div>
+  } @else {
+    {{currentValueName}}
+  }
+
+</div>

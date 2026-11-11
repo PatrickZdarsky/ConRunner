@@ -1,0 +1,36 @@
+<div class="flex flex-col w-full gap-md items-center h-full overflow-y-auto">
+
+  @if ((notifications$ | async)?.length === 0) {
+    <h1 class="flex gap-md signature-gradient-font"><fa-icon [icon]="icons.noNotification" /> It's quiet for now</h1>
+    <span>No notifications available.</span>
+  } @else {
+    <xsb-input-button size="text" content="Clear History" class="pb-md" (xsbClick)="clearHistory()" />
+  }
+
+
+  @for (notification of notifications$ | async; track notification.notification.id) {
+    <div class="card compact w-[min(100%,30rem)]">
+      <div class="flex items-start pr-sm">
+        <h2 class="flex gap-md">
+          <fa-icon class="icon opacity-50" [icon]="icons.notification" />
+          {{notification.notification.title}}
+        </h2>
+
+        <small class="grow text-right">{{notification.notification.time | date:"short"}}</small>
+      </div>
+
+      <div class="flex items-start pr-sm gap-sm">
+        <p class="grow">{{notification.notification.notification}}</p>
+
+        @if (notification.tree !== undefined && notification.tree !== null) {
+          <a class="justify-self-end" [routerLink]="notification.tree">View</a>
+        }
+        @if (notification.notification.id !== undefined && notification.notification.id !== null) {
+          <xsb-input-button size="text" content="Delete" class="justify-self-end" (xsbClick)="clearNotification(notification.notification.id)" />
+        }
+      </div>
+    </div>
+  }
+</div>
+
+

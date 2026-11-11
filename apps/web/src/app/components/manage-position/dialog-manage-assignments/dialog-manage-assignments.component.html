@@ -1,0 +1,90 @@
+@if (manageAssignmentsParams$ | async; as params) {
+  <xsb-dialog
+    bodyStyle="card"
+    (closeDialog)="assignmentChanged.next(hasChanges)"
+  >
+
+    <ng-container dialog-header>
+      <h1 class="signature-gradient-font">
+        {{params.position.name}} Assignments
+      </h1>
+    </ng-container>
+
+    <ng-container dialog-body>
+
+      <div class="grid grid-cols-2 gap-lg gap-y-xl">
+
+        <div class="flex flex-col gap-sm col-start-1 row-start-1">
+          <small><fa-icon [icon]="icons.name" class="pr-sm" />Filter Names</small>
+          <xsb-input-text #filterName
+                          [formControl]="form.controls.filterName"
+                          [xsb-typed]="[filterName, form.controls.filterName]"
+                          name="position-assignments-name" placeholder="Volunteer name"
+          />
+        </div>
+
+        <div class="flex flex-col gap-sm col-start-2 row-start-1">
+          <small><fa-icon [icon]="icons.signedUp" class="pr-sm" />Filter State</small>
+          <xsb-input-multitoggle #filterType
+                          [formControl]="form.controls.filterType"
+                           class="w-fit"
+                          [xsb-typed]="[filterType, form.controls.filterType]"
+                          name="position-assignments-type" [options]="filterOptions"
+          />
+        </div>
+
+        <div class="col-span-2 grid grid-cols-[auto_1fr_auto] gap-sm items-center">
+          @if (filteredVolunteers$ | async; as volunteers) {
+            @for (item of volunteers; track item.volunteer.id) {
+
+              <!-- badge -->
+              @if(item.assignment !== undefined) {
+                @if (item.assignment.status === "AUCTION_REQUEST_FOR_UNASSIGN" || item.assignment.status === "AUCTION") {
+                  <div class="badge hint w-fit">
+                    <fa-icon [icon]="icons.requestedUnassign" />
+                    Requested Unassign
+                  </div>
+                }
+                @else if (item.assignment.status === "REQUEST_FOR_ASSIGNMENT") {
+                  <div class="badge hint w-fit">
+                    <fa-icon [icon]="icons.signupRequested" />
+                    Requested Assign
+                  </div>
+                }
+                @else {
+                  <div class="badge success w-fit">
+                    <fa-icon [icon]="icons.assigned" />
+                    Assigned
+                  </div>
+                }
+              } @else {
+                <div class="badge w-fit">
+                  <fa-icon [icon]="icons.unassigned" />
+                  Unassigned
+                </div>
+              }
+
+              <!-- name-->
+              <span>{{item.volunteer.name}}</span>
+
+              <!-- action -->
+              @if(item.assignment !== undefined && item.assignment.status !== "REQUEST_FOR_ASSIGNMENT") {
+                <xsb-input-button content="Unassign" size="text"
+                                  (xsbClick)="unassignVolunteer(item.assignment)" />
+              } @else {
+                <xsb-input-button content="Assign" size="text"
+                                  (xsbClick)="assignVolunteer(item.volunteer, params.position)" />
+              }
+            }
+
+            @if (volunteers.length === 0) {
+              <span class="col-span-3 text-center">No volunteers match the filter criteria.</span>
+            }
+          }
+        </div>
+
+      </div>
+    </ng-container>
+
+  </xsb-dialog>
+}

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: platform-001-websocket-ticket
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: platform_websocket_ticket
+            columns:
+              - column: {name: ticket_hash, type: VARCHAR(64), constraints: {primaryKey: true, nullable: false}}
+              - column: {name: recipient_id, type: UUID, constraints: {nullable: false}}
+              - column: {name: expires_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+              - column: {name: session_expires_at, type: TIMESTAMP WITH TIME ZONE, constraints: {nullable: false}}
+        - createIndex:
+            tableName: platform_websocket_ticket
+            indexName: ix_platform_websocket_ticket_expiry
+            columns:
+              - column: {name: expires_at}

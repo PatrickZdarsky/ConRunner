@@ -1,0 +1,71 @@
+<div class="card w-full h-fit grid grid-cols-2 gap-lg">
+
+  <h1 class="signature-gradient-font col-span-2">
+    <fa-icon class="icon" [icon]="icons.leaderboard" />
+    Community Leaderboard
+  </h1>
+
+  <span class="col-span-2 whitespace-pre-wrap">The leaderboard ranks volunteers based on their contributed hours.<br>{{statusMessage}}</span>
+
+  <!-- top 3 -->
+  <div class="flex flex-col gap-md justify-center items-center w-full">
+
+    <div
+      tooltipMaxWidth="30ex"
+      [app-tooltip]="'These are the top 3 volunteers with the highest contributed hours.'"
+      class="card compact success w-full grid grid-cols-[min-content_min-content_auto] gap-md gap-y-sm items-center"
+    >
+
+      @for (rank of ranksTop3; track rank) {
+        @switch (rank.rank) {
+          @case (1){
+            <span class="font-semibold opacity-60 text-yellow-500">#{{rank.rank}}</span>
+            <fa-icon [icon]="icons.leaderboardFirst" class="text-yellow-500" />
+          }
+          @case (2){
+            <span class="font-semibold opacity-60 text-gray-300">#{{rank.rank}}</span>
+            <fa-icon [icon]="icons.leaderboardPodium" class="text-gray-300" />
+          }
+          @default {
+            <span class="font-semibold opacity-60 text-amber-700">#{{rank.rank}}</span>
+            <fa-icon [icon]="icons.leaderboardPodium" class="text-amber-700" />
+          }
+        }
+        <div class="flex flex-col items-start">
+          <h2 class="m-0 flex gap-md items-center text-base">
+            {{rank.name}}
+
+            @if (rank.rank === ownRank?.rank) {
+              <small class="text-text-success">(You)</small>
+            }
+          </h2>
+          <span class="justify-self-start">{{rank.hours | number:'1.0-0'}} hours</span>
+        </div>
+      }
+
+      @if (ranksTop3.length === 0) {
+        <span class="col-span-3 text-center opacity-60">No podium ranks yet.</span>
+      }
+    </div>
+  </div>
+
+  <!-- 4-10 -->
+  <div
+    tooltipMaxWidth="30ex"
+    [app-tooltip]="'These are the volunteers ranked 4 to 10 based on their contributed hours.'"
+    class="card compact grid grid-cols-[min-content_auto_auto] gap-md gap-y-sm w-full h-full"
+  >
+    @for (rank of ranksRest; track rank) {
+      <span class="font-semibold opacity-60">#{{rank.rank}}</span>
+      <b class="m-0">{{rank.name}}</b>
+      <span class="justify-self-start pl-sm">5 hours</span>
+    }
+
+    @if (ranksRest.length === 0) {
+      <span class="col-span-3 text-center opacity-60">No further rankings yet.</span>
+    }
+  </div>
+
+
+
+</div>

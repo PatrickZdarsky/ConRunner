@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Source Sans 3' , sans-serif;
+  color: #c6cadf;
+}
+
+h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+
+.signature-gradient-font {
+  @apply signature-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.signature-gradient {
+  background: white;
+  background: linear-gradient(124deg, #c7cbfd 0%, #aea6f3 70%, #c7cbfd 100%);
+}
+
+:root {
+  --scrollbar-foreground: #232430;
+  --scrollbar-background: transparent;
+}
+
+/* Default styled scrollbars */
+body {
+  scrollbar-color: var(--scrollbar-foreground) var(--scrollbar-background);
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-foreground);
+  border-radius: 1rem;
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--scrollbar-background);
+  border-radius: 1rem;
+}
+
+/* Hidden scrollbars when .no-scrollbar is applied */
+.no-scrollbar {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* old Edge/IE */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.overlay-container {
+  position: fixed;
+  top: .8rem;
+  right: .8rem;
+  z-index: 1000;
+}

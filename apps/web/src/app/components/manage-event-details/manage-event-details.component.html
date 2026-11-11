@@ -1,0 +1,102 @@
+@if (manageData$ | async; as manageData) {
+
+  <!-- manage details -->
+  <div class="grid grid-cols-[25rem_25rem] gap-x-xl gap-y-md w-fit h-fit">
+
+    <div class="flex flex-col gap-sm col-start-1 row-start-1">
+      <small><fa-icon [icon]="icons.name" class="pr-sm" />Event Name</small>
+      <label for="event-manage-name">Official name of the event</label>
+      <xsb-input-text #name
+                      [formControl]="form.controls.name"
+                      [xsb-typed]="[name, form.controls.name]"
+                      name="event-manage-name" placeholder="Event name"
+      />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-2 row-start-1">
+      <small><fa-icon [icon]="icons.shortDescription" class="pr-sm" />Caption</small>
+      <label for="event-manage-caption">Overview of what the event is about</label>
+      <xsb-input-text #shortDescription
+                      [formControl]="form.controls.shortDescription"
+                      [xsb-typed]="[shortDescription, form.controls.shortDescription]"
+                      name="event-manage-caption" placeholder="Event caption"
+      />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-1 row-start-2">
+      <small><fa-icon [icon]="icons.startDate" class="pr-sm" />Start Date</small>
+      <label for="event-manage-from">First whole day, in your timezone</label>
+      <xsb-input-date #startDate name="event-manage-from"
+                      [formControl]="form.controls.startDate"
+                      [xsb-typed]="[startDate, form.controls.startDate]" />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-2 row-start-2">
+      <small><fa-icon [icon]="icons.endDate" class="pr-sm" />End Date</small>
+      <label for="event-manage-to">Last whole day, in your timezone </label>
+      <xsb-input-date #endDate name="event-manage-to"
+                      [formControl]="form.controls.endDate"
+                      [xsb-typed]="[endDate, form.controls.endDate]" />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-1 row-start-3">
+      <small><fa-icon [icon]="icons.link" class="pr-sm" />Social Links</small>
+      <label for="event-manage-socials">List of links to social media or websites, separated by a comma</label>
+      <xsb-input-text #socials
+                      [formControl]="form.controls.socials"
+                      [xsb-typed]="[socials, form.controls.socials]"
+                      name="event-manage-socials" placeholder="Event social media links"
+      />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-2 row-start-3">
+      <small><fa-icon [icon]="icons.link" class="pr-sm" />Rewards URL</small>
+      <label for="event-manage-rewards">A URL where users can redeem points and/or view possible rewards</label>
+      <xsb-input-text #rewardsUrl
+                      [formControl]="form.controls.rewardsUrl"
+                      [xsb-typed]="[rewardsUrl, form.controls.rewardsUrl]"
+                      name="event-manage-rewards" placeholder="Rewards URL"
+      />
+    </div>
+
+    <div class="flex flex-col gap-sm col-start-1 row-start-4 col-span-2">
+      <small><fa-icon [icon]="icons.longDescription" class="pr-sm" />Description</small>
+      <label for="event-manage-description">Detailed description of event highlights and what visitors of the event will expect</label>
+      <xsb-input-text #longDescription
+                      [formControl]="form.controls.longDescription"
+                      type="area"
+                      [xsb-typed]="[longDescription, form.controls.longDescription]"
+                      name="event-manage-description" placeholder="Event description"
+      />
+    </div>
+
+    <div class="col-span-2 flex gap-x-lg items-center pt-md">
+      @if (manageData.event === undefined){
+        <xsb-input-button content="Create Event" action="success" (xsbClick)="create()" />
+        <small>or</small>
+        <xsb-input-button content="Import Event" action="success" (xsbClick)="import()" />
+        <xsb-input-button content="Download Event Template" (xsbClick)="downloadTemplate()" />
+      }
+      @else {
+        <xsb-input-button content="Update Event" action="success" (xsbClick)="update(manageData.event)" />
+        <xsb-input-button content="Delete Event" action="danger" (xsbClick)="showEventDeleteConfirm = true" />
+
+        @if (showEventDeleteConfirm){
+          <xsb-dialog action="danger" danger="Delete Event" (closeDialog)="showEventDeleteConfirm = false; $event === 'danger' && delete(manageData.event)">
+            <ng-container dialog-header>
+              <h1>Delete Event</h1>
+            </ng-container>
+
+            <ng-container dialog-body>
+              <p>
+                Are you sure you want to delete this event?<br>
+                This cannot be made undone.<br>
+                All associated data (activities, plans) will be deleted.
+              </p>
+            </ng-container>
+          </xsb-dialog>
+        }
+      }
+    </div>
+  </div>
+}
