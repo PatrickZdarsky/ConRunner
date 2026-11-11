@@ -1,6 +1,7 @@
 package at.control.shiftcontrol.communications.request;
 
 import at.control.shiftcontrol.communications.api.NotificationContext;
+import at.control.shiftcontrol.communications.preference.NotificationLanguageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,15 +14,19 @@ import java.time.Instant;
 class NotificationRequestWorker {
     private static final Logger log = LoggerFactory.getLogger(NotificationRequestWorker.class);
     private final NotificationRequestProcessingService processing;
+    private final NotificationLanguageService languages;
 
-    NotificationRequestWorker(NotificationRequestProcessingService processing) { this.processing = processing; }
+    NotificationRequestWorker(NotificationRequestProcessingService processing, NotificationLanguageService languages) {
+        this.processing = processing;
+        this.languages = languages;
+    }
 
     @Scheduled(fixedDelayString = "${shiftcontrol.communications.processing-delay:PT5S}")
     void process() {
         for (var request : processing.claim(25, Duration.ofMinutes(2))) {
             try {
                 var context = NotificationContext.decode(request.templateData());
-                var template = NotificationTemplates.render(request.type(), context);
+                var template = NotificationTemplates.render(request.type(), context, languages.languageFor(request.recipientId()));
                 String link = NotificationLinks.forRequest(request.type(), context.target());
                 processing.completeWithHistory(request, template.title(), template.body(), link);
             } catch (RuntimeException error) {

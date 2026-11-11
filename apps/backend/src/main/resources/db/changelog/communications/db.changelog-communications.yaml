@@ -223,3 +223,12 @@ databaseChangeLog:
                   type: BOOLEAN
                   defaultValueBoolean: true
                   constraints: {nullable: false}
+  - changeSet:
+      id: communications-010-notification-language
+      author: shiftcontrol
+      changes:
+        - createTable:
+            tableName: communications_notification_language
+            columns:
+              - column: {name: recipient_id, type: UUID, constraints: {primaryKey: true, nullable: false}}
+              - column: {name: language, type: VARCHAR(16), constraints: {nullable: false}}
