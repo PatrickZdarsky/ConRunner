@@ -8,12 +8,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/me/notification-preferences/in-app")
+@RequestMapping(value = "/api/v1/me/notification-preferences/in-app", produces = "application/json")
 class InAppPreferenceEndpoint {
     private final InAppPreferenceService preferences;
     InAppPreferenceEndpoint(InAppPreferenceService preferences) { this.preferences = preferences; }
     record Preference(Boolean enabled) {}
 
+    @io.swagger.v3.oas.annotations.Operation(operationId = "getInAppPreference")
     @GetMapping("/{type}")
     Preference get(Authentication authentication, @PathVariable String type) {
         var id = userId(authentication);
@@ -21,6 +22,7 @@ class InAppPreferenceEndpoint {
         catch (IllegalArgumentException e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage()); }
     }
 
+    @io.swagger.v3.oas.annotations.Operation(operationId = "updateInAppPreference")
     @PutMapping("/{type}")
     Preference put(Authentication authentication, @PathVariable String type, @RequestBody Preference preference) {
         if (preference == null || preference.enabled() == null)

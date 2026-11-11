@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/v1/realtime")
+@RequestMapping(value = "/api/v1/realtime", produces = "application/json")
 class WebSocketTicketEndpoint {
     private final WebSocketTicketService tickets;
     private final RealtimeUserAccess users;

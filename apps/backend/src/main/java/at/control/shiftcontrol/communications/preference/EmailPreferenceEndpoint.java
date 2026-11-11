@@ -8,12 +8,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/me/notification-preferences/email")
+@RequestMapping(value = "/api/v1/me/notification-preferences/email", produces = "application/json")
 class EmailPreferenceEndpoint {
     private final EmailPreferenceService preferences;
     EmailPreferenceEndpoint(EmailPreferenceService preferences) { this.preferences = preferences; }
     record Preference(Boolean enabled) {}
 
+    @io.swagger.v3.oas.annotations.Operation(operationId = "getEmailPreference")
     @GetMapping("/{type}")
     Preference get(Authentication authentication, @PathVariable String type) {
         var id = userId(authentication);
@@ -21,6 +22,7 @@ class EmailPreferenceEndpoint {
         catch (IllegalArgumentException e) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage()); }
     }
 
+    @io.swagger.v3.oas.annotations.Operation(operationId = "updateEmailPreference")
     @PutMapping("/{type}")
     Preference put(Authentication authentication, @PathVariable String type, @RequestBody Preference preference) {
         if (preference == null || preference.enabled() == null)

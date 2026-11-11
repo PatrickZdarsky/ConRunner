@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/me/notification-preferences")
+@RequestMapping(value = "/api/v1/me/notification-preferences", produces = "application/json")
 class NotificationPreferenceEndpoint {
     private final EmailPreferenceService email;
     private final InAppPreferenceService inApp;
@@ -21,8 +21,10 @@ class NotificationPreferenceEndpoint {
         this.inApp = inApp;
         this.languages = languages;
     }
+    @io.swagger.v3.oas.annotations.media.Schema(name = "NotificationTypePreference")
     record Preference(String type, String label, boolean inApp, boolean email) {}
 
+    @io.swagger.v3.oas.annotations.Operation(operationId = "listNotificationPreferences")
     @GetMapping
     List<Preference> list(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()

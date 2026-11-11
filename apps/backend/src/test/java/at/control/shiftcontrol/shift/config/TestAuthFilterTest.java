@@ -25,7 +25,7 @@ class TestAuthFilterTest {
             var actor = (AuthenticatedActor) authentication.getPrincipal();
             assertThat(actor.userId()).contains(userId);
             assertThat(actor.name()).isEqualTo("alice");
-            assertThat(actor.authorities()).extracting("authority").containsExactly(Authorities.PLATFORM_ADMIN_ROLE, "ADMIN");
+            assertThat(actor.authorities()).extracting("authority").containsExactly(Authorities.PLATFORM_ADMIN_ROLE);
         });
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();

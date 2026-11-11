@@ -21,3 +21,8 @@ identity:
   bootstrap-platform-admins:
     - issuer: http://localhost:8180/realms/shiftcontrol
       subject: b0eb6e1e-cb81-4d1e-b093-179d30420001
+
+shiftcontrol:
+  platform:
+    realtime:
+      allowed-origins: http://localhost:4200

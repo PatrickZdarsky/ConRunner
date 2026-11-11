@@ -29,7 +29,7 @@ public class TestAuthFilter extends OncePerRequestFilter {
                 .orElse("00000000-0000-0000-0000-000000000001");
             String name = Optional.ofNullable(request.getHeader(TestSecurityConfig.HDR_USERNAME)).orElse("test");
             List<GrantedAuthority> authorities = "ADMIN".equalsIgnoreCase(type)
-                ? List.of(new SimpleGrantedAuthority(Authorities.PLATFORM_ADMIN_ROLE), new SimpleGrantedAuthority("ADMIN")) : List.of();
+                ? List.of(new SimpleGrantedAuthority(Authorities.PLATFORM_ADMIN_ROLE)) : List.of();
             AuthenticatedActor actor = new AuthenticatedActor() {
                 public ActorType type() { return ActorType.HUMAN; }
                 public String name() { return name; }

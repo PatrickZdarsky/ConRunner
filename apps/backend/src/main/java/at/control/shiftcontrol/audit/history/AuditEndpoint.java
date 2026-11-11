@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/v1/audit")
+@RequestMapping(value = "/api/v1/audit", produces = "application/json")
 class AuditEndpoint {
     private final AuditHistory history;
     AuditEndpoint(AuditHistory history) { this.history = history; }

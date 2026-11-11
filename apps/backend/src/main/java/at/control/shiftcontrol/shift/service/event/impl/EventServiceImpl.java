@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -111,7 +112,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, UUID userId) {
         var volunteer = volunteerDao.getById(userId);
-        return ShiftPlanMapper.toShiftPlanDto(getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer));
+        var event = eventDao.getById(eventId);
+        var shiftPlans = securityHelper.isUserAdmin()
+            ? List.copyOf(event.getShiftPlans())
+            : getVolunteerShiftPlans(event, volunteer);
+        return ShiftPlanMapper.toShiftPlanDto(shiftPlans);
     }
 
     @Override
@@ -173,13 +178,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventShiftPlansOverviewDto getEventShiftPlansOverview(long eventId, UUID userId) {
         var event = eventDao.getById(eventId);
-        var volunteer = volunteerDao.getById(userId);
+        boolean isAdmin = securityHelper.isUserAdmin();
+        var volunteer = isAdmin ? volunteerDao.findById(userId) : Optional.of(volunteerDao.getById(userId));
 
         var eventOverviewDto = EventMapper.toEventDto(event);
-        var userRelevantShiftPlans = getUserRelatedShiftPlanEntitiesOfEvent(eventId, volunteer);
+        var userRelevantShiftPlans = isAdmin
+            ? List.copyOf(event.getShiftPlans())
+            : getVolunteerShiftPlans(event, volunteer.orElseThrow());
 
         // get roles of the user inside this event's shiftplans; Remove equally named roles (from different ShiftPlans)
-        var roles = volunteer.getRoles().stream()
+        var roles = volunteer.stream()
+            .flatMap(profile -> profile.getRoles().stream())
             .map(RoleMapper::toRoleDto)
             .filter(roleDto -> userRelevantShiftPlans.stream()
                 .anyMatch(shiftPlan -> shiftPlan.getRoles().stream()
@@ -275,20 +284,12 @@ public class EventServiceImpl implements EventService {
         publisher.publishEvent(eventEvent);
     }
 
-    private List<ShiftPlan> getUserRelatedShiftPlanEntitiesOfEvent(long eventId, Volunteer volunteer) {
-        var event = eventDao.getById(eventId);
-        var shiftPlans = event.getShiftPlans();
-
-        // skip filtering for admin users
-        if (securityHelper.isUserAdmin()) {
-            return shiftPlans.stream().toList();
-        }
-
+    private List<ShiftPlan> getVolunteerShiftPlans(Event event, Volunteer volunteer) {
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();
         var planningShiftPlans = volunteer.getPlanningPlans();
 
         // filter shiftPlans that the volunteer is part of (volunteerShiftPlans)
-        return shiftPlans.stream()
+        return event.getShiftPlans().stream()
             .filter(shiftPlan -> volunteerShiftPlans.contains(shiftPlan) || planningShiftPlans.contains(shiftPlan))
             .toList();
     }

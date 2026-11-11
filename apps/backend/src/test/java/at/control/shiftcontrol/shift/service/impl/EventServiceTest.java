@@ -30,13 +30,13 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -189,10 +189,29 @@ class EventServiceTest {
         assertThat(result.getOwnEventStatistics()).isEqualTo(ownStats);
         assertThat(result.getOverallEventStatistics()).isEqualTo(overallStats);
 
-        verify(eventDao, times(2)).getById(eventId); // called twice since shiftPlans is fetched via call to getUserRelatedShiftPlansOfEvent
+        verify(eventDao).getById(eventId);
         verify(volunteerDao).getById(userId);
         verify(statisticService).getOwnStatisticsOfShiftPlans(List.of(spRelevant), userId);
         verify(statisticService).getOverallEventStatistics(event);
+    }
+
+    @Test
+    void getEventShiftPlansOverview_includesPlansForAdminWithoutVolunteerProfile() {
+        long eventId = 1L;
+        var plan = new ShiftPlan();
+        plan.setId(2L);
+        var event = new Event();
+        event.setShiftPlans(List.of(plan));
+        event.setStartTime(Instant.MIN);
+        event.setEndTime(Instant.MIN);
+        when(eventDao.getById(eventId)).thenReturn(event);
+        when(securityHelper.isUserAdmin()).thenReturn(true);
+        when(volunteerDao.findById(USER_ID)).thenReturn(Optional.empty());
+
+        var result = eventService.getEventShiftPlansOverview(eventId, USER_ID);
+
+        assertThat(result.getShiftPlans()).isEqualTo(ShiftPlanMapper.toShiftPlanDto(List.of(plan)));
+        assertThat(result.getRoles()).isEmpty();
     }
 
     @Test

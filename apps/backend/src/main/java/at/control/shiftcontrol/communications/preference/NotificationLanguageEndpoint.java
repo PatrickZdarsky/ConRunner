@@ -8,7 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/me/notification-preferences/language")
+@RequestMapping(value = "/api/v1/me/notification-preferences/language", produces = "application/json")
 class NotificationLanguageEndpoint {
     private final NotificationLanguageService languages;
     NotificationLanguageEndpoint(NotificationLanguageService languages) { this.languages = languages; }

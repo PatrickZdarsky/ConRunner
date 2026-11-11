@@ -1,7 +1,7 @@
 package at.control.shiftcontrol.communications.history;
 
 import at.control.shiftcontrol.identity.AuthenticatedActor;
-import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.time.Instant;
 
 @RestController
-@RequestMapping("/api/v1/me/notifications")
+@RequestMapping(value = "/api/v1/me/notifications", produces = "application/json")
 class NotificationHistoryEndpoint {
     private final NotificationHistoryService history;
     NotificationHistoryEndpoint(NotificationHistoryService history) { this.history = history; }
@@ -26,13 +26,13 @@ class NotificationHistoryEndpoint {
     record ReadState(Boolean read) {}
 
     @GetMapping
-    Page<NotificationHistoryService.Notification> list(Authentication authentication,
+    PagedModel<NotificationHistoryService.Notification> list(Authentication authentication,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "25") int size,
             @RequestParam(required = false) String type, @RequestParam(required = false) Boolean read,
             @RequestParam(required = false) Instant from, @RequestParam(required = false) Instant until) {
         if (page < 0 || size < 1 || size > 100 || (from != null && until != null && !from.isBefore(until)))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid pagination or date range");
-        return history.list(userId(authentication), page, size, type, read, from, until);
+        return new PagedModel<>(history.list(userId(authentication), page, size, type, read, from, until));
     }
 
     @PatchMapping("/{id}")

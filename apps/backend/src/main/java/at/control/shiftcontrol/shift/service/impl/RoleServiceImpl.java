@@ -57,14 +57,14 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public @org.jspecify.annotations.NonNull RoleDto getRole(long roleId) {
         Role role = roleDao.getById(roleId);
-        securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
+        assertCanManageRoles(role.getShiftPlan().getId());
         return RoleMapper.toRoleDto(role);
     }
 
     @Override
     @Transactional
     public @org.jspecify.annotations.NonNull RoleDto createRole(long shiftPlanId, @NonNull RoleModificationDto roleDto) {
-        securityHelper.assertUserIsPlanner(shiftPlanId);
+        assertCanManageRoles(shiftPlanId);
         var shiftPlan = shiftPlanDao.getById(shiftPlanId);
         validateUniqueNameInShiftPlan(roleDto.getName(), shiftPlanId, null);
 
@@ -81,7 +81,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public @org.jspecify.annotations.NonNull RoleDto updateRole(long roleId, @NonNull RoleModificationDto roleDto) {
         var role = roleDao.getById(roleId);
-        securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
+        assertCanManageRoles(role.getShiftPlan().getId());
         validateUniqueNameInShiftPlan(roleDto.getName(), role.getShiftPlan().getId(), roleId);
 
         var before = operationsAudit.snapshot(role);
@@ -111,12 +111,18 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public void deleteRole(long roleId) {
         Role role = roleDao.getById(roleId);
-        securityHelper.assertUserIsPlanner(role.getShiftPlan().getId());
+        assertCanManageRoles(role.getShiftPlan().getId());
 
         operationsAudit.role(role, "deleted", operationsAudit.snapshot(role), null);
         var roleEvent = RoleEvent.roleDeleted(role);
         publisher.publishEvent(roleEvent);
         roleDao.delete(role);
+    }
+
+    private void assertCanManageRoles(long shiftPlanId) {
+        if (securityHelper.isNotUserAdmin()) {
+            securityHelper.assertUserIsPlanner(shiftPlanId);
+        }
     }
 
     @Override
