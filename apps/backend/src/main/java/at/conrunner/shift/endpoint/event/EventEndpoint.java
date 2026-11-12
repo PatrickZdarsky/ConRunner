@@ -69,7 +69,6 @@ public class EventEndpoint {
     public Collection<EventDto> getAllEvents() {
         return eventService.search(null);
     }
-    //Todo: Add search capability in future
 
     @GetMapping("/open")
     @Operation(

@@ -16,7 +16,6 @@ import at.conrunner.shift.repo.LocationRepository;
 import at.conrunner.shift.repo.ShiftPlanRepository;
 import at.conrunner.shift.repo.VolunteerRepository;
 import io.restassured.http.Method;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ class LocationIT extends RestITBase {
     @Autowired
     UserAttributeProvider userAttributeProvider;
 
-    private Event eventA, eventB, eventC;
+    private Event eventA, eventB;
 
     private Location locationA, locationB, locationC;
 
@@ -171,12 +170,6 @@ class LocationIT extends RestITBase {
 
         userAttributeProvider.invalidateUserCache(volunteerA.getId());
     }
-
-    @AfterEach
-    void tearDown() {
-
-
-}
 
     @Test
     void findEventByNonExistingIdReturnsNotFound() {

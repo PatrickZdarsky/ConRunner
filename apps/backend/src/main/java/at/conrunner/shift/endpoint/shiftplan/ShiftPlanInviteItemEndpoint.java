@@ -55,8 +55,7 @@ public class ShiftPlanInviteItemEndpoint {
         description = "Get details about a specific invite code for a shift plan"
     )
     public ShiftPlanInviteDetailsDto getShiftPlanInviteDetails(@PathVariable String inviteCode) {
-        var temp = shiftPlanService.getShiftPlanInviteDetails(inviteCode);
-        return temp;
+        return shiftPlanService.getShiftPlanInviteDetails(inviteCode);
     }
 
     @PostMapping("/join")

@@ -34,7 +34,7 @@ public class TestAuthFilter extends OncePerRequestFilter {
                 public ActorType type() { return ActorType.HUMAN; }
                 public String name() { return name; }
                 public Optional<UUID> userId() { return Optional.of(UUID.fromString(id)); }
-                public Collection<? extends GrantedAuthority> authorities() { return authorities; }
+                public Collection<GrantedAuthority> authorities() { return authorities; }
             };
             SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(actor, "N/A", authorities));

@@ -1,6 +1,5 @@
 package at.conrunner.platform.exception;
 
-import java.lang.UnsupportedOperationException;
 import java.lang.invoke.MethodHandles;
 import java.util.stream.Collectors;
 
@@ -28,14 +27,14 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger EXCEPTION_LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<Object> handleAllUnhandledExceptions(
         Exception ex,
         WebRequest request
     ) {
-        LOGGER.error("Unhandled exception", ex);
+        EXCEPTION_LOG.error("Unhandled exception", ex);
         return handleExceptionInternal(
             ex,
             new ApiErrorDto("An unexpected error occurred"),
@@ -60,7 +59,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {ConflictException.class})
     protected ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
-        LOGGER.warn(ex.getMessage());
+        EXCEPTION_LOG.warn(ex.getMessage());
         var conflictException = (ConflictException) ex;
         Object body = conflictException.hasDto() ? conflictException.getDto() : new ApiErrorDto(conflictException.getMessage());
         return handleExceptionInternal(conflictException, body, new HttpHeaders(), CONFLICT, request);
@@ -102,7 +101,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private ResponseEntity<Object> handleInternal(Exception ex, WebRequest request, HttpStatus status) {
-        LOGGER.warn(ex.getMessage());
+        EXCEPTION_LOG.warn(ex.getMessage());
         return handleExceptionInternal(ex, new ApiErrorDto(ex.getMessage()), new HttpHeaders(), status, request);
     }
 

@@ -188,10 +188,30 @@ public class EventImportWorkbookParser {
             validation
         );
 
-        Map<String, List<EventImportWorkbook.ShiftRow>> shiftsByPlanAndName = workbook.shifts().stream()
+        validateUniqueShifts(workbook.shifts(), validation);
+        Set<String> knownLocations = workbook.locations().stream()
+            .map(EventImportWorkbook.LocationRow::locationName)
+            .filter(StringUtils::isNotBlank)
+            .map(EventImportWorkbookParser::normalizeKey)
+            .collect(Collectors.toSet());
+        Set<String> knownActivities = workbook.activities().stream()
+            .map(EventImportWorkbook.ActivityRow::activityName)
+            .filter(StringUtils::isNotBlank)
+            .map(EventImportWorkbookParser::normalizeKey)
+            .collect(Collectors.toSet());
+
+        for (var activity : workbook.activities()) {
+            validateActivity(activity, eventRow, knownLocations, validation);
+        }
+        for (var shift : workbook.shifts()) {
+            validateShift(shift, eventRow, knownLocations, knownActivities, validation);
+        }
+    }
+
+    private void validateUniqueShifts(List<EventImportWorkbook.ShiftRow> shifts, ValidationException.Builder validation) {
+        Map<String, List<EventImportWorkbook.ShiftRow>> shiftsByPlanAndName = shifts.stream()
             .collect(Collectors.groupingBy(shift -> normalizeKey(shift.shiftPlanName()) + "||" + normalizeKey(shift.shiftName())));
-        for (var entry : shiftsByPlanAndName.entrySet()) {
-            List<EventImportWorkbook.ShiftRow> rows = entry.getValue();
+        for (var rows : shiftsByPlanAndName.values()) {
             if (rows.size() <= 1) {
                 continue;
             }
@@ -206,88 +226,79 @@ public class EventImportWorkbookParser {
                 "Duplicate shift_name '" + first.shiftName() + "' in shift_plan '" + first.shiftPlanName() + "' (rows: " + rowNumbers + ")."
             );
         }
+    }
 
-        Set<String> knownLocations = workbook.locations().stream()
-            .map(EventImportWorkbook.LocationRow::locationName)
-            .filter(StringUtils::isNotBlank)
-            .map(EventImportWorkbookParser::normalizeKey)
-            .collect(Collectors.toSet());
-        Set<String> knownActivities = workbook.activities().stream()
-            .map(EventImportWorkbook.ActivityRow::activityName)
-            .filter(StringUtils::isNotBlank)
-            .map(EventImportWorkbookParser::normalizeKey)
-            .collect(Collectors.toSet());
-
-        for (EventImportWorkbook.ActivityRow activity : workbook.activities()) {
-            if (activity.start() != null && activity.end() != null && !activity.start().isBefore(activity.end())) {
-                validation.error(
-                    "Activities.start_time_utc",
-                    "Sheet 'Activities', row " + activity.excelRow() + ": start_time_utc must be before end_time_utc."
-                );
-            }
-
-            if (eventRow.start() != null && activity.start() != null && activity.start().isBefore(eventRow.start())) {
-                validation.error(
-                    "Activities.start_time_utc",
-                    "Sheet 'Activities', row " + activity.excelRow() + ": activity starts before event start."
-                );
-            }
-            if (eventRow.end() != null && activity.end() != null && activity.end().isAfter(eventRow.end())) {
-                validation.error(
-                    "Activities.end_time_utc",
-                    "Sheet 'Activities', row " + activity.excelRow() + ": activity ends after event end."
-                );
-            }
-
-            if (StringUtils.isNotBlank(activity.locationName()) && !knownLocations.contains(normalizeKey(activity.locationName()))) {
-                validation.error(
-                    "Activities.location_name",
-                    "Sheet 'Activities', row " + activity.excelRow() + ": Unknown location_name '" + activity.locationName() + "'."
-                );
-            }
+    private void validateActivity(EventImportWorkbook.ActivityRow activity, EventImportWorkbook.EventRow eventRow,
+                                  Set<String> knownLocations, ValidationException.Builder validation) {
+        if (activity.start() != null && activity.end() != null && !activity.start().isBefore(activity.end())) {
+            validation.error(
+                "Activities.start_time_utc",
+                "Sheet 'Activities', row " + activity.excelRow() + ": start_time_utc must be before end_time_utc."
+            );
         }
 
-        for (EventImportWorkbook.ShiftRow shift : workbook.shifts()) {
-            if (shift.start() != null && shift.end() != null && !shift.start().isBefore(shift.end())) {
-                validation.error(
-                    "Shifts.start_time_utc",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": start_time_utc must be before end_time_utc."
-                );
-            }
+        if (eventRow.start() != null && activity.start() != null && activity.start().isBefore(eventRow.start())) {
+            validation.error(
+                "Activities.start_time_utc",
+                "Sheet 'Activities', row " + activity.excelRow() + ": activity starts before event start."
+            );
+        }
+        if (eventRow.end() != null && activity.end() != null && activity.end().isAfter(eventRow.end())) {
+            validation.error(
+                "Activities.end_time_utc",
+                "Sheet 'Activities', row " + activity.excelRow() + ": activity ends after event end."
+            );
+        }
 
-            if (StringUtils.isNotBlank(shift.locationName()) && StringUtils.isNotBlank(shift.activityName())) {
-                validation.error(
-                    "Shifts.location_name",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": Cannot set both location_name and activity_name."
-                );
-            }
+        if (StringUtils.isNotBlank(activity.locationName()) && !knownLocations.contains(normalizeKey(activity.locationName()))) {
+            validation.error(
+                "Activities.location_name",
+                "Sheet 'Activities', row " + activity.excelRow() + ": Unknown location_name '" + activity.locationName() + "'."
+            );
+        }
+    }
 
-            if (StringUtils.isNotBlank(shift.locationName()) && !knownLocations.contains(normalizeKey(shift.locationName()))) {
-                validation.error(
-                    "Shifts.location_name",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": Unknown location_name '" + shift.locationName() + "'."
-                );
-            }
+    private void validateShift(EventImportWorkbook.ShiftRow shift, EventImportWorkbook.EventRow eventRow,
+                               Set<String> knownLocations, Set<String> knownActivities, ValidationException.Builder validation) {
+        if (shift.start() != null && shift.end() != null && !shift.start().isBefore(shift.end())) {
+            validation.error(
+                "Shifts.start_time_utc",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": start_time_utc must be before end_time_utc."
+            );
+        }
 
-            if (StringUtils.isNotBlank(shift.activityName()) && !knownActivities.contains(normalizeKey(shift.activityName()))) {
-                validation.error(
-                    "Shifts.activity_name",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": Unknown activity_name '" + shift.activityName() + "'."
-                );
-            }
+        if (StringUtils.isNotBlank(shift.locationName()) && StringUtils.isNotBlank(shift.activityName())) {
+            validation.error(
+                "Shifts.location_name",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": Cannot set both location_name and activity_name."
+            );
+        }
 
-            if (eventRow.start() != null && shift.start() != null && shift.start().isBefore(eventRow.start())) {
-                validation.error(
-                    "Shifts.start_time_utc",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": shift starts before event start."
-                );
-            }
-            if (eventRow.end() != null && shift.end() != null && shift.end().isAfter(eventRow.end())) {
-                validation.error(
-                    "Shifts.end_time_utc",
-                    "Sheet 'Shifts', row " + shift.excelRow() + ": shift ends after event end."
-                );
-            }
+        if (StringUtils.isNotBlank(shift.locationName()) && !knownLocations.contains(normalizeKey(shift.locationName()))) {
+            validation.error(
+                "Shifts.location_name",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": Unknown location_name '" + shift.locationName() + "'."
+            );
+        }
+
+        if (StringUtils.isNotBlank(shift.activityName()) && !knownActivities.contains(normalizeKey(shift.activityName()))) {
+            validation.error(
+                "Shifts.activity_name",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": Unknown activity_name '" + shift.activityName() + "'."
+            );
+        }
+
+        if (eventRow.start() != null && shift.start() != null && shift.start().isBefore(eventRow.start())) {
+            validation.error(
+                "Shifts.start_time_utc",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": shift starts before event start."
+            );
+        }
+        if (eventRow.end() != null && shift.end() != null && shift.end().isAfter(eventRow.end())) {
+            validation.error(
+                "Shifts.end_time_utc",
+                "Sheet 'Shifts', row " + shift.excelRow() + ": shift ends after event end."
+            );
         }
     }
 
@@ -376,7 +387,7 @@ public class EventImportWorkbookParser {
 
         try {
             return Instant.parse(normalized);
-        } catch (Exception e) {
+        } catch (Exception _) {
             validation.error(
                 "file",
                 "Sheet '" + sheet.getSheetName() + "', row " + (rowIndex + 1) + ": '" + column

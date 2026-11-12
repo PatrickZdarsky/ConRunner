@@ -93,7 +93,6 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
                 // Check for overlapping time constraints for this volunteer+event+type
                 var existingConstraints = timeConstraintDao.searchByVolunteerAndEventAndType(userId, eventId, TimeConstraintType.EMERGENCY);
                 checkForConstraintOverlaps(createDto, existingConstraints);
-                // todo add trust alert
             }
             default -> throw new IllegalStateException("Unexpected value: " + createDto.getType());
         }
@@ -105,7 +104,7 @@ public class TimeConstraintServiceImpl implements TimeConstraintService {
             handleEmergencyConflictingAssignments(entity);
         }
 
-        //NOTIFY: Publish event
+        // Creation publishes a time-constraint event. Emergency constraints do not create trust alerts.
         operationsAudit.constraint(entity, true);
         publisher.publishEvent(TimeConstraintEvent.timeConstraintCreated(entity));
         return TimeConstraintMapper.toDto(entity);

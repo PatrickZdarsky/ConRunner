@@ -18,7 +18,6 @@ import at.conrunner.shift.repo.ShiftPlanRepository;
 import at.conrunner.shift.repo.ShiftRepository;
 import at.conrunner.shift.repo.VolunteerRepository;
 import io.restassured.http.Method;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -228,14 +227,6 @@ class EventIT extends RestITBase {
             () -> assertThat(assignmentA.getStatus()).isEqualTo(AssignmentStatus.ACCEPTED)
         );
     }
-
-    @AfterEach
-    void tearDown() {
-
-
-
-
-}
 
     @Test
     void cloneEventAsNonAdminReturnsForbidden() {

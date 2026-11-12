@@ -55,7 +55,7 @@ class EmailDeliveryWorker {
                 sender.send(message);
                 if (!deliveries.finish(delivery, false))
                     log.warn("Email delivery {} finished after its lease expired", delivery.id());
-            } catch (RuntimeException error) {
+            } catch (RuntimeException _) {
                 // Avoid recording mail addresses or provider error text in durable state or logs.
                 log.warn("Email delivery {} failed; scheduling retry", delivery.id());
                 deliveries.retry(delivery);

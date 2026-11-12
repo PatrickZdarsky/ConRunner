@@ -11,10 +11,8 @@ public enum ExportFormat {
 
     private final String[] aliases;
 
-    public static final ExportFormat[] VALUES = values();
-
     public static ExportFormat fromString(String format) {
-        for (ExportFormat exportFormat : VALUES) {
+        for (ExportFormat exportFormat : values()) {
             if (exportFormat.name().equalsIgnoreCase(format)) {
                 return exportFormat;
             }

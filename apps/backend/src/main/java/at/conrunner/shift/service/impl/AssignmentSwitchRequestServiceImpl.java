@@ -15,11 +15,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import at.conrunner.communications.api.NotificationRequest;
 import at.conrunner.communications.api.NotificationRequests;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,9 +59,7 @@ import at.conrunner.shift.util.SecurityHelper;
 @Service
 @RequiredArgsConstructor
 public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchRequestService {
-    @Lazy
-    @Autowired(required = false)
-    private AssignmentSwitchRequestService self;
+    private final ObjectProvider<AssignmentSwitchRequestService> transactionalService;
     private final OperationsAudit operationsAudit;
     private final AssignmentSwitchRequestDao assignmentSwitchRequestDao;
     private final AssignmentDao assignmentDao;
@@ -120,39 +117,29 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                 .toList();
         }
 
-        // hanlde case with time conflicts separately
         Collection<TradeCandidatesDto> slotsToOffer = new LinkedList<>();
-        if (!timeConflictingAssignments.isEmpty()) {
-            // only offer assignments that have a time conflict with the requested slot
-            for (Assignment a : timeConflictingAssignments) {
-                // only offer the position to eligible volunteers with no conflicts (besides the time conflict with the requested slot)
-                Collection<Volunteer> usersToTradeWith = assignedVolunteers.stream()
-                    .filter(v -> {
-                        var signupStateOffered = eligibilityService.getSignupStateForPositionSlot(a.getPositionSlot(), v.getId());
-                        return signupStateOffered != PositionSignupState.SIGNED_UP && signupStateOffered != PositionSignupState.NOT_ELIGIBLE
-                            && signupStateOffered != PositionSignupState.TIME_CONFLICT_TIME_CONSTRAINT;
-                    })
-                    .toList();
-                if (!usersToTradeWith.isEmpty()) {
-                    slotsToOffer.add(
-                        positionSlotAssemblingMapper.tradeCandidatesDto(a.getPositionSlot(), usersToTradeWith));
-                }
-            }
-        } else {
-            // normal case
-            // for each assignment, check to which volunteers (of the requested slot) it can be offered
-            for (Assignment a : assignments) {
-                // only offer the position to eligible volunteers with no conflicts
-                Collection<Volunteer> usersToTradeWith = getPossibleUsersForTrade(a.getPositionSlot(), requestedPositionSlot, assignedVolunteers);
-                if (!usersToTradeWith.isEmpty()) {
-                    slotsToOffer.add(
-                        positionSlotAssemblingMapper.tradeCandidatesDto(a.getPositionSlot(), usersToTradeWith));
-                }
+        boolean hasConflicts = !timeConflictingAssignments.isEmpty();
+        Collection<Assignment> candidates = hasConflicts ? timeConflictingAssignments : assignments;
+        for (Assignment assignment : candidates) {
+            PositionSlot offeredSlot = assignment.getPositionSlot();
+            Collection<Volunteer> usersToTradeWith = hasConflicts
+                ? getUsersForConflictingTrade(offeredSlot, assignedVolunteers)
+                : getPossibleUsersForTrade(offeredSlot, requestedPositionSlot, assignedVolunteers);
+            if (!usersToTradeWith.isEmpty()) {
+                slotsToOffer.add(positionSlotAssemblingMapper.tradeCandidatesDto(offeredSlot, usersToTradeWith));
             }
         }
 
         // remove candidates where the current user already requested a trade
         return removeExistingTrades(slotsToOffer, requestedPositionSlotId, currentUserId);
+    }
+
+    private Collection<Volunteer> getUsersForConflictingTrade(PositionSlot offeredSlot, Collection<Volunteer> volunteers) {
+        return volunteers.stream().filter(volunteer -> {
+            var state = eligibilityService.getSignupStateForPositionSlot(offeredSlot, volunteer.getId());
+            return state != PositionSignupState.SIGNED_UP && state != PositionSignupState.NOT_ELIGIBLE
+                && state != PositionSignupState.TIME_CONFLICT_TIME_CONSTRAINT;
+        }).toList();
     }
 
     private Collection<Volunteer> getPossibleUsersForTrade(PositionSlot offeredPositionSlot, PositionSlot requestedPositionSlot,
@@ -297,7 +284,7 @@ public class AssignmentSwitchRequestServiceImpl implements AssignmentSwitchReque
                 throw new IllegalStateException("more than one inverse trade is open" + inverse);
             }
             if (!inverse.isEmpty()) {
-                return List.of(self.acceptTrade(inverse.getFirst().getId(), currentUserId));
+                return List.of(transactionalService.getObject().acceptTrade(inverse.getFirst().getId(), currentUserId));
             }
         }
 

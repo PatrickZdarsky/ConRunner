@@ -37,7 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 @Import(TestSecurityConfig.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.liquibase.enabled=false", "spring.jpa.hibernate.ddl-auto=create-drop", "oidc.provider.issuer-uri=https://identity.example.test/realms/shiftcontrol", "oidc.provider.jwk-set-uri=https://identity.example.test/jwks", "oidc.provider.audience=shiftcontrol-backend"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+    "spring.liquibase.change-log=classpath:db/changelog/db.changelog-local.yaml",
+    "spring.jpa.hibernate.ddl-auto=create-drop",
+    "oidc.provider.issuer-uri=https://identity.example.test/realms/shiftcontrol",
+    "oidc.provider.jwk-set-uri=https://identity.example.test/jwks",
+    "oidc.provider.audience=shiftcontrol-backend"
+})
 @ActiveProfiles("test")
 @Tag("integration")
 public abstract class RestITBase {
@@ -46,7 +52,7 @@ public abstract class RestITBase {
 
     @org.junit.jupiter.api.AfterEach
     void clearDatabase() {
-        var tables = cleanupJdbc.queryForList("select tablename from pg_tables where schemaname = 'public'", String.class);
+        var tables = cleanupJdbc.queryForList("select tablename from pg_tables where schemaname = 'public' and tablename not in ('databasechangelog', 'databasechangeloglock')", String.class);
         if (!tables.isEmpty()) {
             String names = tables.stream().map(name -> "\"" + name.replace("\"", "\"\"") + "\"").collect(java.util.stream.Collectors.joining(", "));
             cleanupJdbc.execute("TRUNCATE TABLE " + names + " RESTART IDENTITY CASCADE");
@@ -124,7 +130,13 @@ public abstract class RestITBase {
     }
 
     @BeforeEach
-    public void setBasePath() {
+    void setUpRestClient() {
+        setBasePath();
+        setThreadNameToTest();
+        setupUsers();
+    }
+
+    private void setBasePath() {
         if (RestAssured.requestSpecification == null) {
             RestAssured.requestSpecification = (new RequestSpecBuilder())
                 .setPort(this.port)
@@ -137,15 +149,12 @@ public abstract class RestITBase {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-    @BeforeEach
-    public void setThreadNameToTest() {
-        Thread var10000 = Thread.currentThread();
-        long var10001 = Thread.currentThread().getId();
-        var10000.setName(var10001 + "-" + this.getClass().getSimpleName());
+    private void setThreadNameToTest() {
+        Thread thread = Thread.currentThread();
+        thread.setName(thread.threadId() + "-" + getClass().getSimpleName());
     }
 
-    @BeforeEach
-    public void setupUsers() {
+    private void setupUsers() {
         Mockito.when(userDirectoryService.getUser(any())).thenAnswer(invocation -> user(invocation.getArgument(0)));
         Mockito.when(userDirectoryService.getUsers(any())).thenAnswer(invocation -> {
             java.util.Collection<java.util.UUID> ids = invocation.getArgument(0);
@@ -421,7 +430,7 @@ public abstract class RestITBase {
         try {
             JsonNode root = new ObjectMapper().readTree(json);
             return root.has("message") ? root.get("message").asText() : json;
-        } catch (Exception e) {
+        } catch (Exception _) {
             // fallback if response is not JSON
             return json;
         }

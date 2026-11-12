@@ -1,5 +1,7 @@
 package at.conrunner.shift.dao.impl.specification;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -10,6 +12,8 @@ import at.conrunner.shift.dto.event.schedule.EventScheduleDaySearchDto;
 import at.conrunner.shift.dto.event.schedule.EventScheduleFilterDto;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 public final class ShiftSpecifications {
     private ShiftSpecifications() {
@@ -59,13 +63,11 @@ public final class ShiftSpecifications {
                 );
             }
 
-            if (filterDto.getShiftPlanIds() != null && !filterDto.getShiftPlanIds().isEmpty()) {
+            if (!CollectionUtils.isEmpty(filterDto.getShiftPlanIds())) {
                 // shiftPlan IDs
                 predicates = criteriaBuilder.and(predicates,
                     root.get("shiftPlan").get("id").in(
-                        filterDto.getShiftPlanIds().stream()
-                            .filter(s -> s != null && !s.isBlank())
-                            .toList()
+                        nonBlankIds(filterDto.getShiftPlanIds())
                     )
                 );
             }
@@ -81,7 +83,7 @@ public final class ShiftSpecifications {
             }
 
             // roleNames: Shift -> slots --> role --> id
-            if (filterDto.getRoleIds() != null && !filterDto.getRoleIds().isEmpty()) {
+            if (!CollectionUtils.isEmpty(filterDto.getRoleIds())) {
                 var roleJoin = root
                     .join("slots", JoinType.INNER)
                     .join("role", JoinType.INNER);
@@ -90,23 +92,19 @@ public final class ShiftSpecifications {
                 // filter only non-null, non-blank role IDs
                 predicates = criteriaBuilder.and(predicates,
                     roleJoin.get("id").in(
-                        filterDto.getRoleIds().stream()
-                            .filter(s -> s != null && !s.isBlank())
-                            .toList()
+                        nonBlankIds(filterDto.getRoleIds())
                     )
                 );
             }
 
             // locations: Shift -> locations --> id
-            if (filterDto.getLocationIds() != null && !filterDto.getLocationIds().isEmpty()) {
+            if (!CollectionUtils.isEmpty(filterDto.getLocationIds())) {
                 var locationJoin = root.join("location", JoinType.INNER);
 
                 // filter only non-null, non-blank location IDs
                 predicates = criteriaBuilder.and(predicates,
                     locationJoin.get("id").in(
-                        filterDto.getLocationIds().stream()
-                            .filter(s -> s != null && !s.isBlank())
-                            .toList()
+                        nonBlankIds(filterDto.getLocationIds())
                     )
                 );
             }
@@ -114,5 +112,8 @@ public final class ShiftSpecifications {
             return predicates;
         };
     }
-}
 
+    private static List<String> nonBlankIds(Collection<String> ids) {
+        return ids.stream().filter(StringUtils::hasText).toList();
+    }
+}

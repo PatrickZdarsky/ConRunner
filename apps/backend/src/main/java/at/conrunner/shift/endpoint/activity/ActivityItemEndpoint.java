@@ -30,8 +30,6 @@ import at.conrunner.shift.service.ActivityService;
 public class ActivityItemEndpoint {
     private final ActivityService activityService;
 
-    // TODO: Get single, update, delete
-
     @GetMapping()
     @Operation(
         operationId = "getActivity",

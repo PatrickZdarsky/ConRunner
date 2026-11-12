@@ -95,7 +95,7 @@ public class UserAccountEntity {
         }
         try {
             applicationRoles.add(role);
-        } catch (UnsupportedOperationException ignored) {
+        } catch (UnsupportedOperationException _) {
             applicationRoles = new ArrayList<>(applicationRoles);
             applicationRoles.add(role);
         }

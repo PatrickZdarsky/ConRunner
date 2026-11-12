@@ -33,7 +33,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         """)
     Collection<Assignment> findAuctionsByShiftPlanId(long spId, Set<AssignmentStatus> auctionStates);
 
-    // TODO delete after trade and auction are fully implemented and method is still not used
     @Query("""
         SELECT a FROM Assignment a
         WHERE a.positionSlot.shift.shiftPlan.id = :spId

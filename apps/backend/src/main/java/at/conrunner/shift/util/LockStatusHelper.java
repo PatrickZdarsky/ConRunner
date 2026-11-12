@@ -9,6 +9,9 @@ import at.conrunner.platform.exception.StateViolationException;
 import at.conrunner.shift.lib.type.LockStatus;
 
 public class LockStatusHelper {
+    private LockStatusHelper() {
+    }
+
     //     --------------------- LOCKED ---------------------
 
     public static boolean isLocked(ShiftPlan shiftPlan) {

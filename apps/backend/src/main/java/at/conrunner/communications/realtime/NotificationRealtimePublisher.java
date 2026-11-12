@@ -34,7 +34,7 @@ class NotificationRealtimePublisher {
                     connections.sendToLocalUser(user, "notifications.changed");
                     observed.put(user, current);
                 }
-            } catch (RuntimeException error) {
+            } catch (RuntimeException _) {
                 log.warn("Could not check notification updates for a connected user");
             }
         }

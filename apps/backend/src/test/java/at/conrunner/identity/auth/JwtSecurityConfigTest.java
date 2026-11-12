@@ -61,8 +61,10 @@ class JwtSecurityConfigTest {
             .thenReturn(new TestApplicationUser(false));
         JwtSecurityConfig config = securityConfig(syncService);
 
-        assertThrows(DisabledException.class, () -> config.jwtAuthenticationConverter(properties()).convert(
-            jwt(ISSUER, AUDIENCE, Instant.now().minusSeconds(60), Instant.now().plusSeconds(60))));
+        var converter = config.jwtAuthenticationConverter(properties());
+        var token = jwt(ISSUER, AUDIENCE, Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+
+        assertThrows(DisabledException.class, () -> converter.convert(token));
     }
 
     @Test

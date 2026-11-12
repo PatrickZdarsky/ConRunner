@@ -38,7 +38,7 @@ public record LocationData(String name, String description, String url) {
             if (uri.getScheme() == null || uri.getHost() == null) {
                 throw new IllegalArgumentException();
             }
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException _) {
             throw new EventCatalogValidationException("Location URL must be a valid absolute URL");
         }
         return normalized;

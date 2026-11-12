@@ -9,13 +9,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class NotificationRequestTest {
     @Test
     void rejectsUnstableNotificationType() {
-        assertThatThrownBy(() -> new NotificationRequest(UUID.randomUUID(), UUID.randomUUID(), "Trade requested!", "{}"))
+        var trigger = UUID.randomUUID();
+        var recipient = UUID.randomUUID();
+        assertThatThrownBy(() -> new NotificationRequest(trigger, recipient, "Trade requested!", "{}"))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void requiresARecipient() {
-        assertThatThrownBy(() -> new NotificationRequest(UUID.randomUUID(), null, "shift.trade.requested", "{}"))
+        var trigger = UUID.randomUUID();
+        assertThatThrownBy(() -> new NotificationRequest(trigger, null, "shift.trade.requested", "{}"))
             .isInstanceOf(NullPointerException.class);
     }
 }

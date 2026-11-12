@@ -41,7 +41,7 @@ public interface RewardPointTransactionRepository extends JpaRepository<RewardPo
      * Points per event for a volunteer: GROUP BY event.
      */
     @Query("""
-            select new at.control.shiftcontrol.shift.dto.rewardpoints.EventPointsInternalDto(
+            select new at.conrunner.shift.dto.rewardpoints.EventPointsInternalDto(
                 t.eventId, coalesce(sum(t.points), 0)
             )
             from RewardPointsTransaction t

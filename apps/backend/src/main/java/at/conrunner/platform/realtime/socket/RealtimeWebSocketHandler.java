@@ -75,15 +75,24 @@ class RealtimeWebSocketHandler extends TextWebSocketHandler implements RealtimeC
             throw new IllegalArgumentException("Invalid realtime message");
         for (var connection : connections.values()) {
             synchronized (connection) {
-                if (!userId.equals(connection.userId)) continue;
-                try {
-                    if (!valid(connection)) { close(connection, CloseStatus.POLICY_VIOLATION); continue; }
-                    connection.session.sendMessage(new TextMessage("{\"type\":\"" + type + "\"}"));
-                } catch (Exception error) {
-                    log.warn("Realtime delivery failed for a connection");
-                    close(connection, CloseStatus.SERVER_ERROR);
+                if (!userId.equals(connection.userId)) {
+                    continue;
                 }
+                send(connection, type);
             }
+        }
+    }
+
+    private void send(Connection connection, String type) {
+        try {
+            if (valid(connection)) {
+                connection.session.sendMessage(new TextMessage("{\"type\":\"" + type + "\"}"));
+            } else {
+                close(connection, CloseStatus.POLICY_VIOLATION);
+            }
+        } catch (Exception _) {
+            log.warn("Realtime delivery failed for a connection");
+            close(connection, CloseStatus.SERVER_ERROR);
         }
     }
 
@@ -96,7 +105,13 @@ class RealtimeWebSocketHandler extends TextWebSocketHandler implements RealtimeC
     private void close(Connection connection, CloseStatus status) {
         if (connection == null) return;
         connections.remove(connection.session.getId());
-        try { if (connection.session.isOpen()) connection.session.close(status); } catch (IOException ignored) { }
+        try {
+            if (connection.session.isOpen()) {
+                connection.session.close(status);
+            }
+        } catch (IOException _) {
+            // The connection is already unregistered. Closing the socket is best effort.
+        }
     }
 
     @Override
@@ -114,7 +129,7 @@ class RealtimeWebSocketHandler extends TextWebSocketHandler implements RealtimeC
                     if (connection.userId == null) {
                         if (!Instant.now().isBefore(connection.connectedAt.plusSeconds(10))) close(connection, CloseStatus.POLICY_VIOLATION);
                     } else if (!valid(connection)) close(connection, CloseStatus.POLICY_VIOLATION);
-                } catch (RuntimeException error) { close(connection, CloseStatus.SERVER_ERROR); }
+                } catch (RuntimeException _) { close(connection, CloseStatus.SERVER_ERROR); }
             }
         }
     }

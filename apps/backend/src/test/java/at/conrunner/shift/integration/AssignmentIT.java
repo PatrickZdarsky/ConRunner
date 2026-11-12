@@ -42,9 +42,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class AssignmentIT extends RestITBase {
     private static final String POSITIONSLOT_PATH = "/position-slots";
-    private static final String SHIFT_POSITIONSLOT_PATH = "shifts/%d/position-slots";
-    private static final String REWARDPOINTS_PATH = "/reward-points";
-    private static final String LEAVE_POSITIONSLOT_PATH = "/position-slots/%s/leave";
     private static final String JOIN_POSITIONSLOT_PATH = "/position-slots/%s/join";
 
     @Autowired

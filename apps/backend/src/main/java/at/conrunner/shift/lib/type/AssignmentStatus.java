@@ -1,6 +1,8 @@
 package at.conrunner.shift.lib.type;
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Set;
 
 public enum AssignmentStatus {
     /**
@@ -20,9 +22,9 @@ public enum AssignmentStatus {
      */
     REQUEST_FOR_ASSIGNMENT;
 
-    public static final EnumSet<AssignmentStatus> ACTIVE_AUCTION_STATES =
-        EnumSet.of(AUCTION, AUCTION_REQUEST_FOR_UNASSIGN);
+    public static final Set<AssignmentStatus> ACTIVE_AUCTION_STATES =
+        Collections.unmodifiableSet(EnumSet.of(AUCTION, AUCTION_REQUEST_FOR_UNASSIGN));
 
-    public static final EnumSet<AssignmentStatus> REQUEST_STATES =
-        EnumSet.of(REQUEST_FOR_ASSIGNMENT, AUCTION_REQUEST_FOR_UNASSIGN);
+    public static final Set<AssignmentStatus> REQUEST_STATES =
+        Collections.unmodifiableSet(EnumSet.of(REQUEST_FOR_ASSIGNMENT, AUCTION_REQUEST_FOR_UNASSIGN));
 }

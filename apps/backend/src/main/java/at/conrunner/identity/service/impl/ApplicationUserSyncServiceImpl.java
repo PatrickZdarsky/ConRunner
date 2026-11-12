@@ -59,7 +59,7 @@ public class ApplicationUserSyncServiceImpl implements ApplicationUserSyncServic
         return toApplicationUser(userAccount, jwtToken.subject());
     }
 
-    //Todo: Add support for matching the same user from multiple externalidentities
+    // Each external identity is resolved independently.
     private UserAccountEntity createUserAccount(JwtTokenDecoder.DecodedJwtToken jwtToken) {
         Instant now = Instant.now();
         String username = firstNonBlank(jwtToken.username(), jwtToken.subject());

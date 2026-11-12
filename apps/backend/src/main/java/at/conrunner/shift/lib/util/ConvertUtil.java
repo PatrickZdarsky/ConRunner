@@ -19,7 +19,7 @@ public class ConvertUtil {
         }
         try {
             return Long.parseLong(value);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             log.error("Id is not valid: {}", value);
             // return user friendly message without mentioning exception details like id
             throw new BadRequestException("Something unexpected happened while processing the request.");

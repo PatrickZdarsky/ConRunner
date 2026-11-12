@@ -3,7 +3,6 @@ package at.conrunner.shift.service.rewardpoints.impl;
 import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Map;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,16 +35,7 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
     @Override
     @Transactional
     public BookingResultDto bookEarn(RewardPointsTransactionDto dto) {
-        return insert(
-            dto.getUserId(),
-            dto.getEventId(),
-            dto.getShiftPlanId(),
-            dto.getPositionSlotId(),
-            dto.getPointsSnapshot(),
-            RewardPointTransactionType.EARN,
-            dto.getSourceKey(),
-            dto.getMetadata()
-        );
+        return insert(dto, RewardPointTransactionType.EARN, dto.getPointsSnapshot());
     }
 
     @Override
@@ -54,54 +44,27 @@ public class RewardPointsLedgerServiceImpl implements RewardPointsLedgerService 
         // reversal is always negative of the snapshot
         int points = -dto.getPointsSnapshot();
 
-        return insert(
-            dto.getUserId(),
-            dto.getEventId(),
-            dto.getShiftPlanId(),
-            dto.getPositionSlotId(),
-            points,
-            RewardPointTransactionType.REVERSAL,
-            dto.getSourceKey(),
-            dto.getMetadata()
-        );
+        return insert(dto, RewardPointTransactionType.REVERSAL, points);
     }
 
     @Override
     @Transactional
     public BookingResultDto bookManualAdjust(RewardPointsTransactionDto dto) {
-        return insert(
-            dto.getUserId(),
-            dto.getEventId(),
-            dto.getShiftPlanId(),
-            dto.getPositionSlotId(),
-            dto.getPointsSnapshot(),
-            RewardPointTransactionType.MANUAL_ADJUST,
-            dto.getSourceKey(),
-            dto.getMetadata()
-        );
+        return insert(dto, RewardPointTransactionType.MANUAL_ADJUST, dto.getPointsSnapshot());
     }
 
-    private BookingResultDto insert(
-        UUID userId,
-        long eventId,
-        Long shiftPlanId,
-        Long positionSlotId,
-        int points,
-        RewardPointTransactionType type,
-        String sourceKey,
-        Map<String, Object> metadata
-    ) {
-        validateInputs(userId, eventId, points, sourceKey, type);
+    private BookingResultDto insert(RewardPointsTransactionDto dto, RewardPointTransactionType type, int points) {
+        validateInputs(dto.getUserId(), dto.getEventId(), points, dto.getSourceKey(), type);
 
         RewardPointsTransaction tx = RewardPointsTransaction.builder()
-            .volunteerId(userId.toString())
-            .eventId(eventId)
-            .shiftPlanId(shiftPlanId) // optional
-            .positionSlotId(positionSlotId) // optional
+            .volunteerId(dto.getUserId().toString())
+            .eventId(dto.getEventId())
+            .shiftPlanId(dto.getShiftPlanId())
+            .positionSlotId(dto.getPositionSlotId())
             .points(points)
             .type(type)
-            .sourceKey(sourceKey)
-            .metadata(metadata)
+            .sourceKey(dto.getSourceKey())
+            .metadata(dto.getMetadata())
             .createdAt(Instant.now())
             .build();
 

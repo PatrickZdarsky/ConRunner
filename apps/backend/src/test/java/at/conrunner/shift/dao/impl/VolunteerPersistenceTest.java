@@ -21,7 +21,7 @@ import at.conrunner.shift.entity.TimeConstraint;
 import at.conrunner.shift.entity.TrustAlert;
 import at.conrunner.shift.entity.UserAccount;
 import at.conrunner.shift.entity.Volunteer;
-import at.control.shiftcontrol.shift.entity.*;
+import at.conrunner.shift.entity.*;
 import java.sql.DriverManager;
 import java.util.List;
 import java.util.UUID;

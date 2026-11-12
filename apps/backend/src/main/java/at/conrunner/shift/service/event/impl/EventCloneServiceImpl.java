@@ -348,22 +348,24 @@ public class EventCloneServiceImpl implements EventCloneService {
             }
 
             for (Shift oldShift : oldShifts) {
-                Collection<PositionSlot> oldSlots = oldShift.getSlots();
-                if (oldSlots == null) {
-                    continue;
-                }
+                wireSlotRoles(oldShift, ctx);
+            }
+        }
+    }
 
-                for (PositionSlot oldSlot : oldSlots) {
-                    PositionSlot newSlot = ctx.slotByOldId.get(oldSlot.getId());
-                    if (newSlot == null) {
-                        throw new IllegalStateException("Missing cloned slot for " + oldSlot.getId());
-                    }
-
-                    if (oldSlot.getRole() != null) {
-                        Role mappedRole = ctx.roleByOldId.get(oldSlot.getRole().getId());
-                        newSlot.setRole(mappedRole);
-                    }
-                }
+    private void wireSlotRoles(Shift oldShift, CloneContext ctx) {
+        Collection<PositionSlot> oldSlots = oldShift.getSlots();
+        if (oldSlots == null) {
+            return;
+        }
+        for (PositionSlot oldSlot : oldSlots) {
+            PositionSlot newSlot = ctx.slotByOldId.get(oldSlot.getId());
+            if (newSlot == null) {
+                throw new IllegalStateException("Missing cloned slot for " + oldSlot.getId());
+            }
+            if (oldSlot.getRole() != null) {
+                Role mappedRole = ctx.roleByOldId.get(oldSlot.getRole().getId());
+                newSlot.setRole(mappedRole);
             }
         }
     }

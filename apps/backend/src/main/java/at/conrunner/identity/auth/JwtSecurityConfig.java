@@ -94,8 +94,8 @@ public class JwtSecurityConfig {
     }
 
     @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http, OidcProviderProps oidcProviderProps) throws Exception {
-        http.csrf(csrf -> csrf.disable());
+    protected SecurityFilterChain filterChain(HttpSecurity http, OidcProviderProps oidcProviderProps) {
+        // Spring Security's resource server exempts bearer-token requests from CSRF checks.
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/swagger-ui/**")
                 .permitAll()

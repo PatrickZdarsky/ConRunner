@@ -11,7 +11,6 @@ import at.conrunner.shift.dto.TrustAlertDisplayDto;
 import at.conrunner.shift.integration.config.RestITBase;
 import at.conrunner.shift.repo.TrustAlertRepository;
 import at.conrunner.shift.repo.VolunteerRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,10 +54,6 @@ public class TrustAlertIT extends RestITBase {
             .build();
         trustAlertB = trustAlertRepository.save(trustAlertB);
     }
-
-    @AfterEach
-    void tearDown() {
-}
 
     @Test
     void getTrustAlertAsAdminSucceeds() {

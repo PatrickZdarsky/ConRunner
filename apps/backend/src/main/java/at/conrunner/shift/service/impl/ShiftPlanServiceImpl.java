@@ -411,15 +411,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         shiftPlanDao.save(shiftPlan);
 
         if (joinedNow) {
-            var triggerId = java.util.UUID.randomUUID();
-            var eventId = String.valueOf(shiftPlan.getEvent().getId());
-            if (invite.getType() == ShiftPlanInviteType.VOLUNTEER_JOIN && shiftPlan.getPlanPlanners() != null) {
-                shiftPlan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
-                    notificationRequests.request(new NotificationRequest(triggerId, id, NotificationTypes.PLAN_VOLUNTEER_JOINED, NotificationContext.encode(eventId + ":" + shiftPlan.getId(), shiftPlan.getName(), null))));
-            } else if (invite.getType() == ShiftPlanInviteType.PLANNER_JOIN) {
-                identityUsers.getPlatformAdmins().forEach(admin ->
-                    notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, NotificationContext.encode("volunteer:" + userId, shiftPlan.getName(), null))));
-            }
+            notifyPlanJoin(invite.getType(), shiftPlan, userId);
         }
 
         //NOTIFY: publish events
@@ -429,6 +421,18 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
             publisher.publishEvent(ShiftPlanVolunteerEvent.joinedAsPlanner(shiftPlan, userId.toString()));
         } else {
             throw new IllegalStateException("Unknown invite type: " + invite.getType());
+        }
+    }
+
+    private void notifyPlanJoin(ShiftPlanInviteType inviteType, ShiftPlan shiftPlan, UUID userId) {
+        var triggerId = java.util.UUID.randomUUID();
+        var eventId = String.valueOf(shiftPlan.getEvent().getId());
+        if (inviteType == ShiftPlanInviteType.VOLUNTEER_JOIN && shiftPlan.getPlanPlanners() != null) {
+            shiftPlan.getPlanPlanners().stream().map(Volunteer::getId).distinct().forEach(id ->
+                notificationRequests.request(new NotificationRequest(triggerId, id, NotificationTypes.PLAN_VOLUNTEER_JOINED, NotificationContext.encode(eventId + ":" + shiftPlan.getId(), shiftPlan.getName(), null))));
+        } else if (inviteType == ShiftPlanInviteType.PLANNER_JOIN) {
+            identityUsers.getPlatformAdmins().forEach(admin ->
+                notificationRequests.request(new NotificationRequest(triggerId, admin.getId(), NotificationTypes.PLAN_PLANNER_JOINED, NotificationContext.encode("volunteer:" + userId, shiftPlan.getName(), null))));
         }
     }
 
@@ -515,7 +519,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
 
         var existingAssignments = assignmentDao.findAssignmentsForShiftPlanAndUser(shiftPlanId, actor.requireUserId());
         if (!existingAssignments.isEmpty()) {
-            existingAssignments.forEach(a -> audit.planLeft(a));
+            existingAssignments.forEach(audit::planLeft);
             assignmentDao.deleteAll(existingAssignments);
         }
 

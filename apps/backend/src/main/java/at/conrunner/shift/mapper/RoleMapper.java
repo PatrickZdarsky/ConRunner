@@ -3,18 +3,17 @@ package at.conrunner.shift.mapper;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.springframework.stereotype.Service;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 
 import at.conrunner.shift.entity.Role;
 import at.conrunner.shift.dto.role.RoleDto;
 import at.conrunner.shift.dto.role.RoleModificationDto;
 
-@RequiredArgsConstructor
-@Service
 public class RoleMapper {
+    private RoleMapper() {
+    }
+
     public static RoleDto toRoleDto(@NonNull Role role) {
         return new RoleDto(
             String.valueOf(role.getId()),

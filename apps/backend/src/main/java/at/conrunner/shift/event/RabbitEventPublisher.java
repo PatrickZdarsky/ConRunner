@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 import at.conrunner.shift.lib.event.BaseEvent;
 import at.conrunner.platform.exception.IllegalArgumentException;
 import at.conrunner.shift.auth.CurrentShiftActor;
+import at.conrunner.shift.auth.ShiftActor;
 import at.conrunner.shift.config.RabbitMqConfig;
 
 @Service
@@ -55,6 +56,6 @@ public class RabbitEventPublisher {
 
     @Nullable
     private String getCurrentUserId() {
-        return currentActor.find().flatMap(actor -> actor.getUserId()).map(java.util.UUID::toString).orElse(null);
+        return currentActor.find().flatMap(ShiftActor::getUserId).map(java.util.UUID::toString).orElse(null);
     }
 }

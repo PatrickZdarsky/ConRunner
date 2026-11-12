@@ -5,6 +5,7 @@ import at.conrunner.shift.entity.PositionSlot;
 import at.conrunner.shift.entity.Shift;
 import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.audit.api.AuditEntry;
+import at.conrunner.identity.User;
 import at.conrunner.identity.UserService;
 import at.conrunner.shift.entity.Assignment;
 import java.util.List;
@@ -21,7 +22,7 @@ public class AssignmentAudit {
     public record Snapshot(String volunteerId, String volunteerName, String status, String rewardPoints) {}
     public Snapshot snapshot(Assignment a) {
         var id = a.getAssignedVolunteer().getId();
-        var name = users.getUsers(List.of(id)).stream().findFirst().map(user -> user.getUsername()).orElse(null);
+        var name = users.getUsers(List.of(id)).stream().findFirst().map(User::getUsername).orElse(null);
         return new Snapshot(id.toString(), name, a.getStatus().name(), Integer.toString(a.getAcceptedRewardPoints()));
     }
     private Snapshot after(Assignment a, Snapshot before) {

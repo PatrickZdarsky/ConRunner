@@ -576,11 +576,8 @@ class ShiftPlanIT extends RestITBase {
             volunteerJoinedAsPlannerOnly.getId()
         );
 
+        assertVolunteerInviteCreated(resultInvite1);
         assertAll(
-            () -> assertThat(resultInvite1).isNotNull(),
-            () -> assertThat(resultInvite1.getCode()).isNotNull(),
-            () -> assertThat(resultInvite1.getCode()).isNotBlank(),
-            () -> assertThat(resultInvite1.getType()).isEqualTo(ShiftPlanInviteType.VOLUNTEER_JOIN),
             () -> assertThat(volunteerRepository.isVolunteerInShiftPlan(volunteerNotJoined.getId(), shiftPlanA.getId())).isFalse(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleA.getId())).isFalse(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleB.getId())).isFalse()
@@ -604,12 +601,8 @@ class ShiftPlanIT extends RestITBase {
             volunteerJoinedAsVolunteerOnly.getId()
         );
 
+        assertVolunteerInviteUsed(inviteDetails1);
         assertAll(
-            () -> assertThat(inviteDetails1).isNotNull(),
-            () -> assertThat(inviteDetails1.isJoined()).isTrue(),
-            () -> assertThat(inviteDetails1.getAttendingVolunteerCount()).isEqualTo(2),
-            () -> assertThat(inviteDetails1.getEventDto()).isNotNull(),
-            () -> assertThat(inviteDetails1.getInviteDto()).isNotNull(),
             () -> assertThat(volunteerRepository.isVolunteerInShiftPlan(volunteerNotJoined.getId(), shiftPlanA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleB.getId())).isTrue()
@@ -628,11 +621,8 @@ class ShiftPlanIT extends RestITBase {
             volunteerJoinedAsPlannerOnly.getId()
         );
 
+        assertVolunteerInviteCreated(resultInvite2);
         assertAll(
-            () -> assertThat(resultInvite2).isNotNull(),
-            () -> assertThat(resultInvite2.getCode()).isNotNull(),
-            () -> assertThat(resultInvite2.getCode()).isNotBlank(),
-            () -> assertThat(resultInvite2.getType()).isEqualTo(ShiftPlanInviteType.VOLUNTEER_JOIN),
             () -> assertThat(volunteerRepository.isVolunteerInShiftPlan(volunteerNotJoined.getId(), shiftPlanA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleB.getId())).isTrue(),
@@ -657,16 +647,30 @@ class ShiftPlanIT extends RestITBase {
             volunteerJoinedAsVolunteerOnly.getId()
         );
 
+        assertVolunteerInviteUsed(inviteDetails2);
         assertAll(
-            () -> assertThat(inviteDetails2).isNotNull(),
-            () -> assertThat(inviteDetails2.isJoined()).isTrue(),
-            () -> assertThat(inviteDetails2.getAttendingVolunteerCount()).isEqualTo(2),
-            () -> assertThat(inviteDetails2.getEventDto()).isNotNull(),
-            () -> assertThat(inviteDetails2.getInviteDto()).isNotNull(),
             () -> assertThat(volunteerRepository.isVolunteerInShiftPlan(volunteerNotJoined.getId(), shiftPlanA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleA.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleB.getId())).isTrue(),
             () -> assertThat(volunteerRepository.hasUserRole(volunteerNotJoined.getId(), roleC.getId())).isTrue()
+        );
+    }
+
+    private void assertVolunteerInviteCreated(ShiftPlanInviteCreateResponseDto invite) {
+        assertThat(invite).isNotNull();
+        assertAll(
+            () -> assertThat(invite.getCode()).isNotBlank(),
+            () -> assertThat(invite.getType()).isEqualTo(ShiftPlanInviteType.VOLUNTEER_JOIN)
+        );
+    }
+
+    private void assertVolunteerInviteUsed(ShiftPlanInviteDetailsDto details) {
+        assertThat(details).isNotNull();
+        assertAll(
+            () -> assertThat(details.isJoined()).isTrue(),
+            () -> assertThat(details.getAttendingVolunteerCount()).isEqualTo(2),
+            () -> assertThat(details.getEventDto()).isNotNull(),
+            () -> assertThat(details.getInviteDto()).isNotNull()
         );
     }
 

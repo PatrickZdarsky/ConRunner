@@ -20,7 +20,6 @@ import at.conrunner.shift.repo.ShiftPlanRepository;
 import at.conrunner.shift.repo.ShiftRepository;
 import at.conrunner.shift.repo.VolunteerRepository;
 import io.restassured.http.Method;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ActivityIT extends RestITBase {
-    private static final String EVENT_CLONE_PATH = "/events/%d/clone";
     private static final String ACTIVITY_COLLECTION_PATH = "/events/%d/activities";
 
 
@@ -232,14 +230,6 @@ class ActivityIT extends RestITBase {
             () -> assertThat(assignmentA.getStatus()).isEqualTo(AssignmentStatus.ACCEPTED)
         );
     }
-
-    @AfterEach
-    void tearDown() {
-
-
-
-
-}
 
     @Test
     void createActivityAsAdminInsideEventBoundsSucceeds() {

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ConflictException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    private final Object dto;
+    private final transient Object dto;
 
     public ConflictException() {
         super();

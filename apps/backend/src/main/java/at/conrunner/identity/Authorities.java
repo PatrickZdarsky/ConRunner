@@ -1,6 +1,9 @@
 package at.conrunner.identity;
 
 public final class Authorities {
+    private Authorities() {
+    }
+
     public static final String PLATFORM_ADMIN_ROLE = "admin";
     static final String HAS_PLATFORM_ADMIN =
         "!authentication.authorities.?[authority.equalsIgnoreCase('" + PLATFORM_ADMIN_ROLE + "')].isEmpty()";

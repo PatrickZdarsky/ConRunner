@@ -4,7 +4,7 @@ import at.conrunner.communications.api.NotificationTypes;
 
 /** Maps trusted notification types and validated identifiers to relative application links. */
 final class NotificationLinks {
-    private static final String ID = "[1-9][0-9]{0,18}";
+    private static final String ID = "[1-9]\\d{0,18}";
 
     private NotificationLinks() {}
 

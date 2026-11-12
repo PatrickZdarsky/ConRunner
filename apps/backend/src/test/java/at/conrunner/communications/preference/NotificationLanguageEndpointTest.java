@@ -23,7 +23,8 @@ class NotificationLanguageEndpointTest {
         endpoint.put(auth, new NotificationLanguageEndpoint.Language("de"));
         verify(languages).setLanguage(user, "de");
         doThrow(new IllegalArgumentException()).when(languages).setLanguage(user, "fr");
-        assertThatThrownBy(() -> endpoint.put(auth, new NotificationLanguageEndpoint.Language("fr")))
+        var unsupportedLanguage = new NotificationLanguageEndpoint.Language("fr");
+        assertThatThrownBy(() -> endpoint.put(auth, unsupportedLanguage))
             .isInstanceOf(ResponseStatusException.class);
         assertThatThrownBy(() -> endpoint.get(null)).isInstanceOf(ResponseStatusException.class);
     }

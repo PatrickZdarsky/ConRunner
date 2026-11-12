@@ -34,7 +34,7 @@ public class UserEvent extends BaseEvent {
 
     public static UserEvent eventUpdate(Volunteer volunteer, Collection<ShiftPlan> plans) {
         return new UserEvent(EventType.USERS_EVENT_UPDATE,
-            RoutingKeys.format(USERS_EVENT_UPDATE, Map.of(findings"userId", volunteer.getId())), VolunteerPart.of(volunteer), ShiftPlanRefPart.of(plans))
+            RoutingKeys.format(USERS_EVENT_UPDATE, Map.of("userId", volunteer.getId())), VolunteerPart.of(volunteer), ShiftPlanRefPart.of(plans))
             .withDescription("User event updated for volunteer ID: " + volunteer.getId());
     }
 

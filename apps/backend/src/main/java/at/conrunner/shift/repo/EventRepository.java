@@ -17,7 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     boolean existsByNameIgnoreCase(String name);
 
     @Query("""
-        SELECT new at.control.shiftcontrol.shift.dto.rows.PlanVolunteerIdRow(
+        SELECT new at.conrunner.shift.dto.rows.PlanVolunteerIdRow(
                 p.id,
                 p.name,
                 v.id

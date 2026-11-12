@@ -32,7 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,7 +66,7 @@ class EventImportServiceImplTest {
     @Test
     void importEvent_createsLocationsActivitiesAndShiftsInOrder() throws Exception {
         EventImportWorkbookParser parser = new EventImportWorkbookParser();
-        service = new EventImportServiceImpl(org.mockito.Mockito.mock(EventManagementAudit.class), eventDao, shiftPlanDao, shiftDao, locationDao, activityDao, shiftMapper, parser, publisher);
+        service = new EventImportServiceImpl(mock(EventManagementAudit.class), eventDao, shiftPlanDao, shiftDao, locationDao, activityDao, shiftMapper, parser, publisher);
 
         MockMultipartFile file = new MockMultipartFile(
             "file",
@@ -108,7 +110,7 @@ class EventImportServiceImplTest {
 
         @SuppressWarnings("unchecked")
         var shiftsCaptor = org.mockito.ArgumentCaptor.forClass((Class<java.util.Collection<Shift>>) (Class<?>) java.util.Collection.class);
-        org.mockito.Mockito.verify(shiftDao).saveAll(shiftsCaptor.capture());
+        verify(shiftDao).saveAll(shiftsCaptor.capture());
         List<Shift> persistedShifts = List.copyOf(shiftsCaptor.getValue());
 
         assertThat(persistedShifts).hasSize(2);

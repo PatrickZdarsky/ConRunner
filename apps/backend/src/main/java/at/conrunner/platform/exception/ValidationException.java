@@ -31,7 +31,7 @@ import lombok.Getter;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class ValidationException extends RuntimeException {
     private final String context;
-    private final Map<String, Collection<?>> validationErrors;
+    private final transient Map<String, Collection<?>> validationErrors;
 
     public ValidationException() {
         super();
@@ -57,13 +57,13 @@ public class ValidationException extends RuntimeException {
         this.validationErrors = Collections.emptyMap();
     }
 
-    private ValidationException(String context, Map<String, Collection<?>> validationErrors) {
+    private ValidationException(String context, Map<String, ? extends Collection<?>> validationErrors) {
         super(buildMessage(context, validationErrors));
         this.context = context;
         this.validationErrors = Collections.unmodifiableMap(validationErrors);
     }
 
-    private static String buildMessage(String context, Map<String, Collection<?>> validationErrors) {
+    private static String buildMessage(String context, Map<String, ? extends Collection<?>> validationErrors) {
         if (validationErrors == null || validationErrors.isEmpty()) {
             return (context == null || context.isBlank())
                 ? "Validation failed."
@@ -81,6 +81,10 @@ public class ValidationException extends RuntimeException {
             sb.append(" - ").append(field).append(": ").append(joined).append("\n");
         });
         return sb.toString().trim();
+    }
+
+    public Map<String, Collection<?>> getValidationErrors() {
+        return validationErrors == null ? Map.of() : validationErrors;
     }
 
     public static Builder builder() {
@@ -109,10 +113,8 @@ public class ValidationException extends RuntimeException {
             if (e == null) {
                 continue;
             }
-            if (e.context != null && !e.context.isBlank()) {
-                if (builder.context == null || builder.context.isBlank()) {
-                    builder.context(e.context);
-                }
+            if (e.context != null && !e.context.isBlank() && (builder.context == null || builder.context.isBlank())) {
+                builder.context(e.context);
             }
             e.getValidationErrors().forEach(builder::error);
         }
@@ -120,7 +122,7 @@ public class ValidationException extends RuntimeException {
     }
 
     public static class Builder {
-        private final Map<String, Collection<?>> errors = new LinkedHashMap<>();
+        private final Map<String, Collection<Object>> errors = new LinkedHashMap<>();
         private String context;
 
         public Builder context(String context) {
@@ -133,10 +135,7 @@ public class ValidationException extends RuntimeException {
                 throw new IllegalArgumentException("field must not be null or blank");
             }
             if (messages != null && !messages.isEmpty()) {
-                @SuppressWarnings("unchecked")
-                Collection<Object> target = (Collection<Object>)
-                    errors.computeIfAbsent(field, k -> new ArrayList<>());
-                target.addAll(messages.stream().map(obj -> (Object) obj).toList());
+                errors.computeIfAbsent(field, k -> new ArrayList<>()).addAll(messages);
             }
             return this;
         }

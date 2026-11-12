@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import at.conrunner.platform.exception.IllegalArgumentException;
 import at.conrunner.shift.lib.type.SocialMediaLinkType;
@@ -17,8 +16,6 @@ import at.conrunner.shift.dto.event.SocialMediaLinkDto;
 public class SocialLinksParser {
     private SocialLinksParser() {
     }
-
-    private static final Pattern SPLIT = Pattern.compile("\\s*,\\s*");
 
     private static final Map<SocialMediaLinkType, Set<String>> DOMAIN_LABELS = Map.of(
         SocialMediaLinkType.INSTAGRAM, Set.of("instagram"),
@@ -38,8 +35,8 @@ public class SocialLinksParser {
         }
 
         var parsed = new ArrayList<SocialMediaLinkDto>();
-        for (String token : SPLIT.split(csv.trim())) {
-            if (token == null || token.isBlank()) {
+        for (String token : csv.split(",")) {
+            if (token.isBlank()) {
                 continue;
             }
 
@@ -120,7 +117,7 @@ public class SocialLinksParser {
     private static URI safeParse(String s) {
         try {
             return new URI(s);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException _) {
             throw new IllegalArgumentException("Invalid URL: " + s);
         }
     }

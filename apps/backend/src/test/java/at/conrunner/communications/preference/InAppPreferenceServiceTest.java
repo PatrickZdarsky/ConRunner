@@ -25,7 +25,8 @@ class InAppPreferenceServiceTest {
 
     @Test
     void rejectsUnknownTypes() {
-        assertThatThrownBy(() -> preferences.setEnabled(UUID.randomUUID(), "unknown", true))
+        var user = UUID.randomUUID();
+        assertThatThrownBy(() -> preferences.setEnabled(user, "unknown", true))
             .isInstanceOf(IllegalArgumentException.class);
         verifyNoInteractions(repository);
     }

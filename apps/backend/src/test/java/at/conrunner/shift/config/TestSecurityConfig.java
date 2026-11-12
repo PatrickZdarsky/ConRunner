@@ -17,7 +17,7 @@ public class TestSecurityConfig {
     public static final String HDR_USERNAME = "X-Test-Username";
 
     @Bean
-    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http, TestAuthFilter testAuthFilter) throws Exception {
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http, TestAuthFilter testAuthFilter) {
         return http
             .csrf(csrf -> csrf.disable())
             .securityContext(sc -> sc.requireExplicitSave(false))

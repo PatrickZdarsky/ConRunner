@@ -30,6 +30,7 @@ class AdminOnlyTest {
     static class AdminActions {
         @AdminOnly
         public void manage() {
+            // The test invokes authorization for this annotated method only.
         }
     }
 }

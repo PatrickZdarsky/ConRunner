@@ -151,12 +151,12 @@ class VolunteerCalendarServiceImplTest {
 
         String calendar = volunteerCalendarService.getCalendar("CALENDAR123");
 
-        assertThat(calendar).contains("BEGIN:VCALENDAR");
-        assertThat(calendar).contains("SUMMARY:ShiftControl Summit - Morning Shift");
-        assertThat(calendar).contains("Assigned slots: Check-in\\, Info Desk");
-        assertThat(calendar).contains("LOCATION:Hall A");
-        assertThat(calendar).contains("URL:https://maps.example.test/hall-a");
-        assertThat(calendar).contains("UID:shift-11-volunteer-" + USER_ID + "@shiftcontrol");
+        assertThat(calendar).contains("BEGIN:VCALENDAR")
+            .contains("SUMMARY:ShiftControl Summit - Morning Shift")
+            .contains("Assigned slots: Check-in\\, Info Desk")
+            .contains("LOCATION:Hall A")
+            .contains("URL:https://maps.example.test/hall-a")
+            .contains("UID:shift-11-volunteer-" + USER_ID + "@shiftcontrol");
     }
 
     @Test

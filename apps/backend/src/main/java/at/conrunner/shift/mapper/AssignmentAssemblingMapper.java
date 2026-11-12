@@ -12,6 +12,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 import at.conrunner.shift.entity.Assignment;
+import at.conrunner.shift.entity.Volunteer;
 import at.conrunner.shift.lib.type.TimeConstraintType;
 import at.conrunner.shift.dao.TimeConstraintDao;
 import at.conrunner.shift.dto.assignment.AssignmentContextDto;
@@ -38,7 +39,7 @@ public class AssignmentAssemblingMapper {
         Map<java.util.UUID, User> usersById = userService.getUsers(
             assignments.stream()
                 .map(Assignment::getAssignedVolunteer)
-                .map(volunteer -> volunteer.getId())
+                .map(Volunteer::getId)
                 .distinct()
                 .toList()
         ).stream().collect(Collectors.toMap(User::getId, Function.identity()));

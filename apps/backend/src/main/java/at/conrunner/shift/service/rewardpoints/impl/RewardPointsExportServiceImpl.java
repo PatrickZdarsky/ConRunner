@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+ import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,37 +170,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
             .sorted(Comparator.comparing(e -> e.getEvent().getStartTime()))
             .toList();
 
-        class VolRow {
-            String volunteerId;
-            String name;
-            String email;
-            final Map<String, Integer> pointsByEventId = new HashMap<>();
-            int totalFinished = 0;
-            int totalAll = 0;
-        }
-
-        Map<String, VolRow> vols = new HashMap<>();
-
-        for (RewardPointsExportDto e : events) {
-            String eventId = e.getEvent().getId();
-
-            for (VolunteerPointsDto vp : e.getVolunteerPoints()) {
-                VolRow vr = vols.computeIfAbsent(vp.getVolunteerId(), id -> {
-                    VolRow x = new VolRow();
-                    x.volunteerId = id;
-                    x.name = vp.getName();
-                    x.email = vp.getEmail();
-                    return x;
-                });
-
-                int pts = vp.getRewardPoints();
-                vr.pointsByEventId.put(eventId, pts);
-                vr.totalAll += pts;
-                if (e.isEventFinished()) {
-                    vr.totalFinished += pts;
-                }
-            }
-        }
+        Map<String, VolunteerSummary> vols = summarizeVolunteers(events);
 
         int r = 0;
         Row header = sheet.createRow(r++);
@@ -217,11 +189,11 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
             cell.setCellStyle(headerStyle);
         }
 
-        List<VolRow> sortedVols = vols.values().stream()
-            .sorted(Comparator.comparing((VolRow v) -> v.name == null ? "" : v.name))
+        List<VolunteerSummary> sortedVols = vols.values().stream()
+            .sorted(Comparator.comparing((VolunteerSummary v) -> v.name == null ? "" : v.name))
             .toList();
 
-        for (VolRow v : sortedVols) {
+        for (VolunteerSummary v : sortedVols) {
             Row row = sheet.createRow(r++);
             int cc = 0;
 
@@ -264,6 +236,41 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
         }
     }
 
+    private Map<String, VolunteerSummary> summarizeVolunteers(List<RewardPointsExportDto> events) {
+        Map<String, VolunteerSummary> vols = new HashMap<>();
+
+        for (RewardPointsExportDto e : events) {
+            String eventId = e.getEvent().getId();
+
+            for (VolunteerPointsDto vp : e.getVolunteerPoints()) {
+                VolunteerSummary vr = vols.computeIfAbsent(vp.getVolunteerId(), id -> {
+                    VolunteerSummary x = new VolunteerSummary();
+                    x.volunteerId = id;
+                    x.name = vp.getName();
+                    x.email = vp.getEmail();
+                    return x;
+                });
+
+                int pts = vp.getRewardPoints();
+                vr.pointsByEventId.put(eventId, pts);
+                vr.totalAll += pts;
+                if (e.isEventFinished()) {
+                    vr.totalFinished += pts;
+                }
+            }
+        }
+        return vols;
+    }
+
+    private static class VolunteerSummary {
+        String volunteerId;
+        String name;
+        String email;
+        final Map<String, Integer> pointsByEventId = new HashMap<>();
+        int totalFinished = 0;
+        int totalAll = 0;
+    }
+
     private static void createTextCell(Row row, int col, String value, CellStyle style) {
         Cell cell = row.createCell(col);
         cell.setCellValue(value == null ? "" : value);
@@ -273,7 +280,7 @@ public class RewardPointsExportServiceImpl extends RewardPointsServiceImpl imple
     private static void createDateCell(Row row, int col, Instant instant, CellStyle style) {
         Cell cell = row.createCell(col);
         if (instant != null) {
-            cell.setCellValue(Date.from(instant));
+            cell.setCellValue(LocalDateTime.ofInstant(instant.truncatedTo(ChronoUnit.MILLIS), ZoneId.systemDefault()));
         } else {
             cell.setBlank();
         }

@@ -42,7 +42,6 @@ class TradePartTest {
         offeringSlot.setDescription("Offering Description");
         offeringSlot.setShift(shift);
 
-        AssignmentKey offeringId = new AssignmentKey(1L, "volunteer-1");
         Assignment offeringAssignment = new Assignment();
         offeringAssignment.setStatus(AssignmentStatus.ACCEPTED);
         offeringAssignment.setPositionSlot(offeringSlot);
@@ -54,7 +53,6 @@ class TradePartTest {
         requestedSlot.setDescription("Requested Description");
         requestedSlot.setShift(shift);
 
-        AssignmentKey requestedId = new AssignmentKey(2L, "volunteer-2");
         Assignment requestedAssignment = new Assignment();
         requestedAssignment.setStatus(AssignmentStatus.ACCEPTED);
         requestedAssignment.setPositionSlot(requestedSlot);

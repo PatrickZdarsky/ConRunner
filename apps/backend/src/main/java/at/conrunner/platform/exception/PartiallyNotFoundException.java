@@ -1,6 +1,5 @@
 package at.conrunner.platform.exception;
 
-import java.lang.IllegalArgumentException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,17 +30,17 @@ import org.slf4j.LoggerFactory;
  * }</pre>
  */
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class PartiallyNotFoundException extends RuntimeException { // todo refactor in Exception ticket
+public class PartiallyNotFoundException extends RuntimeException {
     private final String context;
-    private final Map<String, Collection<?>> missingEntities;
+    private final transient Map<String, Collection<?>> missingEntities;
 
-    private PartiallyNotFoundException(String context, Map<String, Collection<?>> missingEntities) {
+    private PartiallyNotFoundException(String context, Map<String, ? extends Collection<?>> missingEntities) {
         super(buildMessage(context, missingEntities));
         this.context = context;
         this.missingEntities = Collections.unmodifiableMap(missingEntities);
     }
 
-    private static String buildMessage(String context, Map<String, Collection<?>> missingEntities) {
+    private static String buildMessage(String context, Map<String, ? extends Collection<?>> missingEntities) {
         if (missingEntities != null && !missingEntities.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             if (context != null && !context.isBlank()) {
@@ -87,11 +86,8 @@ public class PartiallyNotFoundException extends RuntimeException { // todo refac
             if (e == null) {
                 continue;
             }
-            if (e.context != null && !e.context.isBlank()) {
-                // naive: keep first non-empty context
-                if (builder.context == null || builder.context.isBlank()) {
-                    builder.context(e.context);
-                }
+            if (e.context != null && !e.context.isBlank() && (builder.context == null || builder.context.isBlank())) {
+                builder.context(e.context);
             }
             e.getMissingEntities().forEach(builder::missing);
         }
@@ -104,11 +100,11 @@ public class PartiallyNotFoundException extends RuntimeException { // todo refac
     }
 
     public Map<String, Collection<?>> getMissingEntities() {
-        return missingEntities;
+        return missingEntities == null ? Map.of() : missingEntities;
     }
 
     public static class Builder {
-        private final Map<String, Collection<?>> missing = new LinkedHashMap<>();
+        private final Map<String, Collection<Object>> missing = new LinkedHashMap<>();
         private String context;
 
         /**
@@ -131,10 +127,7 @@ public class PartiallyNotFoundException extends RuntimeException { // todo refac
                 throw new IllegalArgumentException("entityType must not be null or blank");
             }
             if (unresolved != null && !unresolved.isEmpty()) {
-                // Safe cast via Object to avoid wildcard capture issue
-                Collection<Object> target = (Collection<Object>)
-                    missing.computeIfAbsent(entityType, k -> new ArrayList<>());
-                target.addAll(unresolved.stream().map(obj -> (Object) obj).toList());
+                missing.computeIfAbsent(entityType, k -> new ArrayList<>()).addAll(unresolved);
             }
             return this;
         }

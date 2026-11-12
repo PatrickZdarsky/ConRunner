@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class PositionSlotIT extends RestITBase {
     private static final String POSITIONSLOT_PATH = "/position-slots";
-    private static final String SHIFT_POSITIONSLOT_PATH = "shifts/%d/position-slots";
     private static final String REWARDPOINTS_PATH = "/reward-points";
     private static final String LEAVE_POSITIONSLOT_PATH = "/position-slots/%s/leave";
     private static final String JOIN_POSITIONSLOT_PATH = "/position-slots/%s/join";
@@ -399,7 +398,16 @@ class PositionSlotIT extends RestITBase {
             volunteerB.getId()
         );
 
-        // TODO also check here if assigments list of position slot of assigment has correct entries (old removed, new added)
+        var positionSlotAfterClaim = getRequestAsAssigned(
+            POSITIONSLOT_PATH + "/" + positionSlotA.getId(),
+            PositionSlotDto.class,
+            volunteerB.getId()
+        );
+        assertThat(positionSlotAfterClaim.getAssignments())
+            .extracting(assignment -> assignment.getAssignedVolunteer().getId())
+            .contains(volunteerB.getId())
+            .doesNotContain(volunteerA.getId());
+
         assertAll(
             () -> assertThat(response).isNotNull(),
             () -> assertThat(response.getPositionSlotId()).isEqualTo(String.valueOf(positionSlotA.getId())),

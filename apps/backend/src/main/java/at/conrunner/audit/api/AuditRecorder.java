@@ -13,12 +13,14 @@ public class AuditRecorder {
     }
     public void record(String module, String action, String subjectType, String subjectId,
                        String subjectLabel, String summary, List<AuditEntry.Change> changes) {
-        recordAs(context.actor(), module, action, subjectType, subjectId, subjectLabel, summary, changes);
+        recordAs(context.actor(), module, action, new Subject(subjectType, subjectId, subjectLabel), summary, changes);
     }
+    public record Subject(String type, String id, String label) {}
+
     /** Background callers must supply an explicit system actor. */
-    public void recordAs(AuditEntry.Actor actor, String module, String action, String subjectType,
-                         String subjectId, String subjectLabel, String summary, List<AuditEntry.Change> changes) {
-        writer.record(new AuditEntry(actor, module, action, subjectType, subjectId, subjectLabel,
+    public void recordAs(AuditEntry.Actor actor, String module, String action, Subject subject,
+                         String summary, List<AuditEntry.Change> changes) {
+        writer.record(new AuditEntry(actor, module, action, subject.type(), subject.id(), subject.label(),
             summary, context.correlationId(), changes));
     }
 }

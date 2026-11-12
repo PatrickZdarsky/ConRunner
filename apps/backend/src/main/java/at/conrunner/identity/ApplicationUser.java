@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Getter
 public abstract class ApplicationUser implements UserDetails, AuthenticatedActor {
     private final UUID userId;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private final Collection<GrantedAuthority> authorities;
     private final String username;
     private final boolean enabled;
 
@@ -25,7 +26,7 @@ public abstract class ApplicationUser implements UserDetails, AuthenticatedActor
                               String username,
                               boolean enabled) {
         this.userId = userId;
-        this.authorities = authorities;
+        this.authorities = List.copyOf(authorities);
         this.username = username;
         this.enabled = enabled;
     }
@@ -46,7 +47,7 @@ public abstract class ApplicationUser implements UserDetails, AuthenticatedActor
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> authorities() {
+    public Collection<GrantedAuthority> authorities() {
         return authorities;
     }
 

@@ -54,7 +54,7 @@ public record EventData(
             if (uri.getScheme() == null || uri.getHost() == null) {
                 throw new IllegalArgumentException();
             }
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException _) {
             throw new EventCatalogValidationException(label + " must be a valid absolute URL");
         }
         return normalized;

@@ -69,7 +69,8 @@ class AuditPersistenceTest {
     @Test void requiresTransactionAndRollsBackAlongsideBusinessData() {
         var noTx = new TransactionTemplate(transactions);
         noTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
-        noTx.executeWithoutResult(s -> assertThatThrownBy(() -> writer.record(entry(UUID.randomUUID(), "x")))
+        var outsideTransaction = entry(UUID.randomUUID(), "x");
+        noTx.executeWithoutResult(s -> assertThatThrownBy(() -> writer.record(outsideTransaction))
             .isInstanceOf(IllegalTransactionStateException.class));
         UUID id = UUID.randomUUID();
         independent().executeWithoutResult(status -> {
@@ -83,13 +84,15 @@ class AuditPersistenceTest {
     }
     @Test void failedAuditInsertRollsBackBusinessWrite() {
         UUID id = UUID.randomUUID();
-        assertThatThrownBy(() -> independent().executeWithoutResult(status -> {
+        var transaction = independent();
+        java.util.function.Consumer<org.springframework.transaction.TransactionStatus> write = status -> {
             jdbc.update("insert into audit_entry (id,occurred_at,actor_user_id,module,action,subject_type,subject_ref,summary) values (?,current_timestamp,?,'x','x','x','business','x')", id, id);
             var invalid = new AuditEntry(new AuditEntry.Actor(AuditEntry.ActorKind.HUMAN, id, null, "Alex"),
                 "shift", "assignment.updated", "assignment", "invalid", null, "Updated", null,
                 List.of(new AuditEntry.Change("status", null, "invalid\u0000text")));
             writer.record(invalid);
-        })).isInstanceOf(RuntimeException.class);
+        };
+        assertThatThrownBy(() -> transaction.executeWithoutResult(write)).isInstanceOf(RuntimeException.class);
         assertThat(jdbc.queryForObject("select count(*) from audit_entry where id=?", Integer.class, id)).isZero();
     }
     @Test void retentionDeletesExpiredEntriesAndTheirChanges() {
@@ -112,8 +115,6 @@ class AuditPersistenceTest {
         var users = org.mockito.Mockito.mock(UserService.class);
         var current = org.mockito.Mockito.mock(CurrentShiftActor.class);
         var actor = org.mockito.Mockito.mock(ShiftActor.class);
-        @SuppressWarnings("unchecked") var traces = (org.springframework.beans.factory.ObjectProvider<io.micrometer.tracing.Tracer>)
-            org.mockito.Mockito.mock(org.springframework.beans.factory.ObjectProvider.class);
         UUID userId = UUID.randomUUID();
         org.mockito.Mockito.when(current.find()).thenReturn(java.util.Optional.of(actor));
         org.mockito.Mockito.when(actor.requireUserId()).thenReturn(userId);

@@ -42,5 +42,4 @@ public class PositionConstraint {
             ", target=" + target +
             '}';
     }
-    // TODO: Add constraint details here
 }

@@ -2,19 +2,40 @@ package at.conrunner.audit.history;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class AuditHistory {
+    private static final String SEARCH_FILTERS = """
+        where (cast(:fromTime as timestamptz) is null or occurred_at >= :fromTime)
+          and (cast(:untilTime as timestamptz) is null or occurred_at < :untilTime)
+          and (cast(:actorId as uuid) is null or actor_user_id = :actorId)
+          and (cast(:module as varchar) is null or module = :module)
+          and (cast(:action as varchar) is null or action = :action)
+          and (cast(:subjectType as varchar) is null or subject_type = :subjectType)
+          and (cast(:subjectId as varchar) is null or subject_ref = :subjectId)
+        """;
+    private static final String COUNT_ENTRIES = "select count(*) from audit_entry " + SEARCH_FILTERS;
+    private static final String FIND_ENTRIES = "select * from audit_entry " + SEARCH_FILTERS
+        + "order by occurred_at desc, id desc limit :size offset :offset";
+
     private final JdbcTemplate jdbc;
-    AuditHistory(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+    private final NamedParameterJdbcTemplate searchJdbc;
+
+    AuditHistory(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+        this.searchJdbc = new NamedParameterJdbcTemplate(jdbc);
+    }
+
     record Change(String field, String before, String after) {}
     record Entry(UUID id, Instant occurredAt, String actorKind, UUID actorUserId, String actorIdentifier,
                  String actorLabel, String module, String action, String subjectType, String subjectId,
@@ -24,19 +45,18 @@ class AuditHistory {
 
     @Transactional(readOnly = true)
     Result search(AuditSearch filter, int page, int size) {
-        var where = new StringBuilder(" where 1=1");
-        var args = new ArrayList<Object>();
-        add(where, args, "occurred_at >= ?", filter.from() == null ? null : Timestamp.from(filter.from()));
-        add(where, args, "occurred_at < ?", filter.until() == null ? null : Timestamp.from(filter.until()));
-        add(where, args, "actor_user_id = ?", filter.actorUserId());
-        add(where, args, "module = ?", filter.module());
-        add(where, args, "action = ?", filter.action());
-        add(where, args, "subject_type = ?", filter.subjectType());
-        add(where, args, "subject_ref = ?", filter.subjectId());
-        Long total = jdbc.queryForObject("select count(*) from audit_entry" + where, Long.class, args.toArray());
-        var pageArgs = new ArrayList<>(args); pageArgs.add(size); pageArgs.add((long) page * size);
-        var entries = jdbc.query("select * from audit_entry" + where + " order by occurred_at desc, id desc limit ? offset ?",
-            (rs, row) -> map(rs), pageArgs.toArray());
+        var parameters = new MapSqlParameterSource()
+            .addValue("fromTime", utc(filter.from()))
+            .addValue("untilTime", utc(filter.until()))
+            .addValue("actorId", filter.actorUserId())
+            .addValue("module", filter.module())
+            .addValue("action", filter.action())
+            .addValue("subjectType", filter.subjectType())
+            .addValue("subjectId", filter.subjectId())
+            .addValue("size", size)
+            .addValue("offset", (long) page * size);
+        Long total = searchJdbc.queryForObject(COUNT_ENTRIES, parameters, Long.class);
+        var entries = searchJdbc.query(FIND_ENTRIES, parameters, (rs, _) -> map(rs));
         return new Result(entries, page, size, total == null ? 0 : total);
     }
     private Entry map(ResultSet rs) throws SQLException {
@@ -49,7 +69,7 @@ class AuditHistory {
             rs.getString("subject_label"), rs.getString("summary"), rs.getString("result"), rs.getString("correlation_id"),
             rs.getInt("schema_version"), changes);
     }
-    private static void add(StringBuilder sql, List<Object> args, String expression, Object value) {
-        if (value != null) { sql.append(" and ").append(expression); args.add(value); }
+    private static OffsetDateTime utc(Instant instant) {
+        return instant == null ? null : instant.atOffset(ZoneOffset.UTC);
     }
 }

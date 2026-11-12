@@ -13,7 +13,7 @@ public final class EmailAddress {
             var address = new InternetAddress(value, true);
             address.validate();
             return value.equals(address.getAddress()) && address.getPersonal() == null;
-        } catch (AddressException e) {
+        } catch (AddressException _) {
             return false;
         }
     }

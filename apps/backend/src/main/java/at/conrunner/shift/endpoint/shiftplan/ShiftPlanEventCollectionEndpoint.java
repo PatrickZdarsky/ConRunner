@@ -38,7 +38,6 @@ public class ShiftPlanEventCollectionEndpoint {
     public Collection<ShiftPlanDto> getAllShiftPlansOfEvent(@PathVariable String eventId) {
         return shiftPlanService.getAllOfEvent(ConvertUtil.idToLong(eventId));
     }
-    //Todo: Add search capability in future
 
     @PostMapping()
     @Operation(

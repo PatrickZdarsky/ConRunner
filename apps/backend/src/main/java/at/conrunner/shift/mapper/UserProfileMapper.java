@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import at.conrunner.shift.dto.role.RoleDto;
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 
 import at.conrunner.shift.entity.Event;
 import at.conrunner.shift.entity.ShiftPlan;
@@ -14,9 +12,10 @@ import at.conrunner.shift.lib.util.ConvertUtil;
 import at.conrunner.shift.dto.userprofile.UserProfileDto;
 import at.conrunner.identity.User;
 
-@RequiredArgsConstructor
-@Service
 public class UserProfileMapper {
+    private UserProfileMapper() {
+    }
+
     public static UserProfileDto toUserProfileDto(
         User user,
         Volunteer volunteer,

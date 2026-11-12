@@ -73,7 +73,6 @@ public class TestEntityFactory {
             .startTime(Instant.now())
             .endTime(Instant.now())
             .build();
-        // TODO add other fields
         return eventRepository.save(event);
     }
 

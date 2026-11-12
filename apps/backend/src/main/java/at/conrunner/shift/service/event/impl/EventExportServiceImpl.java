@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -63,7 +63,7 @@ public class EventExportServiceImpl implements EventExportService {
         var exportFormat = ExportFormat.fromString(format);
         if (exportFormat == null) {
             throw new BadRequestException("Invalid format: " + format + ". Supported formats are: "
-                + Stream.of(ExportFormat.VALUES).map(Enum::name).collect(Collectors.joining(", ")));
+                + Stream.of(ExportFormat.values()).map(Enum::name).collect(Collectors.joining(", ")));
         }
         var event = eventDao.getById(eventId);
 
@@ -221,7 +221,7 @@ public class EventExportServiceImpl implements EventExportService {
             return s;
         }
         if (v instanceof Boolean b) {
-            return b ? "true" : "false";
+            return b.toString();
         }
         if (v instanceof Integer || v instanceof Long || v instanceof Short) {
             return String.valueOf(v);
@@ -360,22 +360,22 @@ public class EventExportServiceImpl implements EventExportService {
         }
 
         if (value instanceof Instant instant) {
-            cell.setCellValue(Date.from(instant));
+            cell.setCellValue(LocalDateTime.ofInstant(instant.truncatedTo(ChronoUnit.MILLIS), ZoneId.systemDefault()));
             cell.setCellStyle(dateTimeStyle);
             return;
         }
         if (value instanceof LocalDateTime ldt) {
-            cell.setCellValue(Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()));
+            cell.setCellValue(ldt.atZone(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS));
             cell.setCellStyle(dateTimeStyle);
             return;
         }
         if (value instanceof OffsetDateTime odt) {
-            cell.setCellValue(Date.from(odt.toInstant()));
+            cell.setCellValue(odt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS));
             cell.setCellStyle(dateTimeStyle);
             return;
         }
         if (value instanceof ZonedDateTime zdt) {
-            cell.setCellValue(Date.from(zdt.toInstant()));
+            cell.setCellValue(zdt.withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS));
             cell.setCellStyle(dateTimeStyle);
             return;
         }
