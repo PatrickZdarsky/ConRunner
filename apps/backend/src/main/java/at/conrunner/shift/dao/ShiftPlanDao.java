@@ -1,0 +1,17 @@
+package at.conrunner.shift.dao;
+
+import java.util.UUID;
+import java.util.Collection;
+import java.util.Set;
+
+import at.conrunner.shift.entity.ShiftPlan;
+
+public interface ShiftPlanDao extends BasicDao<ShiftPlan, Long> {
+    Collection<ShiftPlan> findByEventId(Long eventId);
+
+    Collection<ShiftPlan> findAll();
+
+    Collection<ShiftPlan> findAllUserRelatedShiftPlansInEvent(UUID userId, String eventId);
+
+    Collection<ShiftPlan> getByIds(Set<Long> shiftPlanIds);
+}

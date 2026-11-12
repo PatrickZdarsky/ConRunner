@@ -1,0 +1,101 @@
+package at.conrunner.identity.impl;
+
+import at.conrunner.identity.entity.UserAccountStatus;
+import at.conrunner.identity.User;
+import at.conrunner.identity.UserAccountMapper;
+import at.conrunner.identity.UserSearchRequest;
+import at.conrunner.identity.UserService;
+import at.conrunner.identity.entity.UserAccountEntity;
+import at.conrunner.identity.repo.UserAccountRepository;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+    private final UserAccountRepository userAccountRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Collection<User> getPlatformAdmins() {
+        return userAccountRepository.findAllPlatformAdminsWithExternalIdentities().stream()
+            .filter(account -> account.getStatus() == UserAccountStatus.ACTIVE)
+            .map(UserAccountMapper::toDto).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUser(@NonNull UUID userId) {
+        UserAccountEntity account = userAccountRepository.findById(userId).orElse(null);
+        if (account == null) {
+            throw new NoSuchElementException("User not found: " + userId);
+        }
+        return UserAccountMapper.toDto(account);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Collection<User> getUsers(@NonNull Collection<UUID> userIds) {
+        Set<UUID> requestedIds = userIds.stream()
+            .filter(Objects::nonNull)
+            .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
+        if (requestedIds.isEmpty()) {
+            return List.of();
+        }
+
+        Map<UUID, UserAccountEntity> accountsByUserId = new LinkedHashMap<>();
+        userAccountRepository.findAllById(requestedIds)
+            .forEach(account -> accountsByUserId.put(account.getId(), account));
+        return requestedIds.stream()
+            .map(accountsByUserId::get)
+            .filter(Objects::nonNull)
+            .map(UserAccountMapper::toDto)
+            .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> searchUsers(int page, int size, @NonNull UserSearchRequest searchDto) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<UUID> accountIdPage = userAccountRepository.searchUserIds(toSearchPattern(searchDto.getName()), pageable);
+        if (accountIdPage.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, accountIdPage.getTotalElements());
+        }
+
+        Map<UUID, UserAccountEntity> accountsById = userAccountRepository
+            .findAllWithExternalIdentitiesByIdIn(accountIdPage.getContent())
+            .stream()
+            .collect(java.util.stream.Collectors.toMap(
+                UserAccountEntity::getId,
+                java.util.function.Function.identity()));
+
+        List<User> users = accountIdPage.getContent().stream()
+            .map(accountsById::get)
+            .filter(Objects::nonNull)
+            .map(UserAccountMapper::toDto)
+            .toList();
+        return new PageImpl<>(users, pageable, accountIdPage.getTotalElements());
+    }
+
+    private static String toSearchPattern(String name) {
+        return name == null || name.isBlank() ? null : "%" + name.trim().toLowerCase(Locale.ROOT) + "%";
+    }
+
+}

@@ -1,0 +1,74 @@
+package at.conrunner.shift.dao.impl;
+
+import java.util.UUID;
+import java.util.Collection;
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+
+import at.conrunner.shift.entity.PositionSlot;
+import at.conrunner.shift.entity.PositionSlotPreference;
+import at.conrunner.shift.entity.PositionSlotPreferenceId;
+import at.conrunner.shift.dao.PositionSlotDao;
+import at.conrunner.shift.repo.PositionSlotPreferenceRepository;
+import at.conrunner.shift.repo.PositionSlotRepository;
+
+@RequiredArgsConstructor
+@Component
+public class PositionSlotDaoImpl implements PositionSlotDao {
+    private final PositionSlotRepository positionSlotRepository;
+    private final PositionSlotPreferenceRepository positionSlotPreferenceRepository;
+
+    @Override
+    public @NonNull String getName() {
+        return "PositionSlot";
+    }
+
+    @Override
+    public @NonNull Optional<PositionSlot> findById(Long id) {
+        return positionSlotRepository.findById(id);
+    }
+
+    @Override
+    public PositionSlot save(PositionSlot entity) {
+        return positionSlotRepository.save(entity);
+    }
+
+    @Override
+    public Collection<PositionSlot> saveAll(Collection<PositionSlot> entities) {
+        return positionSlotRepository.saveAll(entities);
+    }
+
+    @Override
+    public void delete(PositionSlot entity) {
+        positionSlotRepository.delete(entity);
+    }
+
+    @Override
+    public void setPreference(@NonNull UUID volunteerId, long positionSlotId, int preference) {
+        var preferenceId = PositionSlotPreferenceId.of(volunteerId.toString(), positionSlotId);
+        var positionSlotPreference = positionSlotPreferenceRepository.findById(preferenceId);
+        if (positionSlotPreference.isPresent()) {
+            var existingPreference = positionSlotPreference.get();
+            existingPreference.setPreferenceLevel(preference);
+            positionSlotPreferenceRepository.save(existingPreference);
+        } else {
+            var newPreference = PositionSlotPreference.builder()
+                    .id(preferenceId)
+                    .preferenceLevel(preference)
+                    .build();
+            positionSlotPreferenceRepository.save(newPreference);
+        }
+    }
+
+    @Override
+    public int getPreference(@NonNull UUID volunteerId, long positionSlotId) {
+        var preferenceId = PositionSlotPreferenceId.of(volunteerId.toString(), positionSlotId);
+        var positionSlotPreference = positionSlotPreferenceRepository.findById(preferenceId);
+
+        return positionSlotPreference.map(PositionSlotPreference::getPreferenceLevel).orElse(0);
+    }
+}
