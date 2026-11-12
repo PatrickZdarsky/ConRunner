@@ -1,5 +1,8 @@
-# Helm
+# ConRunner Helm packaging
 
-Reserved for the Kubernetes chart if Kubernetes remains a supported deployment target. Do not copy
-the old chart until its routing, health, secrets, and database lifecycle have been reconciled with
-the new runtime.
+Kubernetes packaging is pending. The [Compose setup](../compose/README.md) documents local
+infrastructure, and the [web container guide](../../apps/web/README.md#container-build) documents
+the current image and API routing.
+
+A future chart needs to define HTTP and WebSocket routing, health probes, secrets and OIDC
+configuration, and the PostgreSQL migration and backup lifecycle.

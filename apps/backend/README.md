@@ -1,173 +1,161 @@
-# ShiftControl backend
+# ConRunner backend
 
-## Notification email
+ConRunner runs the backend as one Spring Boot application under `at.conrunner`. Domain modules
+share the deployment and database and own their own persistence and workflows.
 
-Email delivery is disabled by default. Configure `spring.mail.host`, the SMTP port and credentials,
-then set `shiftcontrol.communications.email.enabled=true` and
-`shiftcontrol.communications.email.from` to a sender address and
-`shiftcontrol.communications.email.frontend-base-url` to the HTTPS application URL. Each user must opt in for the
-notification type and have a verified email claim from the identity provider. SMTP timeouts are
-configured in `application.yaml`. Delivery is retried and is at least once: a process failure after
-SMTP accepts a message can result in a duplicate.
+## Run and test
+
+Use JDK 25 and the Maven wrapper at the repository root. The [local infrastructure guide](../../ops/compose/README.md)
+shows how to start PostgreSQL and Keycloak and run the backend with the `local` profile. The local
+API exposes [Swagger UI](http://localhost:8081/swagger-ui.html) and
+[OpenAPI JSON](http://localhost:8081/v3/api-docs).
+
+```sh
+./mvnw test
+```
+
+Docker is required for PostgreSQL tests that use Testcontainers. For browser tests, see
+[the Playwright guide](../../e2e/README.md). If you change an HTTP endpoint or DTO, regenerate the
+Angular client with `./dev client` from the repository root.
+
+## Application modules
+
+| Package | Ownership |
+| --- | --- |
+| `identity` | Local user UUIDs, external identity mappings, authentication, and platform roles |
+| `eventcatalog` | Events, locations, and programme sessions |
+| `shift` | Volunteers, plan membership, invites, shifts, roles, assignments, trades, and rewards |
+| `communications` | Notification requests, preferences, history, and email delivery |
+| `audit` | Audit entries, search, and retention |
+| `platform` | Shared technical facilities, including WebSocket connections |
+
+The shift HTTP API still serves event management requests and delegates catalogue operations to
+`eventcatalog`. See the [architecture guide](../../docs/architecture/README.md) for module boundaries,
+[ADR-0002](../../docs/adr/0002-compatibility-first-shift-migration.md) for shift migration decisions,
+and the [Liquibase guide](src/main/resources/db/changelog/README.md) for schema ownership.
+
+Configuration examples use the property keys supported by the application. The `shiftcontrol.*`
+prefix still applies to several runtime settings.
+
+## OIDC configuration
+
+The backend is an OAuth 2.0 resource server. Production configuration must provide the trusted issuer,
+its JWK set URI, and the access-token audience expected by this API. The realm and audience
+below are example deployment values.
+
+```yaml
+oidc:
+  provider:
+    issuer-uri: https://identity.example/realms/conrunner
+    jwk-set-uri: https://identity.example/realms/conrunner/protocol/openid-connect/certs
+    audience: conrunner-backend
+    username-claim: preferred_username
+```
+
+`allowed-issuers` defaults to `issuer-uri`. The identity module owns OIDC subjects and issuers.
+APIs and other modules use ConRunner's local user UUID. `username-claim` selects the token claim
+used for the local username and defaults to `preferred_username`. The local account also stores
+email, email verification state, and avatar information when available.
+
+Bootstrap administrators by exact issuer and subject. For a machine client, list the authorities
+the client needs, such as `audit.read` for a client that queries the audit timeline.
+
+```yaml
+identity:
+  bootstrap-platform-admins:
+    - issuer: https://identity.example/realms/conrunner
+      subject: 8c4d9d54-6b2a-4b42-a285-1bf1d5494881
+  machine-clients:
+    - client-id: audit-reader
+      authorities:
+        - audit.read
+```
+
+ConRunner grants and persists the local `PLATFORM_ADMIN` role when that exact issuer and
+subject sign in. A machine client receives only its configured authorities, and
+only when all of those authorities are also present in its token's `scope` or `scp` claims.
+
+## Notifications
+
+### Email and preferences
+
+Email delivery is disabled by default. Configure the SMTP host, port, and credentials under
+`spring.mail`, then set the following properties.
+
+| Property | Value |
+| --- | --- |
+| `shiftcontrol.communications.email.enabled` | `true` to start the email worker |
+| `shiftcontrol.communications.email.from` | Sender address |
+| `shiftcontrol.communications.email.frontend-base-url` | HTTPS URL of the web app |
+
+Email requires opt-in for the notification type and a verified email claim from the identity
+provider. SMTP timeouts are defined in [`application.yaml`](src/main/resources/application.yaml).
+Delivery uses at-least-once retries. If the process fails after SMTP accepts a message, a retry
+can send a duplicate.
 
 Notification history is available at `GET /api/v1/me/notifications` and its
 read state can be changed with `PATCH /api/v1/me/notifications/{id}` using `{"read": true}` or
 `{"read": false}`. `GET /api/v1/me/notification-preferences` lists supported notification types
-with a display label and current in-app and email settings. Clients should use these returned type
-identifiers instead of maintaining their own list. Manage a setting with `GET` or `PUT` on
+with a display label and current in-app and email settings. Use the returned type IDs to read or
+update a setting with `GET` or `PUT` on
 `/api/v1/me/notification-preferences/{in-app|email}/{type}`, using `{"enabled": true}` or
-`{"enabled": false}` for PUT. In-app defaults to enabled and email defaults to disabled. Settings
-are captured when the notification request is created; email opt-out and address verification are
-also rechecked before delivery. The former shift profile notification-settings and recipient endpoints
-have been removed; the legacy notification service must not be used as a delivery consumer.
+`{"enabled": false}` for PUT. In-app defaults to enabled and email defaults to disabled. ConRunner
+captures settings when it creates a notification request and rechecks email opt-out and address
+verification before delivery. Read or update the notification language with `GET` or `PUT` on
+`/api/v1/me/notification-preferences/language`. PUT takes a body such as `{"language": "en"}`.
+See the [legacy notification migration notes](../../docs/architecture/legacy-notifications.md)
+for retired endpoints and the previous delivery path.
 
-## Notification WebSocket
+### WebSocket updates
 
 An authenticated user calls `POST /api/v1/realtime/ticket`, opens a WebSocket to
 `/api/v1/realtime/ws`, then sends the returned `ticket` as its first text message within
 10 seconds. The server replies with `{"type":"ready"}` and emits
 `{"type":"notifications.changed"}` whenever the user's history changes. Fetch notification
 history on connection and whenever that message arrives. Reconnect with a new ticket after a
-disconnect; connections expire when the access token expires or after 15 minutes, whichever comes
+disconnect. Connections expire when the access token expires or after 15 minutes, whichever comes
 first. Tickets are single-use and expire after at most 60 seconds.
-Same-origin connections are allowed by default; set the comma-separated
-`shiftcontrol.platform.realtime.allowed-origins` for explicitly trusted separate frontend origins.
+
+The backend accepts same-origin connections by default. Set
+`shiftcontrol.platform.realtime.allowed-origins` to a comma-separated list of additional trusted
+frontend origins.
 Use HTTPS/WSS in deployment. Instances poll a shared database revision, so a connection on any
 instance can receive changes committed by another instance.
-
-## Legacy RabbitMQ events
-
-Legacy event publishing is disabled by default. To enable it, set
-`shiftcontrol.events.rabbitmq.enabled: true` in application configuration (or set
-`SHIFTCONTROL_EVENTS_RABBITMQ_ENABLED=true`) and configure the broker using Spring Boot's
-`spring.rabbitmq` properties. The publisher sends to the `shiftcontrol` topic exchange.
-An optional Micrometer tracer supplies trace IDs when one is configured.
-
-The legacy events include sensitive credentials and publishing is not durable across broker or
-process failures. Address those limitations before using this integration in production.
-
-This directory contains the single Spring Boot deployable. Domain separation is package-based so
-Spring Modulith can discover and verify it without introducing a Maven module, network protocol, or
-release pipeline for every domain.
-
-## Application modules
-
-All modules are direct children of `at.control.shiftcontrol`:
-
-| Module | Ownership |
-| --- | --- |
-| `identity` | Stable local user IDs, external identities, authentication, and global capabilities |
-| `eventcatalog` | Event, venue, location, session, and submission identities |
-| `schedule` | Drafts, constraints, validation, publication, and immutable schedule versions |
-| `shift` | Volunteers, plan membership/access, shift plans, shifts, roles, assignments, trades, and rewards |
-| `dispatch` | Live operational cases/tasks, responder/resource state, escalation, and timeline |
-| `communications` | Notification preferences, records, templates, and delivery attempts |
-| `audit` | Sanitized audit records, retention, export, and query support |
-| `risk` | Trust/risk policies, evaluation state, and alerts |
-| `integrations` | External mappings, sync runs, credentials, and anti-corruption adapters |
-| `platform` | Strictly technical shared facilities without business ownership |
-
-The Pretalx adapter starts under `integrations.pretalx`. Pretalx transport types stay there; the
-event catalog and schedule modules define their own models.
-
-`shift` owns the staffing domain as one cohesive module. Its volunteer profiles and plan membership
-records reference identity's UUID user ID. `dispatch` may reference that same ID, but owns live
-operational responder state and must not access shift persistence directly.
-
-## Package convention
-
-Use module-first packages—not an `application` / `domain` / `infrastructure` split. Create a shift
-subpackage only for an established, cohesive workflow; it is an organizational aid, never another
-application module. Under [ADR-0002](../../docs/adr/0002-compatibility-first-shift-migration.md),
-the established shift workflows remain cohesive rather than being divided into trade, availability,
-or reward mini-modules. The `assignment` package is an organizational home for the live-assignment
-workflow, not a submodule.
-
-The existing empty layer directories are transitional scaffolding; do not add new migrated code to
-them. Delete comment-only `package-info.java` files; retain one only where it supplies actual
-module metadata. A subpackage becomes cross-module-visible only when it is deliberately annotated
-as a Spring Modulith named `api` or `events` interface. The full rules and examples are in [the
-backend code-structure guide](../../docs/architecture/code-structure.md).
-
-Tests mirror their production feature package. Cross-module boundary verification belongs in
-`at.control.shiftcontrol.architecture`; full-stack journeys belong in the repository-level `e2e`
-directory.
-
-Liquibase changes will be grouped under `src/main/resources/db/changelog/<module>`. Each module owns
-its change sets and includes them from a single application-level master changelog once persistence
-work begins.
-
-## OIDC configuration
-
-The backend is an OAuth 2.0 resource server. Production configuration must provide the trusted issuer,
-its JWK set URI, and the access-token audience expected by this API:
-
-```yaml
-oidc:
-  provider:
-    issuer-uri: https://identity.example/realms/shiftcontrol
-    jwk-set-uri: https://identity.example/realms/shiftcontrol/protocol/openid-connect/certs
-    audience: shiftcontrol-backend
-    username-claim: preferred_username
-```
-
-`allowed-issuers` defaults to `issuer-uri`. OIDC subjects and issuers remain internal to the identity
-module; APIs and other modules use ShiftControl's UUID user ID. `username-claim` is the one token
-claim copied to the local username; it defaults to `preferred_username` and can instead be a claim
-such as `nickname`. First and last names are intentionally not stored.
-
-For an initial platform administrator or a still-external transition client, configure only the
-specific external identity or client capability that is needed:
-
-```yaml
-identity:
-  bootstrap-platform-admins:
-    - issuer: https://identity.example/realms/shiftcontrol
-      subject: 8c4d9d54-6b2a-4b42-a285-1bf1d5494881
-  machine-clients:
-    - client-id: notification-worker
-      authorities:
-        - notifications.recipients.read
-```
-
-A bootstrap entry grants the local `PLATFORM_ADMIN` role when that exact issuer/subject signs in;
-the role is then persisted locally. A machine client receives only its configured authorities, and
-only when all of those authorities are also present in its token's `scope` or `scp` claim. These
-temporary machine-client entries should disappear as callers move into this application.
-
-## Initializr baseline
-
-The generated dependencies and application/test bootstrap are intentionally unchanged. `HELP.md`
-contains the original Initializr reference links. Add configuration and implementation only as the
-corresponding migration phase begins.
 
 ## Audit history
 
 `GET /api/v1/audit` returns a bounded, newest-first audit timeline for platform administrators
-and principals with `audit.read`. Parameters are `page` (zero-based), `size` (1–100), optional
+and principals with `audit.read`. Use `page` (zero-based), `size` (1–100), and optional filters
 `from` (inclusive) and `until` (exclusive) ISO instants, `actorUserId`, `module`, `action`,
 `subjectType`, and `subjectId`. Text filters are exact. The response contains actor and subject
 labels, a readable summary, stable identifiers, and approved before/after field changes. The UUID
-tie-breaker makes ordering deterministic; page offsets can still shift when new records arrive.
+tie-breaker makes ordering deterministic. Page offsets can shift when new records arrive.
 
-New entries are written through `audit::api` in the caller's transaction. Audit input is trusted
-internal code, not a generic event or request serializer: producers must explicitly select safe
-fields, and must not include credentials, bearer links, raw payloads, or unnecessary personal data.
-Changes use scalar snapshots and a schema version to support later interpretation. There is no
-rollback endpoint or general-purpose restoration guarantee. Assignment records currently cover
-join/leave, requests and their decisions, auction and trade changes, and removals when their
-containing slot, shift, plan, or event is deleted. Other business features are not yet instrumented.
-Bulk operations can produce one entry per affected assignment.
+New entries are written through `audit::api` in the caller's transaction. Producers explicitly
+select safe fields and omit credentials, bearer links, raw payloads, and unnecessary personal data.
+Changes use scalar snapshots and a schema version to support later interpretation. Audit history covers
+event catalogue changes and staffing assignment activity, including joins, leaves, requests and
+decisions, auctions, trades, and removals. Bulk operations can produce one entry per affected
+assignment.
 
-Entries expire at startup after two years by default. Configure an ISO-8601 period such as
-`shiftcontrol.audit.retention=P3Y`; configuration changes apply on the next startup. Startup cleanup
-is performed in batches, and a failure stops startup. Ordinary application APIs cannot edit or delete
-entries, although database privileges should be restricted separately in production. The legacy
-RabbitMQ `log_entry` archive is not imported: it may contain bearer tokens and must be inventoried
-and sanitized before any historical migration.
+At startup, ConRunner deletes entries older than two years by default. Configure an ISO-8601 period
+such as `shiftcontrol.audit.retention=P3Y` to change retention on the next startup. Cleanup runs
+in batches and stops startup if it fails. The legacy RabbitMQ `log_entry` archive
+requires an inventory and sanitization before any historical import because it may contain bearer
+tokens.
 
 Audit producers can use `AuditRecorder` to add authenticated actor and trace context automatically.
-Feature helpers own action identifiers, summaries, and approved fields; assignment callers use named
+Feature helpers own action identifiers, summaries, and approved fields. Assignment callers use
 methods such as `joined(assignment)` or `leaveRequested(assignment, before)`. Take the immutable
-`before` snapshot before mutating the entity. Missing authentication is rejected rather than silently
-attributed to a system actor; background producers can use `recordAs` with an explicit system identity.
+`before` snapshot before mutating the entity. Background producers can use
+`recordAs` with an explicit system identity.
+
+## Legacy RabbitMQ events
+
+Legacy event publishing is disabled by default. To enable it, set
+`shiftcontrol.events.rabbitmq.enabled=true` or `SHIFTCONTROL_EVENTS_RABBITMQ_ENABLED=true` and
+configure the broker through Spring Boot's `spring.rabbitmq` properties. The publisher uses the
+`shiftcontrol` topic exchange and includes trace IDs when a Micrometer tracer is configured.
+
+Legacy event payloads can include sensitive credentials, and a broker or process failure can lose
+events. Address those limitations before enabling the integration in production.

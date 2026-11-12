@@ -1,30 +1,51 @@
-# Local backend development
+# ConRunner local infrastructure
 
-Start PostgreSQL and a development Keycloak from the repository root:
+[`compose.yaml`](compose.yaml) starts PostgreSQL and a development Keycloak. For the web app and
+backend together, follow the [root quickstart](../../README.md#local-development).
+
+## Run the backend by itself
+
+Use JDK 25 and Docker with the Compose plugin. From the repository root:
 
 ```sh
-docker compose -f ops/compose/compose.yaml up -d
+docker compose -f ops/compose/compose.yaml up -d --wait
 ./mvnw -pl apps/backend spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
-Java 25 and Docker Compose are required. The backend listens on `http://localhost:8081`.
-Alternatively, run `ConRunnerApplication` in your IDE with the `local` Spring profile.
-The local profile runs the audit migration and lets Hibernate update the remaining schema because
-the legacy entity mappings and current migrations overlap. This schema is for development only
-and persists in the `postgres-data` volume; it does not validate the production migrations.
+You can also run `at.conrunner.ConRunnerApplication` in your IDE with the `local` Spring profile.
+Wait for Keycloak's realm import to finish before signing in.
 
-Keycloak runs at `http://localhost:8180`, with admin console credentials `admin` / `admin`.
-The imported `shiftcontrol` realm contains the public client `shiftcontrol-local` and a platform
-administrator user `dev` / `dev`. Obtain a development access token with:
+| Service | Local address | Development configuration |
+| --- | --- | --- |
+| Backend | `http://localhost:8081` | [OpenAPI JSON](http://localhost:8081/v3/api-docs) |
+| PostgreSQL | `localhost:5432` | Database, user, and password are all `shiftcontrol` |
+| Keycloak | [Admin console](http://localhost:8180/admin/) | Console login `admin` / `admin` |
+| Keycloak application client | `shiftcontrol-local` in the `shiftcontrol` realm | Application login `dev` / `dev` |
+
+The local Spring profile applies the audit Liquibase changelog and uses Hibernate to update the
+rest of the development schema. PostgreSQL data persists in the `postgres-data` volume. See the
+[database migration guide](../../apps/backend/src/main/resources/db/changelog/README.md) for the
+master changelog.
+
+## Call the local API
+
+The development realm supports the password grant for manual API testing. Request an access token
+and send its `access_token` value in the `Authorization: Bearer <token>` header.
 
 ```sh
-curl -s -X POST http://localhost:8180/realms/shiftcontrol/protocol/openid-connect/token \
-  -d 'grant_type=password' -d 'client_id=shiftcontrol-local' -d 'username=dev' -d 'password=dev'
+curl -fsS -X POST http://localhost:8180/realms/shiftcontrol/protocol/openid-connect/token \
+  -d 'grant_type=password' -d 'client_id=shiftcontrol-local' \
+  -d 'username=dev' -d 'password=dev'
 ```
 
-Use the returned `access_token` as a Bearer token. Keycloak may take a little time to start.
-These credentials and settings are for local development only. The Keycloak development database
-is stored in the container; recreating it reimports the realm and resets changes made in its console.
+## Reload or stop local services
 
-Stop the services with `docker compose -f ops/compose/compose.yaml down`. Add `-v` to also delete
-all local PostgreSQL data.
+To apply changes to [`realm.json`](keycloak/realm.json), recreate the Keycloak container. This
+reimports the realm and resets changes made in the Keycloak admin console.
+
+```sh
+docker compose -f ops/compose/compose.yaml up -d --force-recreate keycloak
+```
+
+Run `./dev down` to stop and remove the containers while keeping PostgreSQL data.
+`docker compose -f ops/compose/compose.yaml down -v` also deletes the PostgreSQL volume and its data.

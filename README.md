@@ -1,72 +1,59 @@
-# ShiftControl
+# ConRunner
 
-ShiftControl is being rebuilt as a monorepo containing a modular-monolith backend, one web client,
-and the operational material needed to release them together. The backend currently contains the
-identity foundation and architectural module scaffolding; `shiftservice` domain behavior is migrated
-incrementally from the existing system.
+ConRunner helps convention and event teams organize volunteer staffing. Administrators set up events,
+planners manage shift plans and staffing roles, and volunteers join plans and sign up for shifts.
+The application also handles assignment requests and trades, volunteer rewards, in-app
+notifications, and audit history.
 
-## Repository layout
-
-```text
-.
-├── apps/
-│   ├── backend/             # one Spring Boot/Spring Modulith deployable
-│   └── web/                 # Angular web application
-├── contracts/               # contracts for genuinely external consumers only
-├── docs/
-│   ├── adr/                 # architecture decision records
-│   ├── architecture/        # current architecture and module rules
-│   └── requirements/        # module behavior and migration specifications
-├── e2e/                     # full-stack acceptance journeys
-├── ops/
-│   ├── compose/             # local and small-production topology
-│   ├── helm/                # Kubernetes packaging, if retained
-│   └── runbooks/            # operational and recovery procedures
-├── .mvn/                    # shared Maven wrapper configuration
-└── pom.xml                  # repository build aggregator
-```
-
-## Build
-
-Java 25 is the generated project's baseline.
-
-```shell
-./mvnw test
-```
-
-For a local backend with PostgreSQL and Keycloak, see [local development](ops/compose/README.md).
-
-The root Maven build aggregates the backend; the Angular application uses npm from `apps/web`.
+The repository contains an Angular web app and a single Java backend built with Spring Boot and
+Spring Modulith. PostgreSQL stores application data, and Keycloak provides sign-in for local
+development.
 
 ## Local development
 
-Prerequisites: Java 25, Node.js and npm, Python 3, curl, Docker and Docker Compose. From the repository root:
+Install JDK 25, Node.js and npm (CI uses Node.js 24), Python 3, curl, and Docker with the Compose plugin.
+The development scripts use Bash and `setsid`. From the repository root, run:
 
 ```sh
-./dev client   # first setup and after backend HTTP API/DTO changes
-./dev up       # start PostgreSQL, Keycloak, backend and Angular
+./dev up
 ```
 
-Open http://localhost:4200 and sign in as `dev` / `dev`. The dev command installs frontend dependencies on first client generation. The Angular dev server reloads frontend changes and proxies `/api` (including WebSockets) to the backend on port 8081. Press Ctrl+C to stop the application processes; `./dev down` stops the infrastructure and keeps the database volume. The client generator uses a separate temporary PostgreSQL container and backend instance, so it does not modify the development database or rely on a running backend. It writes the OpenAPI artifact to `apps/backend/target/openapi.json` and the ignored TypeScript client to `apps/web/src/api-client`.
+Open [the web app](http://localhost:4200) and sign in as `dev` with password `dev`. This local account
+has platform administrator access. To try the setup workflow, create an event, add a shift plan,
+then open the plan's **Roles** tab and create a volunteer role.
 
-Run `npm run build` in `apps/web` to verify the frontend after generating the client. If a backend endpoint or DTO changes, rerun `./dev client`; frontend-only edits do not require regeneration. Keycloak realm import happens when its container is created; an existing Keycloak container must be recreated to pick up realm configuration changes. See [local backend development](ops/compose/README.md) for details.
+On first run, `./dev up` installs the web dependencies and generates the Angular API client if
+needed. It then starts PostgreSQL and Keycloak in Docker and runs the backend and Angular dev server
+on the host. Angular forwards `/api` requests, including WebSocket connections, to port 8081.
 
-## Architectural direction
+Press Ctrl+C to stop the web and backend processes. Run `./dev down` to stop the containers while
+keeping the PostgreSQL volume. See the [Compose guide](ops/compose/README.md) for backend-only
+startup, local service details, and how to reload the Keycloak realm.
 
-- One backend process contains independently owned Spring Modulith application modules.
-- A module exposes only deliberate named `api` or `events` interfaces; its root package is module
-  metadata, not a dumping ground.
-- A module owns its entities, repositories, migrations, and lifecycle.
-- Cross-module calls use application APIs, stable identifiers, and immutable values—not another
-  module's JPA entities or repositories.
-- In-process domain events coordinate committed internal behavior. External side effects will use a
-  transactional outbox when that infrastructure is introduced.
-- Shift staffing, programme scheduling, and dispatch remain separate domain modules even though they share one
-  deployable and database.
-- External integrations live behind anti-corruption adapters; Pretalx models do not become core
-  schedule models.
+## Build and test
 
-See [the backend structure](apps/backend/README.md) and
-[the architecture guide](docs/architecture/README.md) before adding code. The detailed migration
-convention is [Backend code structure and module interaction](docs/architecture/code-structure.md).
-Module behavior and migration decisions live in [requirements specifications](docs/requirements/).
+| Task | Command | Run from |
+| --- | --- | --- |
+| Run backend tests | `./mvnw test` | Repository root, with Docker available for Testcontainers |
+| Generate the Angular API client | `./dev client` | Repository root |
+| Build the web app | `npm run build` | `apps/web`, after generating the client |
+| Lint the web app | `npm run lint` | `apps/web` |
+| Run Angular unit tests | `npm run test-headless` | `apps/web`, with Chrome available |
+| Run full-stack browser tests | [Playwright setup and commands](e2e/README.md) | `e2e`, with the local stack running |
+
+Rerun `./dev client` when backend HTTP endpoints or DTOs change. It runs the backend against a
+temporary PostgreSQL container, writes the OpenAPI description to `apps/backend/target/openapi.json`,
+and regenerates the Git-ignored TypeScript client at `apps/web/src/api-client`.
+
+## Repository guide
+
+| Path | Contents |
+| --- | --- |
+| [`apps/backend`](apps/backend/README.md) | HTTP API, domain modules, identity, notifications, and audit |
+| [`apps/web`](apps/web/README.md) | Angular development, generated client, and container configuration |
+| [`e2e`](e2e/README.md) | Playwright tests against the full local stack |
+| [`docs/architecture`](docs/architecture/README.md) | Module boundaries and backend implementation conventions |
+| [`docs/requirements`](docs/requirements/README.md) | Product behavior, migration scope, and requirement status |
+| [`docs/adr`](docs/adr/README.md) | Architecture decisions and their rationale |
+| [`contracts`](contracts/README.md) | Home for versioned external contracts |
+| [`ops`](ops/README.md) | Local infrastructure and deployment documentation |
