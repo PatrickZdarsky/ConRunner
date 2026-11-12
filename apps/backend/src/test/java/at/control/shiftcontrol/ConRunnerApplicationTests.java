@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
     "oidc.provider.jwk-set-uri=https://identity.example.test/realms/shiftcontrol/protocol/openid-connect/certs",
     "oidc.provider.audience=shiftcontrol-backend"
 })
-class ShiftcontrolApplicationTests {
+class ConRunnerApplicationTests {
 
 	@Test
 	void contextLoads() {

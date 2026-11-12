@@ -8,7 +8,7 @@ docker compose -f ops/compose/compose.yaml up -d
 ```
 
 Java 25 and Docker Compose are required. The backend listens on `http://localhost:8081`.
-Alternatively, run `ShiftcontrolApplication` in your IDE with the `local` Spring profile.
+Alternatively, run `ConRunnerApplication` in your IDE with the `local` Spring profile.
 The local profile runs the audit migration and lets Hibernate update the remaining schema because
 the legacy entity mappings and current migrations overlap. This schema is for development only
 and persists in the `postgres-data` volume; it does not validate the production migrations.

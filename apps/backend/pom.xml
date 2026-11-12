@@ -8,11 +8,11 @@
 		<version>4.1.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>at.control</groupId>
-	<artifactId>shiftcontrol-backend</artifactId>
+	<groupId>at.conrunner</groupId>
+	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ShiftControl Backend</name>
-	<description>Modular monolith backend for ShiftControl</description>
+	<name>ConRunner Backend</name>
+	<description>Modular monolith backend for ConRunner</description>
 	<url/>
 	<licenses>
 		<license/>
