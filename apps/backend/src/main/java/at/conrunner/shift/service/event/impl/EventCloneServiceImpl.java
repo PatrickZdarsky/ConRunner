@@ -23,6 +23,7 @@ import at.conrunner.shift.entity.Volunteer;
 import at.conrunner.shift.lib.event.events.EventEvent;
 import at.conrunner.platform.exception.IllegalStateException;
 import at.conrunner.identity.AdminOnly;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dto.event.EventDto;
 import at.conrunner.shift.mapper.EventMapper;
@@ -33,6 +34,7 @@ import at.conrunner.shift.service.event.EventCloneService;
 public class EventCloneServiceImpl implements EventCloneService {
     private final EventManagementAudit eventManagementAudit;
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -41,6 +43,7 @@ public class EventCloneServiceImpl implements EventCloneService {
     public EventDto cloneEvent(long eventId) {
         Event source = eventDao.getById(eventId);
 
+        var sourcePlans = shiftPlanDao.findByEventId(eventId);
         CloneContext ctx = new CloneContext();
 
         Event target = cloneEventRoot(source);
@@ -50,20 +53,20 @@ public class EventCloneServiceImpl implements EventCloneService {
         cloneActivities(source, target, ctx);
 
         // clone shift plans and their internal hierarchy
-        cloneShiftPlans(source, target, ctx);
-        cloneRoles(source, ctx);
-        cloneShifts(source, ctx);
-        clonePositionSlots(source, ctx);
+        cloneShiftPlans(sourcePlans, target, ctx);
+        cloneRoles(sourcePlans, ctx);
+        cloneShifts(sourcePlans, ctx);
+        clonePositionSlots(sourcePlans, ctx);
 
         // wire cross references using mappings
-        wireShiftReferences(source, ctx);        // shift.location, shift.relatedActivity
-        wireSlotReferences(source, ctx);         // slot.role
+        wireShiftReferences(sourcePlans, ctx);        // shift.location, shift.relatedActivity
+        wireSlotReferences(sourcePlans, ctx);         // slot.role
 
         // copy shared relations (volunteers) without cloning them
-        copyShiftPlanVolunteers(source, ctx);
+        copyShiftPlanVolunteers(sourcePlans, ctx);
 
-        // Persist everything once (cascades handle deep graph)
         Event persisted = eventDao.save(target);
+        shiftPlanDao.saveAll(ctx.shiftPlanByOldId.values());
 
         eventManagementAudit.record("event", "cloned", persisted.getId(), null, eventManagementAudit.snapshot(persisted));
         publisher.publishEvent(EventEvent.eventCloned(persisted, source.getId()));
@@ -78,7 +81,6 @@ public class EventCloneServiceImpl implements EventCloneService {
             .startTime(source.getStartTime())
             .endTime(source.getEndTime())
             .locations(new ArrayList<>())
-            .shiftPlans(new ArrayList<>())
             .build();
     }
 
@@ -144,14 +146,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void cloneShiftPlans(Event source, Event target, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        ensureEventShiftPlansInitialized(target);
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void cloneShiftPlans(Collection<ShiftPlan> sourcePlans, Event target, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             ShiftPlan newPlan = ShiftPlan.builder()
                 .event(target)
                 .name(oldPlan.getName())
@@ -162,23 +158,12 @@ public class EventCloneServiceImpl implements EventCloneService {
                 .shifts(new ArrayList<>())
                 .build();
 
-            target.getShiftPlans().add(newPlan);
             ctx.shiftPlanByOldId.put(oldPlan.getId(), newPlan);
         }
     }
 
-    private void ensureEventShiftPlansInitialized(Event target) {
-        if (target.getShiftPlans() == null) {
-            target.setShiftPlans(new ArrayList<>());
-        }
-    }
-
-    private void cloneRoles(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void cloneRoles(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             ShiftPlan newPlan = ctx.shiftPlanByOldId.get(oldPlan.getId());
             if (newPlan == null) {
                 throw new IllegalStateException("Something went wrong during cloning shift plans");
@@ -212,12 +197,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void cloneShifts(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void cloneShifts(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             ShiftPlan newPlan = ctx.shiftPlanByOldId.get(oldPlan.getId());
             if (newPlan == null) {
                 throw new IllegalStateException("Something went wrong during cloning shift plans");
@@ -255,12 +236,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void clonePositionSlots(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void clonePositionSlots(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             Collection<Shift> oldShifts = oldPlan.getShifts();
             if (oldShifts == null) {
                 continue;
@@ -304,12 +281,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void wireShiftReferences(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void wireShiftReferences(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             Collection<Shift> oldShifts = oldPlan.getShifts();
             if (oldShifts == null) {
                 continue;
@@ -322,7 +295,7 @@ public class EventCloneServiceImpl implements EventCloneService {
                 }
 
                 // location
-                if (oldShift.getLocation() != null) {
+                if (oldShift.getRelatedActivity() == null && oldShift.getLocation() != null) {
                     Location mappedLocation = ctx.locationByOldId.get(oldShift.getLocation().getId());
                     newShift.setLocation(mappedLocation);
                 }
@@ -336,12 +309,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void wireSlotReferences(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void wireSlotReferences(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             Collection<Shift> oldShifts = oldPlan.getShifts();
             if (oldShifts == null) {
                 continue;
@@ -370,12 +339,8 @@ public class EventCloneServiceImpl implements EventCloneService {
         }
     }
 
-    private void copyShiftPlanVolunteers(Event source, CloneContext ctx) {
-        if (source.getShiftPlans() == null) {
-            return;
-        }
-
-        for (ShiftPlan oldPlan : source.getShiftPlans()) {
+    private void copyShiftPlanVolunteers(Collection<ShiftPlan> sourcePlans, CloneContext ctx) {
+        for (ShiftPlan oldPlan : sourcePlans) {
             ShiftPlan newPlan = ctx.shiftPlanByOldId.get(oldPlan.getId());
             if (newPlan == null) {
                 throw new IllegalStateException("Something went wrong during cloning shift plans");

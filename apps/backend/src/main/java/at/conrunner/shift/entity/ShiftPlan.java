@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -32,7 +33,7 @@ import at.conrunner.shift.lib.type.LockStatus;
 @Setter
 @Builder
 @Entity
-@Table(name = "shift_plan")
+@Table(name = "shift_plan", indexes = @Index(name = "idx_shift_plan_event", columnList = "event_id"))
 public class ShiftPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

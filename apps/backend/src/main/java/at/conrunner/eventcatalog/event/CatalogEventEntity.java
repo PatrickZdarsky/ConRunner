@@ -43,6 +43,9 @@ public class CatalogEventEntity {
     @Column(name = "end_time", nullable = false)
     private Instant endTime;
 
+    @Column(name = "archived_at")
+    private Instant archivedAt;
+
     @Column(name = "reward_points_redeem_url", length = 2048)
     private String rewardPointsRedeemUrl;
 

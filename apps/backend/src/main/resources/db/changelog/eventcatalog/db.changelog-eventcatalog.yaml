@@ -215,3 +215,16 @@ databaseChangeLog:
                   name: event_id
               - column:
                   name: start_time
+  - changeSet:
+      id: eventcatalog-004-archive-events
+      author: conrunner
+      changes:
+        - addColumn:
+            tableName: eventcatalog_event
+            columns:
+              - column:
+                  name: archived_at
+                  type: TIMESTAMP WITH TIME ZONE
+        - sql:
+            sql: CREATE INDEX idx_eventcatalog_active_start ON eventcatalog_event (start_time) WHERE archived_at IS NULL
+            splitStatements: false

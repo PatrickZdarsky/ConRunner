@@ -16,6 +16,7 @@ import at.conrunner.platform.exception.IllegalArgumentException;
 import at.conrunner.shift.lib.util.ConvertUtil;
 import at.conrunner.shift.auth.CurrentShiftActor;
 import at.conrunner.shift.auth.ShiftActor;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 
 @Service
@@ -24,6 +25,7 @@ import at.conrunner.shift.dao.EventDao;
 public class SecurityHelper {
     private final CurrentShiftActor currentActor;
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
 
     public boolean isUserPlanner(long shiftPlanId, ShiftActor actor) {
         return actor.isPlannerInPlan(shiftPlanId);
@@ -46,13 +48,8 @@ public class SecurityHelper {
     }
 
     public boolean isUserPlannerInAnyPlanOfEvent(Event event) {
-        if (event.getShiftPlans() == null || event.getShiftPlans().isEmpty()) {
-            return false;
-        }
-
-        return event.getShiftPlans()
-            .stream()
-            .anyMatch(shiftPlan -> isUserPlanner(shiftPlan.getId()));
+        var plannerPlanIds = currentActor.get().getRelevantPlannerPlans();
+        return shiftPlanDao.existsInEvent(event.getId(), plannerPlanIds);
     }
 
     public void assertUserIsPlanner(ShiftPlan shiftPlan) {
@@ -68,9 +65,7 @@ public class SecurityHelper {
     }
 
     public void assertUserIsPlannerInAnyPlanOfEvent(Event event) {
-        boolean isPlannerInAnyPlan = isUserPlannerInAnyPlanOfEvent(event);
-        var isNotAdmin = isNotUserAdmin();
-        if (!isPlannerInAnyPlan && isNotAdmin) {
+        if (isNotUserAdmin() && !isUserPlannerInAnyPlanOfEvent(event)) {
             log.error("User has no planner access to any shift plan of event with id: {}", event.getId());
             throw new ForbiddenException("User has no planner access to any shift plan of event.");
         }
@@ -200,15 +195,13 @@ public class SecurityHelper {
     }
 
     private boolean isUserInAnyPlanOfEvent(Event event) {
-        return event.getShiftPlans()
-            .stream()
-            .anyMatch(shiftPlan -> isUserInPlan(shiftPlan.getId()));
+        var actor = currentActor.get();
+        return shiftPlanDao.existsInEvent(event.getId(), actor.getRelevantPlannerPlans())
+            || shiftPlanDao.existsInEvent(event.getId(), actor.getRelevantVolunteerPlans());
     }
 
     public void assertUserIsAllowedToAccessEvent(Event event) {
-        boolean isInAnyPlan = isUserInAnyPlanOfEvent(event); // also false if no shift plans exist
-        boolean isNotAdmin = isNotUserAdmin();
-        if (!isInAnyPlan && isNotAdmin) {
+        if (isNotUserAdmin() && !isUserInAnyPlanOfEvent(event)) {
             log.error("User has no access to any shift plan of event with id: {}", event.getId());
             throw new ForbiddenException("User has no access to any shift plan of event.");
         }

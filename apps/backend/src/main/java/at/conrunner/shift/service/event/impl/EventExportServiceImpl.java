@@ -40,13 +40,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import at.conrunner.shift.entity.Event;
 import at.conrunner.shift.entity.PositionSlot;
 import at.conrunner.shift.entity.Shift;
-import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.shift.lib.event.events.EventEvent;
 import at.conrunner.platform.exception.BadRequestException;
 import at.conrunner.platform.exception.FileExportException;
 import at.conrunner.shift.lib.type.AssignmentStatus;
 import at.conrunner.shift.lib.type.ExportFormat;
 import at.conrunner.identity.AdminOnly;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dto.event.EventExportDto;
 import at.conrunner.shift.service.event.EventExportService;
@@ -55,6 +55,7 @@ import at.conrunner.shift.service.event.EventExportService;
 @RequiredArgsConstructor
 public class EventExportServiceImpl implements EventExportService {
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -90,7 +91,7 @@ public class EventExportServiceImpl implements EventExportService {
     }
 
     private List<Map<String, Object>> getExportData(Event event) {
-        var shiftPlans = event.getShiftPlans() == null ? List.<ShiftPlan>of() : event.getShiftPlans();
+        var shiftPlans = shiftPlanDao.findByEventId(event.getId());
 
         var shifts = shiftPlans.stream()
             .filter(Objects::nonNull)
@@ -120,7 +121,7 @@ public class EventExportServiceImpl implements EventExportService {
             row.put("shift_start_time_utc", shift.getStartTime());
             row.put("shift_end_time_utc", shift.getEndTime());
 
-            var location = shift.getLocation();
+            var location = shift.getEffectiveLocation();
             row.put("shift_location", location == null ? "" : location.getName());
 
             var relatedActivity = shift.getRelatedActivity();

@@ -12,6 +12,8 @@ import at.conrunner.shift.lib.type.TimeConstraintType;
 
 @Repository
 public interface TimeConstraintRepository extends JpaRepository<TimeConstraint, Long> {
+    Collection<TimeConstraint> findAllByEventId(long eventId);
+
     @Query("""
         SELECT tc
         FROM TimeConstraint tc

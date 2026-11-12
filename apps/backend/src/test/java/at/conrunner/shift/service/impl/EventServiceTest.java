@@ -8,6 +8,7 @@ import at.conrunner.platform.exception.NotFoundException;
 import at.conrunner.shift.auth.CurrentShiftActor;
 import at.conrunner.shift.auth.ShiftActor;
 import at.conrunner.shift.dao.EventDao;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.RewardPointsTransactionDao;
 import at.conrunner.shift.dao.userprofile.VolunteerDao;
 import at.conrunner.shift.dto.OverallStatisticsDto;
@@ -50,6 +51,9 @@ class EventServiceTest {
     private EventDao eventDao;
 
     @Mock
+    private ShiftPlanDao shiftPlanDao;
+
+    @Mock
     private VolunteerDao volunteerDao;
 
     @Mock
@@ -83,13 +87,15 @@ class EventServiceTest {
 
         // Arrange: event that matches (contains spRelevant)
         Event relevantEvent = new Event();
-        relevantEvent.setShiftPlans(List.of(spRelevant));
+        relevantEvent.setId(1L);
+        spRelevant.setEvent(relevantEvent);
         relevantEvent.setStartTime(Instant.MIN);
         relevantEvent.setEndTime(Instant.MAX);
 
         // Arrange: event that does NOT match (contains spIrrelevant)
         Event nonRelevantEvent = new Event();
-        nonRelevantEvent.setShiftPlans(List.of(spIrrelevant));
+        nonRelevantEvent.setId(2L);
+        spIrrelevant.setEvent(nonRelevantEvent);
 
         var assignedUser = mock(ShiftActor.class);
         when(assignedUser.requireUserId()).thenReturn(USER_ID);
@@ -136,9 +142,6 @@ class EventServiceTest {
         long eventId = 1L;
         java.util.UUID userId = java.util.UUID.randomUUID();
 
-        Event event = new Event();
-        event.setShiftPlans(List.of());
-
         when(volunteerDao.getById(userId)).thenThrow(NotFoundException.class);
 
         assertThatThrownBy(() -> eventService.getUserRelatedShiftPlansOfEvent(eventId, userId))
@@ -160,7 +163,7 @@ class EventServiceTest {
         spIrrelevant.setId(2L);
 
         Event event = new Event();
-        event.setShiftPlans(List.of(spRelevant, spIrrelevant));
+        when(shiftPlanDao.findByEventId(eventId)).thenReturn(List.of(spRelevant, spIrrelevant));
         event.setStartTime(Instant.MIN);
         event.setEndTime(Instant.MIN);
 
@@ -175,7 +178,7 @@ class EventServiceTest {
         OverallStatisticsDto overallStats = mock(OverallStatisticsDto.class);
 
         when(statisticService.getOwnStatisticsOfShiftPlans(List.of(spRelevant), userId)).thenReturn(ownStats);
-        when(statisticService.getOverallEventStatistics(event)).thenReturn(overallStats);
+        when(statisticService.getOverallEventStatistics(List.of(spRelevant, spIrrelevant))).thenReturn(overallStats);
         when(rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(userId.toString(), eventId)).thenReturn(10L);
 
         var result = eventService.getEventShiftPlansOverview(eventId, userId);
@@ -193,7 +196,7 @@ class EventServiceTest {
         verify(eventDao).getById(eventId);
         verify(volunteerDao).getById(userId);
         verify(statisticService).getOwnStatisticsOfShiftPlans(List.of(spRelevant), userId);
-        verify(statisticService).getOverallEventStatistics(event);
+        verify(statisticService).getOverallEventStatistics(List.of(spRelevant, spIrrelevant));
     }
 
     @Test
@@ -202,7 +205,7 @@ class EventServiceTest {
         var plan = new ShiftPlan();
         plan.setId(2L);
         var event = new Event();
-        event.setShiftPlans(List.of(plan));
+        when(shiftPlanDao.findByEventId(eventId)).thenReturn(List.of(plan));
         event.setStartTime(Instant.MIN);
         event.setEndTime(Instant.MIN);
         when(eventDao.getById(eventId)).thenReturn(event);
@@ -238,7 +241,6 @@ class EventServiceTest {
 
         Event event = new Event();
         event.setId(eventId);
-        event.setShiftPlans(List.of(new ShiftPlan()));
 
         when(eventDao.getById(eventId)).thenReturn(event);
 
@@ -247,7 +249,7 @@ class EventServiceTest {
             new PlanVolunteerIdRow(1L, "Main Desk", planner2),
             new PlanVolunteerIdRow(2L, "Backstage", planner2)
         );
-        when(eventDao.getPlannersForEventAndUser(eventId, userId)).thenReturn(rows);
+        when(shiftPlanDao.getPlannersForEventAndUser(eventId, userId)).thenReturn(rows);
         when(userDirectoryService.getUsers(Set.of(planner1, planner2))).thenReturn(List.of(
             User.builder().id(planner1).username("planner1").email("alice@example.com").build(),
             User.builder().id(planner2).username("planner2").email("bob@example.com").build()

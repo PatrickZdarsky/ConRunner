@@ -153,24 +153,20 @@ public class ShiftServiceImpl implements ShiftService {
         shift.setBonusRewardPoints(modificationDto.getBonusRewardPoints());
         if (StringUtils.isNotBlank(modificationDto.getActivityId())) {
             var activity = activityDao.getById(ConvertUtil.idToLong(modificationDto.getActivityId()));
-            shift.setRelatedActivity(activity);
-
-            if (activity.getLocation() != null) {
-                var eventLocations = shift.getShiftPlan().getEvent().getLocations();
-                if (!eventLocations.contains(activity.getLocation())) {
-                    throw new BadRequestException("Activity location does not belong to the same event as the shift");
-                }
-                shift.setLocation(activity.getLocation());
+            if (activity.getEvent().getId() != event.getId()) {
+                throw new BadRequestException("Activity does not belong to the same event as the shift");
             }
-        } else if (StringUtils.isNotBlank(modificationDto.getLocationId())) {
-            var location = locationDao.getById(ConvertUtil.idToLong(modificationDto.getLocationId()));
-
-            var eventLocations = shift.getShiftPlan().getEvent().getLocations();
-            if (!eventLocations.contains(location)) {
+            shift.setRelatedActivity(activity);
+            shift.setLocation(null);
+        } else {
+            var location = StringUtils.isNotBlank(modificationDto.getLocationId())
+                ? locationDao.getById(ConvertUtil.idToLong(modificationDto.getLocationId()))
+                : null;
+            if (location != null && location.getEvent().getId() != event.getId()) {
                 throw new BadRequestException("Location does not belong to the same event as the shift");
             }
-            shift.setLocation(location);
             shift.setRelatedActivity(null);
+            shift.setLocation(location);
         }
     }
 

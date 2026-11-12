@@ -12,6 +12,7 @@ public record EventDetails(
     String longDescription,
     Instant startTime,
     Instant endTime,
+    Instant archivedAt,
     String rewardPointsRedeemUrl,
     List<EventLink> links
 ) {

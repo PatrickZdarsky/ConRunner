@@ -17,6 +17,7 @@ import at.conrunner.shift.entity.Assignment;
 import at.conrunner.shift.entity.Shift;
 import at.conrunner.platform.exception.ForbiddenException;
 import at.conrunner.platform.exception.NotFoundException;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dto.leaderboard.LeaderBoardDto;
 import at.conrunner.shift.dto.leaderboard.RankDto;
@@ -31,6 +32,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     private static final int LEADERBOARD_LIMIT = 10;
 
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
     private final SecurityHelper securityHelper;
     private final UserService userService;
 
@@ -39,7 +41,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         var event = eventDao.findById(eventId).orElseThrow(NotFoundException::new);
         securityHelper.assertUserIsAllowedToAccessEvent(event);
 
-        List<Assignment> allAssignments = ensureList(event.getShiftPlans()).stream()
+        List<Assignment> allAssignments = shiftPlanDao.findByEventId(eventId).stream()
             .flatMap(plan -> ensureList(plan.getShifts()).stream())
             .flatMap(shift -> ensureList(shift.getSlots()).stream())
             .flatMap(slot -> ensureList(slot.getAssignments()).stream())

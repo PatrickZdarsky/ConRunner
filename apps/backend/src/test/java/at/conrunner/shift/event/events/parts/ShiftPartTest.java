@@ -27,6 +27,7 @@ class ShiftPartTest {
 
         Location location = new Location();
         location.setId(1L);
+        activity.setLocation(location);
 
         Shift shift = new Shift();
         ShiftPlan shiftPlan = new ShiftPlan();
@@ -47,7 +48,6 @@ class ShiftPartTest {
         shift.setStartTime(Instant.parse("2023-01-01T10:00:00Z"));
         shift.setEndTime(Instant.parse("2023-01-01T12:00:00Z"));
         shift.setRelatedActivity(activity);
-        shift.setLocation(location);
         shift.setSlots(Collections.singletonList(positionSlot));
 
         // Act

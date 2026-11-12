@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import jakarta.persistence.EntityManager;
 class EventCatalogPersistenceTest {
     @org.springframework.test.context.bean.override.mockito.MockitoBean
     CatalogAudit audit;
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    Clock clock;
 
     private static final Instant START = Instant.parse("2026-05-12T07:00:00Z");
     private static final Instant END = Instant.parse("2026-05-12T22:00:00Z");
@@ -92,6 +95,26 @@ class EventCatalogPersistenceTest {
         List<EventDetails> open = eventService.findOpen(START);
 
         assertEquals(List.of("Current Fest"), open.stream().map(EventDetails::name).toList());
+    }
+
+    @Test
+    void archivesAnEventWithoutRemovingItsCatalogData() {
+        org.mockito.Mockito.when(clock.instant()).thenReturn(END.plusSeconds(1));
+        EventDetails event = eventService.create(event("Past Fest", START, END));
+        LocationDetails location = locationService.create(event.id(), new LocationData("Main Hall", null, null));
+        SessionDetails session = sessionService.create(event.id(),
+            new SessionData("Opening", null, START, START.plusSeconds(3600), location.id()));
+        eventService.archive(event.id());
+        entityManager.flush();
+        entityManager.clear();
+
+        assertEquals(List.of(), eventService.search(null));
+        assertEquals(List.of(), eventService.findOpen(START));
+        assertEquals(List.of(event.id()), eventService.search("fest", true).stream().map(EventDetails::id).toList());
+        assertEquals(location.id(), sessionService.get(session.id()).locationId());
+
+        eventService.unarchive(event.id());
+        assertEquals(List.of(event.id()), eventService.search(null).stream().map(EventDetails::id).toList());
     }
 
     private static EventData event(String name, Instant start, Instant end) {

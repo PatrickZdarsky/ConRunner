@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -28,7 +29,7 @@ import at.conrunner.shift.lib.type.TimeConstraintType;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "time_constraint")
+@Table(name = "time_constraint", indexes = @Index(name = "idx_time_constraint_event", columnList = "event_id"))
 public class TimeConstraint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

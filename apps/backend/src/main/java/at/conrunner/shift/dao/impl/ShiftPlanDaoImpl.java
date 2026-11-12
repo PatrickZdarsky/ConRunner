@@ -6,10 +6,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import at.conrunner.shift.dto.rows.PlanVolunteerIdRow;
 import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.platform.exception.PartiallyNotFoundException;
 import at.conrunner.shift.dao.ShiftPlanDao;
+import at.conrunner.shift.repo.PositionConstraintRepository;
+import at.conrunner.shift.repo.PositionSlotPreferenceRepository;
 import at.conrunner.shift.repo.ShiftPlanRepository;
+import at.conrunner.shift.repo.VolunteerRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
@@ -18,6 +22,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShiftPlanDaoImpl implements ShiftPlanDao {
     private final ShiftPlanRepository shiftPlanRepository;
+    private final VolunteerRepository volunteerRepository;
+    private final PositionConstraintRepository positionConstraintRepository;
+    private final PositionSlotPreferenceRepository positionSlotPreferenceRepository;
 
     @Override
     public @NonNull String getName() {
@@ -41,12 +48,36 @@ public class ShiftPlanDaoImpl implements ShiftPlanDao {
 
     @Override
     public void delete(ShiftPlan entity) {
+        var volunteers = volunteerRepository.findAllReferencingPlan(entity);
+        for (var volunteer : volunteers) {
+            volunteer.getVolunteeringPlans().remove(entity);
+            volunteer.getPlanningPlans().remove(entity);
+            volunteer.getLockedPlans().remove(entity);
+            volunteer.getRoles().removeIf(role -> role.getShiftPlan().getId() == entity.getId());
+        }
+        positionConstraintRepository.deleteForPlan(entity.getId());
+        positionSlotPreferenceRepository.deleteForPlan(entity.getId());
         shiftPlanRepository.delete(entity);
     }
 
     @Override
     public Collection<ShiftPlan> findByEventId(Long eventId) {
         return shiftPlanRepository.findByEventId(eventId);
+    }
+
+    @Override
+    public boolean existsInEvent(long eventId, Set<Long> planIds) {
+        return !planIds.isEmpty() && shiftPlanRepository.existsByEventIdAndIdIn(eventId, planIds);
+    }
+
+    @Override
+    public Set<Long> findEventIdsForUser(UUID userId) {
+        return shiftPlanRepository.findEventIdsForUser(userId);
+    }
+
+    @Override
+    public Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, UUID userId) {
+        return shiftPlanRepository.getPlannersForEventAndUser(eventId, userId);
     }
 
     @Override

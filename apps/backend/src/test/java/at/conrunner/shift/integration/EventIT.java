@@ -2,30 +2,47 @@ package at.conrunner.shift.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import at.conrunner.shift.dao.impl.specification.ShiftSpecifications;
+import at.conrunner.shift.dto.event.EventDto;
+import at.conrunner.shift.dto.event.schedule.EventScheduleFilterDto;
+import at.conrunner.shift.entity.Activity;
 import at.conrunner.shift.entity.Assignment;
 import at.conrunner.shift.entity.Event;
+import at.conrunner.shift.entity.Location;
 import at.conrunner.shift.entity.PositionSlot;
+import at.conrunner.shift.entity.RewardPointsTransaction;
 import at.conrunner.shift.entity.Shift;
 import at.conrunner.shift.entity.ShiftPlan;
+import at.conrunner.shift.entity.TimeConstraint;
 import at.conrunner.shift.entity.Volunteer;
 import at.conrunner.shift.lib.type.AssignmentStatus;
 import at.conrunner.shift.lib.type.LockStatus;
+import at.conrunner.shift.lib.type.RewardPointTransactionType;
+import at.conrunner.shift.lib.type.TimeConstraintType;
 import at.conrunner.shift.integration.config.RestITBase;
+import at.conrunner.shift.repo.ActivityRepository;
 import at.conrunner.shift.repo.AssignmentRepository;
 import at.conrunner.shift.repo.EventRepository;
+import at.conrunner.shift.repo.LocationRepository;
 import at.conrunner.shift.repo.PositionSlotRepository;
+import at.conrunner.shift.repo.RewardPointTransactionRepository;
 import at.conrunner.shift.repo.ShiftPlanRepository;
 import at.conrunner.shift.repo.ShiftRepository;
+import at.conrunner.shift.repo.TimeConstraintRepository;
 import at.conrunner.shift.repo.VolunteerRepository;
 import io.restassured.http.Method;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -50,6 +67,21 @@ class EventIT extends RestITBase {
 
     @Autowired
     AssignmentRepository assignmentRepository;
+
+    @Autowired
+    TimeConstraintRepository timeConstraintRepository;
+
+    @Autowired
+    ActivityRepository activityRepository;
+
+    @Autowired
+    LocationRepository locationRepository;
+
+    @Autowired
+    RewardPointTransactionRepository rewardPointTransactionRepository;
+
+    @Autowired
+    JdbcTemplate jdbc;
 
     private Event eventA;
     private ShiftPlan shiftPlanA;
@@ -251,5 +283,82 @@ class EventIT extends RestITBase {
             "Event not found.",
             true
         );
+    }
+
+    @Test
+    void cloningAnEventPersistsItsNewPlansAndShifts() {
+        EventDto clone = doRequest(Method.POST, EVENT_CLONE_PATH.formatted(eventA.getId()), "", Map.of(),
+            asAdminHeaders(), HttpStatus.OK.value(), EventDto.class);
+        long cloneId = Long.parseLong(clone.getId());
+
+        assertThat(shiftPlanRepository.findByEventId(cloneId)).singleElement().satisfies(plan -> {
+            assertThat(plan.getName()).isEqualTo(shiftPlanA.getName());
+            assertThat(plan.getId()).isNotEqualTo(shiftPlanA.getId());
+        });
+        assertThat(shiftRepository.findAll(ShiftSpecifications.inEvent(cloneId)))
+            .extracting(Shift::getName).containsExactlyInAnyOrder(shiftA.getName(), shiftB.getName());
+    }
+
+    @Test
+    void deletingEventRemovesLiveStaffingAndPreservesHistory() {
+        var constraint = timeConstraintRepository.save(TimeConstraint.builder()
+            .volunteer(volunteerA)
+            .event(eventA)
+            .type(TimeConstraintType.UNAVAILABLE)
+            .startTime(eventA.getStartTime())
+            .endTime(eventA.getEndTime())
+            .build());
+        var reward = rewardPointTransactionRepository.save(RewardPointsTransaction.builder()
+            .eventId(eventA.getId())
+            .shiftPlanId(shiftPlanA.getId())
+            .positionSlotId(positionSlotA.getId())
+            .volunteerId(volunteerA.getId().toString())
+            .points(assignmentA.getAcceptedRewardPoints())
+            .type(RewardPointTransactionType.EARN)
+            .sourceKey("event-delete-test")
+            .createdAt(Instant.now())
+            .build());
+
+        doRequest(Method.DELETE, "/events/" + eventA.getId(), "", Map.of(), asAdminHeaders(), HttpStatus.OK.value(), null);
+
+        assertThat(eventRepository.existsById(eventA.getId())).isFalse();
+        assertThat(shiftPlanRepository.existsById(shiftPlanA.getId())).isFalse();
+        assertThat(shiftRepository.existsById(shiftA.getId())).isFalse();
+        assertThat(positionSlotRepository.existsById(positionSlotA.getId())).isFalse();
+        assertThat(assignmentRepository.existsById(assignmentA.getId())).isFalse();
+        assertThat(timeConstraintRepository.existsById(constraint.getId())).isFalse();
+        assertThat(volunteerRepository.existsById(volunteerA.getId())).isTrue();
+        assertThat(rewardPointTransactionRepository.existsById(reward.getId())).isTrue();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM audit_entry WHERE action = ? AND subject_ref = ?", Long.class,
+            "assignment.removed", String.valueOf(assignmentA.getId()))).isEqualTo(1L);
+    }
+
+    @Test
+    void scheduleLocationFilterFollowsTheActivityWhenItMoves() {
+        var oldLocation = locationRepository.save(Location.builder().event(eventA).name("Hall A").build());
+        var newLocation = locationRepository.save(Location.builder().event(eventA).name("Hall B").build());
+        var activity = activityRepository.save(Activity.builder()
+            .event(eventA)
+            .name("Opening")
+            .startTime(shiftB.getStartTime())
+            .endTime(shiftB.getEndTime())
+            .location(oldLocation)
+            .build());
+        shiftA.setLocation(oldLocation);
+        shiftB.setRelatedActivity(activity);
+        shiftRepository.saveAll(List.of(shiftA, shiftB));
+
+        assertThat(shiftsAt(oldLocation)).containsExactlyInAnyOrder(shiftA.getId(), shiftB.getId());
+        activity.setLocation(newLocation);
+        activityRepository.save(activity);
+
+        assertThat(shiftsAt(oldLocation)).containsExactly(shiftA.getId());
+        assertThat(shiftsAt(newLocation)).containsExactly(shiftB.getId());
+    }
+
+    private List<Long> shiftsAt(Location location) {
+        var filter = new EventScheduleFilterDto();
+        filter.setLocationIds(List.of(String.valueOf(location.getId())));
+        return shiftRepository.findAll(ShiftSpecifications.matchesSearchDto(filter)).stream().map(Shift::getId).toList();
     }
 }

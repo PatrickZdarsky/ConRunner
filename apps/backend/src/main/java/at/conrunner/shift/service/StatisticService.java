@@ -1,9 +1,9 @@
 package at.conrunner.shift.service;
 
 import java.util.UUID;
+import java.util.Collection;
 import java.util.List;
 
-import at.conrunner.shift.entity.Event;
 import at.conrunner.shift.entity.Shift;
 import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.shift.entity.Volunteer;
@@ -18,7 +18,7 @@ public interface StatisticService {
 
     @NonNull OverallStatisticsDto getOverallShiftPlanStatistics(@NonNull ShiftPlan shiftPlan);
 
-    @NonNull OverallStatisticsDto getOverallEventStatistics(@NonNull Event event);
+    @NonNull OverallStatisticsDto getOverallEventStatistics(@NonNull Collection<ShiftPlan> eventPlans);
 
     @NonNull OwnStatisticsDto getOwnStatisticsOfShiftPlans(@NonNull List<ShiftPlan> shiftPlans, @NonNull UUID userId);
 

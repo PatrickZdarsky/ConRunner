@@ -27,6 +27,8 @@ public interface ShiftPlanService {
 
     void delete(long shiftPlanId);
 
+    void deletePlansForEvent(long eventId);
+
     @NonNull ShiftPlanInviteCreateResponseDto createShiftPlanInviteCode(long shiftPlanId, @NonNull ShiftPlanInviteCreateRequestDto requestDto);
 
     void revokeShiftPlanInvite(long inviteId);

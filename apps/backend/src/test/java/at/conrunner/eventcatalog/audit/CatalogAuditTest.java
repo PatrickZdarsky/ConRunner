@@ -20,6 +20,7 @@ class CatalogAuditTest {
                 new AuditEntry.Change("startTime", before.start(), after.start()),
                 new AuditEntry.Change("endTime", null, null),
                 new AuditEntry.Change("eventId", null, null),
-                new AuditEntry.Change("locationId", null, null)));
+                new AuditEntry.Change("locationId", null, null),
+                new AuditEntry.Change("archivedAt", null, null)));
     }
 }

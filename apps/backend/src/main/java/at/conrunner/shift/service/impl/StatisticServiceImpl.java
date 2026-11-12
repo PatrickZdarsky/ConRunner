@@ -3,12 +3,12 @@ package at.conrunner.shift.service.impl;
 import java.util.UUID;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 
-import at.conrunner.shift.entity.Event;
 import at.conrunner.shift.entity.PositionSlot;
 import at.conrunner.shift.entity.Shift;
 import at.conrunner.shift.entity.ShiftPlan;
@@ -56,16 +56,16 @@ public class StatisticServiceImpl implements StatisticService {
     }
 
     @Override
-    public @NonNull OverallStatisticsDto getOverallEventStatistics(@NonNull Event event) {
-        var totalHours = event.getShiftPlans().stream()
+    public @NonNull OverallStatisticsDto getOverallEventStatistics(@NonNull Collection<ShiftPlan> eventPlans) {
+        var totalHours = eventPlans.stream()
             .mapToDouble(shiftPlan ->
                 calculateTotalHoursInShifts(shiftPlan.getShifts().stream().toList()))
             .sum();
-        var totalShifts = event.getShiftPlans().stream()
+        var totalShifts = eventPlans.stream()
             .mapToInt(shiftPlan ->
                 calculateTotalShiftCountInShifts(shiftPlan.getShifts().stream().toList()))
             .sum();
-        var volunteerCount = calculateVolunteerCountInEvent(event);
+        var volunteerCount = calculateVolunteerCountInEvent(eventPlans);
 
         return OverallStatisticsDto.builder()
             .totalHours(totalHours)
@@ -167,9 +167,9 @@ public class StatisticServiceImpl implements StatisticService {
         return shiftPlan.getPlanVolunteers().size();
     }
 
-    private int calculateVolunteerCountInEvent(Event event) {
+    private int calculateVolunteerCountInEvent(Collection<ShiftPlan> eventPlans) {
         var volunteerSet = new HashSet<String>();
-        for (var shiftPlan : event.getShiftPlans()) {
+        for (var shiftPlan : eventPlans) {
             volunteerSet.addAll(shiftPlan.getPlanVolunteers().stream().map(v -> v.getId().toString()).toList());
         }
         return volunteerSet.size();

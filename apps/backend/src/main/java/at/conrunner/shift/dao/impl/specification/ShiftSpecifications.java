@@ -97,14 +97,15 @@ public final class ShiftSpecifications {
                 );
             }
 
-            // locations: Shift -> locations --> id
             if (!CollectionUtils.isEmpty(filterDto.getLocationIds())) {
-                var locationJoin = root.join("location", JoinType.INNER);
-
-                // filter only non-null, non-blank location IDs
+                var directLocation = root.join("location", JoinType.LEFT);
+                var activity = root.join("relatedActivity", JoinType.LEFT);
+                var activityLocation = activity.join("location", JoinType.LEFT);
+                var locationIds = nonBlankIds(filterDto.getLocationIds());
                 predicates = criteriaBuilder.and(predicates,
-                    locationJoin.get("id").in(
-                        nonBlankIds(filterDto.getLocationIds())
+                    criteriaBuilder.or(
+                        criteriaBuilder.and(criteriaBuilder.isNull(activity.get("id")), directLocation.get("id").in(locationIds)),
+                        activityLocation.get("id").in(locationIds)
                     )
                 );
             }

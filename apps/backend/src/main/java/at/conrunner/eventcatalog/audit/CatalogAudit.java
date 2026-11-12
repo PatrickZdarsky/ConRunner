@@ -10,7 +10,11 @@ import org.springframework.stereotype.Service;
 public class CatalogAudit {
     private final AuditRecorder recorder;
     public CatalogAudit(AuditRecorder recorder) { this.recorder = recorder; }
-    public record Snapshot(String name, String start, String end, String parent, String location) {}
+    public record Snapshot(String name, String start, String end, String parent, String location, String archivedAt) {
+        public Snapshot(String name, String start, String end, String parent, String location) {
+            this(name, start, end, parent, location, null);
+        }
+    }
     public void record(String type, String operation, UUID id, Snapshot before, Snapshot after) {
         var label = after == null ? before.name() : after.name();
         recorder.record("eventcatalog", type + "." + operation, type, id.toString(), label,
@@ -19,7 +23,8 @@ public class CatalogAudit {
                 change("startTime", before, after, Snapshot::start),
                 change("endTime", before, after, Snapshot::end),
                 change("eventId", before, after, Snapshot::parent),
-                change("locationId", before, after, Snapshot::location)));
+                change("locationId", before, after, Snapshot::location),
+                change("archivedAt", before, after, Snapshot::archivedAt)));
     }
     private static AuditEntry.Change change(String name, Snapshot before, Snapshot after,
                                             java.util.function.Function<Snapshot, String> field) {

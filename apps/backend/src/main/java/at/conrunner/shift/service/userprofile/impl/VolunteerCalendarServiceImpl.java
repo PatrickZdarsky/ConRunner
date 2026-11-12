@@ -198,7 +198,7 @@ public class VolunteerCalendarServiceImpl implements VolunteerCalendarService {
         }
 
         private CalendarShiftEntry toEntry() {
-            Location location = shift.getLocation();
+            Location location = shift.getEffectiveLocation();
             String summary = "%s - %s".formatted(shift.getShiftPlan().getEvent().getName(), shift.getName());
             String description = buildDescription(location);
 

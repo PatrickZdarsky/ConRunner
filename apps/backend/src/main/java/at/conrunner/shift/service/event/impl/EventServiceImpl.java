@@ -1,8 +1,8 @@
 package at.conrunner.shift.service.event.impl;
 
 import at.conrunner.shift.audit.EventManagementAudit;
+import at.conrunner.shift.audit.OperationsAudit;
 import org.springframework.transaction.annotation.Transactional;
-import at.conrunner.shift.audit.AssignmentAudit;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import at.conrunner.identity.User;
 import at.conrunner.identity.UserService;
@@ -32,8 +33,10 @@ import at.conrunner.platform.exception.BadRequestException;
 import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.identity.AdminOnly;
 import at.conrunner.shift.auth.CurrentShiftActor;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dao.RewardPointsTransactionDao;
+import at.conrunner.shift.dao.TimeConstraintDao;
 import at.conrunner.shift.dao.userprofile.VolunteerDao;
 import at.conrunner.shift.dto.event.EventDto;
 import at.conrunner.shift.dto.event.EventModificationDto;
@@ -49,6 +52,7 @@ import at.conrunner.shift.mapper.EventMapper;
 import at.conrunner.shift.mapper.RoleMapper;
 import at.conrunner.shift.mapper.ShiftPlanMapper;
 import at.conrunner.shift.mapper.UserAssemblingMapper;
+import at.conrunner.shift.service.ShiftPlanService;
 import at.conrunner.shift.service.StatisticService;
 import at.conrunner.shift.service.event.EventService;
 import at.conrunner.shift.util.SecurityHelper;
@@ -58,8 +62,11 @@ import at.conrunner.shift.util.SocialLinksParser;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final EventManagementAudit eventManagementAudit;
-    private final AssignmentAudit audit;
+    private final OperationsAudit operationsAudit;
+    private final ShiftPlanService shiftPlanService;
+    private final TimeConstraintDao timeConstraintDao;
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
     private final VolunteerDao volunteerDao;
     private final RewardPointsTransactionDao rewardPointsTransactionDao;
     private final StatisticService statisticService;
@@ -91,11 +98,11 @@ public class EventServiceImpl implements EventService {
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();
         var planningShiftPlans = volunteer.getPlanningPlans();
 
-        // filter events that the volunteer is part of
+        var relevantEventIds = Stream.concat(volunteerShiftPlans.stream(), planningShiftPlans.stream())
+            .map(plan -> plan.getEvent().getId())
+            .collect(Collectors.toSet());
         var relevantEvents = filteredEvents.stream()
-            .filter(event -> event.getShiftPlans().stream()
-                .anyMatch(shiftPlan -> volunteerShiftPlans.contains(shiftPlan) || planningShiftPlans.contains(shiftPlan))
-            )
+            .filter(event -> relevantEventIds.contains(event.getId()))
             .toList();
 
         return EventMapper.toEventDto(relevantEvents);
@@ -106,16 +113,17 @@ public class EventServiceImpl implements EventService {
         if (securityHelper.isUserAdmin()) {
             return EventMapper.toEventDto(eventDao.getAllOpenEvents());
         }
-        return EventMapper.toEventDto(eventDao.getAllOpenEventsForUser(currentUser));
+        return EventMapper.toEventDto(eventDao.getOpenEventsByIds(shiftPlanDao.findEventIdsForUser(currentUser)));
     }
 
     @Override
     public List<ShiftPlanDto> getUserRelatedShiftPlansOfEvent(long eventId, UUID userId) {
         var volunteer = volunteerDao.getById(userId);
         var event = eventDao.getById(eventId);
+        var eventPlans = shiftPlanDao.findByEventId(event.getId());
         var shiftPlans = securityHelper.isUserAdmin()
-            ? List.copyOf(event.getShiftPlans())
-            : getVolunteerShiftPlans(event, volunteer);
+            ? List.copyOf(eventPlans)
+            : getVolunteerShiftPlans(eventPlans, volunteer);
         return ShiftPlanMapper.toShiftPlanDto(shiftPlans);
     }
 
@@ -126,7 +134,7 @@ public class EventServiceImpl implements EventService {
         securityHelper.assertUserIsAllowedToAccessEvent(event);
 
         // get planner IDs of users plans
-        Collection<PlanVolunteerIdRow> rows = eventDao.getPlannersForEventAndUser(eventId, userId);
+        Collection<PlanVolunteerIdRow> rows = shiftPlanDao.getPlannersForEventAndUser(eventId, userId);
 
         // Resolve all planner contacts from Shiftservice's local user directory.
         Set<UUID> allPlannerIds =
@@ -182,9 +190,10 @@ public class EventServiceImpl implements EventService {
         var volunteer = isAdmin ? volunteerDao.findById(userId) : Optional.of(volunteerDao.getById(userId));
 
         var eventOverviewDto = EventMapper.toEventDto(event);
+        var eventPlans = shiftPlanDao.findByEventId(eventId);
         var userRelevantShiftPlans = isAdmin
-            ? List.copyOf(event.getShiftPlans())
-            : getVolunteerShiftPlans(event, volunteer.orElseThrow());
+            ? List.copyOf(eventPlans)
+            : getVolunteerShiftPlans(eventPlans, volunteer.orElseThrow());
 
         // get roles of the user inside this event's shiftplans; Remove equally named roles (from different ShiftPlans)
         var roles = volunteer.stream()
@@ -208,7 +217,7 @@ public class EventServiceImpl implements EventService {
             .shiftPlans(ShiftPlanMapper.toShiftPlanDto(userRelevantShiftPlans))
             .rewardPoints((int) rewardPointsTransactionDao.sumPointsByVolunteerAndEvent(userId.toString(), eventId))
             .ownEventStatistics(statisticService.getOwnStatisticsOfShiftPlans(userRelevantShiftPlans, userId))
-            .overallEventStatistics(statisticService.getOverallEventStatistics(event))
+            .overallEventStatistics(statisticService.getOverallEventStatistics(eventPlans))
             .roles(roles)
             .build();
     }
@@ -277,19 +286,23 @@ public class EventServiceImpl implements EventService {
     public void deleteEvent(long eventId) {
         var event = eventDao.getById(eventId);
 
-        if (event.getShiftPlans() != null) event.getShiftPlans().forEach(plan -> audit.removedWithPlan(plan, "Assignment removed when event was deleted"));
+        shiftPlanService.deletePlansForEvent(eventId);
+        for (var constraint : timeConstraintDao.findAllByEventId(eventId)) {
+            operationsAudit.constraint(constraint, false);
+            timeConstraintDao.delete(constraint);
+        }
         eventManagementAudit.record("event", "deleted", event.getId(), eventManagementAudit.snapshot(event), null);
         var eventEvent = EventEvent.eventDeleted(event);
         eventDao.delete(event);
         publisher.publishEvent(eventEvent);
     }
 
-    private List<ShiftPlan> getVolunteerShiftPlans(Event event, Volunteer volunteer) {
+    private List<ShiftPlan> getVolunteerShiftPlans(Collection<ShiftPlan> eventPlans, Volunteer volunteer) {
         var volunteerShiftPlans = volunteer.getVolunteeringPlans();
         var planningShiftPlans = volunteer.getPlanningPlans();
 
         // filter shiftPlans that the volunteer is part of (volunteerShiftPlans)
-        return event.getShiftPlans().stream()
+        return eventPlans.stream()
             .filter(shiftPlan -> volunteerShiftPlans.contains(shiftPlan) || planningShiftPlans.contains(shiftPlan))
             .toList();
     }

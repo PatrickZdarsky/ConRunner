@@ -21,6 +21,7 @@ import at.conrunner.shift.lib.type.PositionSignupState;
 import at.conrunner.shift.lib.type.ShiftRelevance;
 import at.conrunner.shift.auth.CurrentShiftActor;
 import at.conrunner.shift.dao.ActivityDao;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dao.ShiftDao;
 import at.conrunner.shift.dao.userprofile.VolunteerDao;
@@ -52,6 +53,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EventScheduleServiceImpl implements EventScheduleService {
     private final EventDao eventDao;
+    private final ShiftPlanDao shiftPlanDao;
     private final ShiftDao shiftDao;
     private final ActivityDao activityDao;
     private final VolunteerDao volunteerDao;
@@ -74,7 +76,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
                 userId,
                 filterDto).stream()
-            .filter(shift -> shift.getLocation() == null)
+            .filter(shift -> shift.getEffectiveLocation() == null)
             .filter(securityHelper::isUserInPlan)
             .toList();
         var scheduleLayoutNoLocationDto = buildScheduleLayoutNoLocationDto(shiftsWithoutLocation);
@@ -148,10 +150,10 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         var queriedShifts = getShiftsBasedOnViewModes(eventId, userId, filterDto, filteredShiftsWithoutViewMode);
         Map<Location, List<Shift>> shiftsByLocation = new HashMap<>();
         for (var shift : queriedShifts) {
-            if (shift.getLocation() == null || !securityHelper.isUserInPlan(shift)) {
+            if (shift.getEffectiveLocation() == null || !securityHelper.isUserInPlan(shift)) {
                 continue;
             }
-            shiftsByLocation.computeIfAbsent(shift.getLocation(), k -> new ArrayList<>()).add(shift);
+            shiftsByLocation.computeIfAbsent(shift.getEffectiveLocation(), k -> new ArrayList<>()).add(shift);
         }
         // add all other locations of the event without shifts
         var locations = event.getLocations();
@@ -212,7 +214,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
                 currentActor.get().requireUserId(),
                 searchDto).stream()
-            .filter(shift -> shift.getLocation() == null)
+            .filter(shift -> shift.getEffectiveLocation() == null)
             .filter(securityHelper::isUserInPlan)
             .toList();
 
@@ -299,7 +301,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
     @Override
     public EventScheduleFilterValuesDto getEventScheduleFilterValues(long eventId) {
         var event = eventDao.getById(eventId);
-        var shiftPlans = event.getShiftPlans();
+        var shiftPlans = shiftPlanDao.findByEventId(eventId);
         if (shiftPlans == null || shiftPlans.isEmpty()) {
             return EventScheduleFilterValuesDto.builder()
                 .locations(List.of())

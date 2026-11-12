@@ -194,9 +194,19 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
     @AdminOnly
     @Transactional
     public void delete(long shiftPlanId) {
-        var shiftPlan = shiftPlanDao.getById(shiftPlanId);
+        deletePlan(shiftPlanDao.getById(shiftPlanId), "Assignment removed when plan was deleted");
+    }
 
-        var invites = shiftPlanInviteDao.findAllByShiftPlanId(shiftPlanId);
+    @Override
+    @AdminOnly
+    @Transactional
+    public void deletePlansForEvent(long eventId) {
+        shiftPlanDao.findByEventId(eventId)
+            .forEach(plan -> deletePlan(plan, "Assignment removed when event was deleted"));
+    }
+
+    private void deletePlan(ShiftPlan shiftPlan, String assignmentAuditSummary) {
+        var invites = shiftPlanInviteDao.findAllByShiftPlanId(shiftPlan.getId());
         for (var invite : invites) {
             operationsAudit.invite(invite, "deleted", invite.isActive(), null);
             var inviteEvent = ShiftPlanInviteEvent.inviteDeleted(invite);
@@ -205,7 +215,7 @@ public class ShiftPlanServiceImpl implements ShiftPlanService {
         }
 
         planningAudit.planDeleted(shiftPlan);
-        audit.removedWithPlan(shiftPlan, "Assignment removed when plan was deleted");
+        audit.removedWithPlan(shiftPlan, assignmentAuditSummary);
         var shiftPlanEvent = ShiftPlanEvent.planDeleted(shiftPlan);
         shiftPlanDao.delete(shiftPlan);
         publisher.publishEvent(shiftPlanEvent);

@@ -1,10 +1,11 @@
 package at.conrunner.eventcatalog.event;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import at.conrunner.eventcatalog.audit.CatalogAudit;
 import java.util.UUID;
 
+import at.conrunner.eventcatalog.audit.CatalogAudit;
 import at.conrunner.eventcatalog.error.EventCatalogConflictException;
 import at.conrunner.eventcatalog.error.EventCatalogNotFoundException;
 import at.conrunner.eventcatalog.error.EventCatalogValidationException;
@@ -16,10 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventService {
     private final CatalogAudit audit;
     private final EventRepository eventRepository;
+    private final Clock clock;
 
-    public EventService(EventRepository eventRepository, CatalogAudit audit) {
+    public EventService(EventRepository eventRepository, CatalogAudit audit, Clock clock) {
         this.audit = audit;
         this.eventRepository = eventRepository;
+        this.clock = clock;
     }
 
     @Transactional
@@ -47,6 +50,9 @@ public class EventService {
         if (!event.getName().equalsIgnoreCase(data.name()) && eventRepository.existsByNameIgnoreCase(data.name())) {
             throw new EventCatalogConflictException("An event with this name already exists");
         }
+        if (event.getArchivedAt() != null && data.endTime().isAfter(clock.instant())) {
+            throw new EventCatalogConflictException("Unarchive the event before moving its end into the future");
+        }
         var before = snapshot(event);
         apply(event, data);
         event = eventRepository.save(event);
@@ -59,10 +65,15 @@ public class EventService {
     }
 
     public List<EventDetails> search(String name) {
-        if (name == null || name.isBlank()) {
-            return eventRepository.findAll().stream().map(EventService::toDetails).toList();
-        }
-        return eventRepository.findAllByNameContainingIgnoreCaseOrderByStartTimeAsc(name.trim()).stream()
+        return search(name, false);
+    }
+
+    public List<EventDetails> search(String name, boolean archived) {
+        String term = name == null ? "" : name.trim();
+        var events = archived
+            ? eventRepository.findAllByArchivedAtIsNotNullAndNameContainingIgnoreCaseOrderByStartTimeAsc(term)
+            : eventRepository.findAllByArchivedAtIsNullAndNameContainingIgnoreCaseOrderByStartTimeAsc(term);
+        return events.stream()
             .map(EventService::toDetails)
             .toList();
     }
@@ -71,9 +82,35 @@ public class EventService {
         if (now == null) {
             throw new EventCatalogValidationException("Open-event time is required");
         }
-        return eventRepository.findAllByEndTimeGreaterThanEqualOrderByStartTimeAsc(now).stream()
+        return eventRepository.findAllByArchivedAtIsNullAndEndTimeGreaterThanEqualOrderByStartTimeAsc(now).stream()
             .map(EventService::toDetails)
             .toList();
+    }
+
+    @Transactional
+    public EventDetails archive(UUID eventId) {
+        var event = getEntity(eventId);
+        if (event.getArchivedAt() == null) {
+            Instant now = clock.instant();
+            if (event.getEndTime().isAfter(now)) {
+                throw new EventCatalogConflictException("Only events that have ended can be archived");
+            }
+            var before = snapshot(event);
+            event.setArchivedAt(now);
+            audit.record("event", "archived", eventId, before, snapshot(event));
+        }
+        return toDetails(event);
+    }
+
+    @Transactional
+    public EventDetails unarchive(UUID eventId) {
+        var event = getEntity(eventId);
+        if (event.getArchivedAt() != null) {
+            var before = snapshot(event);
+            event.setArchivedAt(null);
+            audit.record("event", "unarchived", eventId, before, snapshot(event));
+        }
+        return toDetails(event);
     }
 
     @Transactional
@@ -92,7 +129,8 @@ public class EventService {
     }
 
     private static CatalogAudit.Snapshot snapshot(CatalogEventEntity e) {
-        return new CatalogAudit.Snapshot(e.getName(), CatalogAudit.value(e.getStartTime()), CatalogAudit.value(e.getEndTime()), null, null);
+        return new CatalogAudit.Snapshot(e.getName(), CatalogAudit.value(e.getStartTime()), CatalogAudit.value(e.getEndTime()),
+            null, null, CatalogAudit.value(e.getArchivedAt()));
     }
 
     private static void apply(CatalogEventEntity event, EventData data) {
@@ -107,7 +145,7 @@ public class EventService {
 
     private static EventDetails toDetails(CatalogEventEntity event) {
         return new EventDetails(event.getId(), event.getName(), event.getShortDescription(), event.getLongDescription(), event.getStartTime(),
-            event.getEndTime(), event.getRewardPointsRedeemUrl(), event.getLinks().stream()
+            event.getEndTime(), event.getArchivedAt(), event.getRewardPointsRedeemUrl(), event.getLinks().stream()
                 .map(link -> new EventLink(link.getType(), link.getUrl()))
                 .toList());
     }

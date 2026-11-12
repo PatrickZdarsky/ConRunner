@@ -1,11 +1,13 @@
 package at.conrunner.eventcatalog.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +32,8 @@ class EventServiceTest {
     CatalogAudit audit;
     @Mock
     private EventRepository eventRepository;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private EventService eventService;
@@ -119,11 +123,25 @@ class EventServiceTest {
     void findOpen_returnsOnlyEventsWhoseEndIsNotInThePast() {
         Instant now = Instant.parse("2026-05-12T12:00:00Z");
         CatalogEventEntity open = entity(UUID.randomUUID(), "Open", START, now);
-        when(eventRepository.findAllByEndTimeGreaterThanEqualOrderByStartTimeAsc(now)).thenReturn(List.of(open));
+        when(eventRepository.findAllByArchivedAtIsNullAndEndTimeGreaterThanEqualOrderByStartTimeAsc(now)).thenReturn(List.of(open));
 
         List<EventDetails> result = eventService.findOpen(now);
 
         assertEquals(List.of("Open"), result.stream().map(EventDetails::name).toList());
+    }
+
+    @Test
+    void archivesOnlyEndedEventsAndCanRestoreThem() {
+        UUID eventId = UUID.randomUUID();
+        var event = entity(eventId, "Fest", START, END);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(clock.instant()).thenReturn(START, END);
+
+        assertThrows(EventCatalogConflictException.class, () -> eventService.archive(eventId));
+        assertNull(event.getArchivedAt());
+        assertEquals(END, eventService.archive(eventId).archivedAt());
+        assertEquals(END, eventService.archive(eventId).archivedAt());
+        assertNull(eventService.unarchive(eventId).archivedAt());
     }
 
     private static EventData data(String name, Instant start, Instant end, List<EventLink> links) {

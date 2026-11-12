@@ -116,7 +116,8 @@ class EventImportServiceImplTest {
         assertThat(persistedShifts).hasSize(2);
         assertThat(persistedShifts.get(0).getRelatedActivity()).isNotNull();
         assertThat(persistedShifts.get(0).getRelatedActivity().getName()).isEqualTo("Opening Ceremony");
-        assertThat(persistedShifts.get(0).getLocation()).isEqualTo(persistedShifts.get(0).getRelatedActivity().getLocation());
+        assertThat(persistedShifts.get(0).getLocation()).isNull();
+        assertThat(persistedShifts.get(0).getEffectiveLocation()).isEqualTo(persistedShifts.get(0).getRelatedActivity().getLocation());
         assertThat(persistedShifts.get(1).getRelatedActivity()).isNull();
         assertThat(persistedShifts.get(1).getLocation()).isNotNull();
         assertThat(persistedShifts.get(1).getLocation().getName()).isEqualTo("Info Desk");

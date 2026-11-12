@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -21,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Getter
 @Setter
@@ -28,7 +30,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "shift")
+@Table(name = "shift", indexes = {
+    @Index(name = "idx_shift_location", columnList = "location_id"),
+    @Index(name = "idx_shift_activity", columnList = "activity_id")
+})
+@Check(constraints = "activity_id IS NULL OR location_id IS NULL")
 public class Shift {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,6 +67,7 @@ public class Shift {
     private Instant endTime;
 
     @ManyToOne
+    @JoinColumn(name = "location_id")
     private Location location;
 
     @ManyToOne
@@ -72,6 +79,10 @@ public class Shift {
 
     @Column(nullable = false)
     private int bonusRewardPoints;
+
+    public Location getEffectiveLocation() {
+        return relatedActivity == null ? location : relatedActivity.getLocation();
+    }
 
     @Override
     public String toString() {

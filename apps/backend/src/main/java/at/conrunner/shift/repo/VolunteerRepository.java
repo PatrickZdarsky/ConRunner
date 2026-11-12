@@ -9,10 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.shift.entity.Volunteer;
 
 @Repository
 public interface VolunteerRepository extends JpaRepository<Volunteer, UUID> {
+    @Query("""
+        SELECT v FROM Volunteer v
+        WHERE :plan MEMBER OF v.volunteeringPlans
+           OR :plan MEMBER OF v.planningPlans
+           OR :plan MEMBER OF v.lockedPlans
+           OR EXISTS (SELECT r FROM Volunteer member JOIN member.roles r WHERE member = v AND r.shiftPlan = :plan)
+        """)
+    Collection<Volunteer> findAllReferencingPlan(ShiftPlan plan);
+
     Optional<Volunteer> findById(UUID userId);
 
     Optional<Volunteer> findByCalendarShareId(String calendarShareId);

@@ -108,6 +108,8 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
         JOIN FETCH s.shiftPlan sp
         JOIN FETCH sp.event e
         LEFT JOIN FETCH s.location l
+        LEFT JOIN FETCH s.relatedActivity activity
+        LEFT JOIN FETCH activity.location
         WHERE a.assignedVolunteer.id = :volunteerId
         AND a.status IN :statuses
         ORDER BY s.startTime, s.id, ps.id

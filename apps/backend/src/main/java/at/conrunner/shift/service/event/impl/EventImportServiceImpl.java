@@ -195,7 +195,7 @@ public class EventImportServiceImpl implements EventImportService {
 
         for (EventImportWorkbook.ShiftRow shiftRow : shiftRows) {
             Activity activity = resolveActivity(shiftRow.activityName(), activitiesByName);
-            Location location = activity != null ? activity.getLocation() : resolveLocation(shiftRow.locationName(), locationsByName);
+            Location location = activity == null ? resolveLocation(shiftRow.locationName(), locationsByName) : null;
 
             shifts.add(Shift.builder()
                 .shiftPlan(shiftPlansByName.get(normalizeKey(shiftRow.shiftPlanName())))

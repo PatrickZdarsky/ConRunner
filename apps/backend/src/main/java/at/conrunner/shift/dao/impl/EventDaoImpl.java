@@ -1,10 +1,10 @@
 package at.conrunner.shift.dao.impl;
 
-import java.util.UUID;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,6 @@ import org.jspecify.annotations.NonNull;
 import at.conrunner.shift.entity.Event;
 import at.conrunner.shift.dao.EventDao;
 import at.conrunner.shift.dto.event.EventSearchDto;
-import at.conrunner.shift.dto.rows.PlanVolunteerIdRow;
 import at.conrunner.shift.repo.EventRepository;
 
 @RequiredArgsConstructor
@@ -73,8 +72,8 @@ public class EventDaoImpl implements EventDao {
     }
 
     @Override
-    public Collection<Event> getAllOpenEventsForUser(UUID userId) {
-        return eventRepository.getAllOpenEventsForUser(userId, Instant.now());
+    public Collection<Event> getOpenEventsByIds(Set<Long> ids) {
+        return ids.isEmpty() ? List.of() : eventRepository.getOpenEventsByIds(ids, Instant.now());
     }
 
     @Override
@@ -85,11 +84,6 @@ public class EventDaoImpl implements EventDao {
     @Override
     public boolean existsByNameIgnoreCase(String name) {
         return eventRepository.existsByNameIgnoreCase(name);
-    }
-
-    @Override
-    public Collection<PlanVolunteerIdRow> getPlannersForEventAndUser(long eventId, UUID userId) {
-        return eventRepository.getPlannersForEventAndUser(eventId, userId);
     }
 
     @Override

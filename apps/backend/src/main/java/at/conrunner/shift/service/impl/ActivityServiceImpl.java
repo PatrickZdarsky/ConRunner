@@ -116,8 +116,8 @@ public class ActivityServiceImpl implements ActivityService {
         Location location = null;
         if (StringUtils.isNotBlank(modificationDto.getLocationId())) {
             location = locationDao.getById(ConvertUtil.idToLong(modificationDto.getLocationId()));
-            if (location.isReadOnly()) {
-                throw new BadRequestException("Cannot assign read-only location to activity");
+            if (location.getEvent().getId() != activity.getEvent().getId()) {
+                throw new BadRequestException("Location does not belong to the same event as the activity");
             }
         }
 

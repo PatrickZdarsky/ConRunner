@@ -7,6 +7,7 @@ import at.conrunner.shift.entity.Shift;
 import at.conrunner.shift.entity.ShiftPlan;
 import at.conrunner.shift.entity.Volunteer;
 import at.conrunner.shift.dao.EventDao;
+import at.conrunner.shift.dao.ShiftPlanDao;
 import at.conrunner.identity.User;
 import at.conrunner.identity.UserService;
 import at.conrunner.shift.util.SecurityHelper;
@@ -31,6 +32,9 @@ class LeaderboardServiceTest {
     private EventDao eventDao;
 
     @Mock
+    private ShiftPlanDao shiftPlanDao;
+
+    @Mock
     private SecurityHelper securityHelper;
 
     @Mock
@@ -53,7 +57,7 @@ class LeaderboardServiceTest {
 
         var event = new Event();
         event.setId(9L);
-        event.setShiftPlans(List.of(plan));
+        when(shiftPlanDao.findByEventId(9L)).thenReturn(List.of(plan));
 
         when(eventDao.findById(9L)).thenReturn(Optional.of(event));
         when(userDirectoryService.getUsers(Set.of(user1.getId(), user2.getId()))).thenReturn(List.of(

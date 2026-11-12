@@ -26,7 +26,7 @@ public class ShiftAssemblingMapper {
 
     public static ShiftDto toDto(@NonNull Shift shift, Collection<PositionSlotDto> positionSlots) {
         var relatedActivity = shift.getRelatedActivity();
-        var location = shift.getLocation();
+        var location = shift.getEffectiveLocation();
 
         return new ShiftDto(
             String.valueOf(shift.getId()),
@@ -45,7 +45,7 @@ public class ShiftAssemblingMapper {
     }
 
     public static ShiftContextDto toContextDto(Shift shift) {
-        var location = shift.getLocation();
+        var location = shift.getEffectiveLocation();
         return new ShiftContextDto(
             String.valueOf(shift.getId()),
             shift.getName(),

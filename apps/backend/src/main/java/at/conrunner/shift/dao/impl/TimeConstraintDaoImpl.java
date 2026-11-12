@@ -45,6 +45,11 @@ public class TimeConstraintDaoImpl implements TimeConstraintDao {
     }
 
     @Override
+    public Collection<TimeConstraint> findAllByEventId(long eventId) {
+        return timeConstraintRepository.findAllByEventId(eventId);
+    }
+
+    @Override
     public Collection<TimeConstraint> searchByVolunteerAndEvent(UUID volunteerId, long eventId) {
         return timeConstraintRepository.searchByVolunteerAndEvent(volunteerId, eventId);
     }

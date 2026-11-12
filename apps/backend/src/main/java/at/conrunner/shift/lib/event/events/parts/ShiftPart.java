@@ -39,7 +39,7 @@ public class ShiftPart {
             shift.getEndTime(),
             shift.getRelatedActivity() != null ? shift.getRelatedActivity().getId() : null,
             shift.getSlots() != null ? shift.getSlots().stream().map(PositionSlotPart::of).toList() : null,
-            shift.getLocation() != null ? shift.getLocation().getId() : null
+            shift.getEffectiveLocation() != null ? shift.getEffectiveLocation().getId() : null
         );
     }
 }
