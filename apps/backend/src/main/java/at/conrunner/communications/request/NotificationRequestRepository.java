@@ -11,8 +11,11 @@ import java.util.UUID;
 interface NotificationRequestRepository extends JpaRepository<NotificationRequestEntity, UUID> {
     @Modifying
     @Query(value = """
-        insert into communications_request (id, trigger_id, recipient_id, notification_type, template_data, created_at, email_requested, in_app_requested)
-        values (:id, :triggerId, :recipientId, :type, :data, current_timestamp, :emailRequested, :inAppRequested)
+        insert into communications_request
+            (id, trigger_id, recipient_id, notification_type, template_data, created_at,
+             status, attempts, available_at, email_requested, in_app_requested)
+        values (:id, :triggerId, :recipientId, :type, :data, current_timestamp,
+                'PENDING', 0, current_timestamp, :emailRequested, :inAppRequested)
         on conflict (trigger_id, recipient_id, notification_type) do nothing
         """, nativeQuery = true)
     int insertIfAbsent(@Param("id") UUID id, @Param("triggerId") UUID triggerId,

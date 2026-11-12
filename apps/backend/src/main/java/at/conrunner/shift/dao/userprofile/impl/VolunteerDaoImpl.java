@@ -127,4 +127,9 @@ public class VolunteerDaoImpl implements VolunteerDao {
     public boolean existsByCalendarShareId(String calendarShareId) {
         return volunteerRepository.existsByCalendarShareId(calendarShareId);
     }
+
+    @Override
+    public boolean existsById(UUID uuid) {
+        return volunteerRepository.existsById(uuid);
+    }
 }

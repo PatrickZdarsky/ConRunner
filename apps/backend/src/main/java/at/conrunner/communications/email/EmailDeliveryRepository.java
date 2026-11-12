@@ -9,8 +9,10 @@ import java.util.UUID;
 interface EmailDeliveryRepository extends JpaRepository<EmailDeliveryEntity, UUID> {
     @Modifying
     @Query(value = """
-        insert into communications_email_delivery (id, request_id, recipient_id, notification_type, title, body, link_target, status)
-        values (:id, :requestId, :recipientId, :type, :title, :body, :link, 'PENDING') on conflict (request_id) do nothing
+        insert into communications_email_delivery
+            (id, request_id, recipient_id, notification_type, title, body, link_target, status, attempts, available_at)
+        values (:id, :requestId, :recipientId, :type, :title, :body, :link, 'PENDING', 0, current_timestamp)
+        on conflict (request_id) do nothing
         """, nativeQuery = true)
     int insertIfAbsent(@Param("id") UUID id, @Param("requestId") UUID requestId,
         @Param("recipientId") UUID recipientId, @Param("type") String type,

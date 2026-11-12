@@ -2,7 +2,11 @@ package at.conrunner.shift.service.impl;
 
 import java.util.UUID;
 import java.util.HashSet;
+
+import at.conrunner.identity.AuthenticatedActor;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -15,6 +19,14 @@ import at.conrunner.shift.service.VolunteerService;
 @RequiredArgsConstructor
 public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerDao volunteerDao;
+
+    @EventListener
+    public void onAuthenticationSuccess(AuthenticationSuccessEvent event) {
+        var userId = ((AuthenticatedActor) event.getAuthentication().getPrincipal()).userId();
+        if (userId.isPresent() && !volunteerDao.existsById(userId.get())) {
+            createVolunteer(userId.get());
+        }
+    }
 
     private @NonNull Volunteer createVolunteer(@NonNull UUID userId) {
         var newVolunteer = Volunteer.builder()

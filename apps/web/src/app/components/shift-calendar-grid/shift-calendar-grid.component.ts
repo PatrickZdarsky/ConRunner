@@ -156,18 +156,7 @@ export class ShiftCalendarGridComponent {
           })))
         ])
         .flat();
-      const shiftMap = new Map<string, typeof shifts[number]>();
-      for (const shiftItem of shifts) {
-        const shiftId = shiftItem.shift.shiftDto.id;
-        const existingShiftItem = shiftMap.get(shiftId);
-
-        if (
-          existingShiftItem === undefined ||
-          shiftItem.shift.columnIndex > existingShiftItem.shift.columnIndex
-        ) {
-          shiftMap.set(shiftId, shiftItem);
-        }
-      }
+      const shiftMap = new Map(shifts.map(shiftItem => [shiftItem.shift.shiftDto.id, shiftItem]));
 
       return {
         activities: [...activityMap.values()],

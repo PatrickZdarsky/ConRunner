@@ -191,7 +191,7 @@ export class EventCalendarComponent implements OnDestroy {
             switchMap(filters =>
             this._eventScheduleService.getEventScheduleLayout(
               eventId,
-              undefined,
+              filters?.plansList,
               mapValue.undefinedIfEmptyString(filters?.shiftName),
               filters?.relevanceList,
               filters?.rolesList,
@@ -429,7 +429,7 @@ export class EventCalendarComponent implements OnDestroy {
     const activitiesNoLocation: ActivityDto[] = [];
 
     schedule.activities.forEach(activity => {
-      if(activity.location === undefined) {
+      if(!activity.location) {
         activitiesNoLocation.push(activity);
         return;
       }

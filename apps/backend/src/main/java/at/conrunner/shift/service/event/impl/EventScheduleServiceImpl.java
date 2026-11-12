@@ -2,6 +2,8 @@ package at.conrunner.shift.service.event.impl;
 
 import java.util.UUID;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -52,6 +54,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EventScheduleServiceImpl implements EventScheduleService {
+    private record ShiftPlacement(Shift shift, int columnIndex) {}
+
     private final EventDao eventDao;
     private final ShiftPlanDao shiftPlanDao;
     private final ShiftDao shiftDao;
@@ -69,21 +73,15 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         var shiftsByLocation = getScheduleShiftsByLocation(event, filterDto);
         // Build location DTOs
         var scheduleLayoutDtos = shiftsByLocation.entrySet().stream()
+            .filter(entry -> entry.getKey() != null)
             .map(entry -> buildScheduleLayoutDto(entry.getKey(), entry.getValue()))
             .toList();
 
         var userId = currentActor.get().requireUserId();
-        var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
-                userId,
-                filterDto).stream()
-            .filter(shift -> shift.getEffectiveLocation() == null)
-            .filter(securityHelper::isUserInPlan)
-            .toList();
-        var scheduleLayoutNoLocationDto = buildScheduleLayoutNoLocationDto(shiftsWithoutLocation);
+        var scheduleLayoutNoLocationDto = buildScheduleLayoutNoLocationDto(shiftsByLocation.get(null));
 
         var allShifts = new ArrayList<Shift>();
         shiftsByLocation.values().forEach(allShifts::addAll);
-        allShifts.addAll(shiftsWithoutLocation);
 
         var volunteer = volunteerDao.getById(userId);
 
@@ -112,14 +110,8 @@ public class EventScheduleServiceImpl implements EventScheduleService {
     }
 
     private int getRequiredShiftColumns(List<Shift> shifts) {
-        // sort for deterministic column placement
-        var sorted = shifts.stream()
-            .sorted(Comparator
-                .comparing(Shift::getStartTime)
-                .thenComparing(Shift::getEndTime)).toList();
-        var shiftColumns = calculateShiftColumns(sorted);
-        return shiftColumns.stream()
-            .mapToInt(ShiftColumnDto::getColumnIndex)
+        return calculateShiftPlacements(shifts).stream()
+            .mapToInt(ShiftPlacement::columnIndex)
             .max()
             .orElse(-1) + 1;
     }
@@ -127,16 +119,22 @@ public class EventScheduleServiceImpl implements EventScheduleService {
     @Override
     public EventScheduleContentDto getEventScheduleContent(long eventId, EventScheduleDaySearchDto searchDto) {
         var event = eventDao.getById(eventId);
-        var shiftsByLocation = getScheduleShiftsByLocation(event, searchDto);
-        // Build location DTOs
+        var date = searchDto == null ? null : searchDto.getDate();
+        // Assign columns across the filtered event so shifts spanning two days keep their column.
+        var filters = searchDto == null ? null : new EventScheduleFilterDto(
+            searchDto.getShiftPlanIds(), searchDto.getShiftName(), searchDto.getShiftRelevances(),
+            searchDto.getRoleIds(), searchDto.getLocationIds());
+        var shiftsByLocation = getScheduleShiftsByLocation(event, filters);
         var scheduleContentDtos = shiftsByLocation.entrySet().stream()
-            .map(entry -> buildScheduleContentDto(entry.getKey(), entry.getValue()))
+            .filter(entry -> entry.getKey() != null)
+            .map(entry -> buildScheduleContentDto(entry.getKey(), entry.getValue(), date))
             .toList();
 
-        var scheduleContentNoLocationDto = buildScheduleContentNoLocationDto(event.getId(), searchDto);
+        var scheduleContentNoLocationDto = buildScheduleContentNoLocationDto(
+            event.getId(), shiftsByLocation.get(null), date);
 
         return EventScheduleContentDto.builder()
-            .date(searchDto != null ? searchDto.getDate() : null)
+            .date(date)
             .scheduleContentDtos(scheduleContentDtos)
             .scheduleContentNoLocationDto(scheduleContentNoLocationDto)
             .build();
@@ -145,12 +143,11 @@ public class EventScheduleServiceImpl implements EventScheduleService {
     private Map<Location, List<Shift>> getScheduleShiftsByLocation(Event event, EventScheduleFilterDto filterDto) {
         long eventId = event.getId();
         var userId = validateEventAccessAndGetUserId(event);
-        // if param is ShiftPlanScheduleFilterDto filtering is done without date; date filtering is only done if param is ShiftPlanScheduleDaySearchDto instance
         var filteredShiftsWithoutViewMode = shiftDao.searchShiftsInEvent(eventId, userId, filterDto);
         var queriedShifts = getShiftsBasedOnViewModes(eventId, userId, filterDto, filteredShiftsWithoutViewMode);
         Map<Location, List<Shift>> shiftsByLocation = new HashMap<>();
         for (var shift : queriedShifts) {
-            if (shift.getEffectiveLocation() == null || !securityHelper.isUserInPlan(shift)) {
+            if (!securityHelper.isUserInPlan(shift)) {
                 continue;
             }
             shiftsByLocation.computeIfAbsent(shift.getEffectiveLocation(), k -> new ArrayList<>()).add(shift);
@@ -160,6 +157,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         for (var location : locations) {
             shiftsByLocation.putIfAbsent(location, new ArrayList<>());
         }
+        shiftsByLocation.putIfAbsent(null, List.of());
 
         return shiftsByLocation;
     }
@@ -182,12 +180,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         return freeAndEligible || freeAndOpenTrade || hasOpenTrade || hasAuction;
     }
 
-    private ScheduleContentDto buildScheduleContentDto(Location location, List<Shift> shifts) {
-        // sort for deterministic column placement
-        shifts.sort(Comparator
-            .comparing(Shift::getStartTime)
-            .thenComparing(Shift::getEndTime));
-        var shiftColumns = calculateShiftColumns(shifts);
+    private ScheduleContentDto buildScheduleContentDto(Location location, List<Shift> shifts, LocalDate date) {
         // get activities related to this location (shift unrelated, even when no shifts are present)
         var activitiesRelatedToLocation = activityDao.findAllByLocationId(location.getId()).stream()
             .distinct()
@@ -196,13 +189,14 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         return ScheduleContentDto.builder()
             .location(LocationMapper.toLocationDto(location))
             .activities(activitiesRelatedToLocation)
-            .shiftColumns(shiftColumns)
+            .shiftColumns(toShiftColumns(shifts, date))
             .build();
     }
 
     private ScheduleContentNoLocationDto buildScheduleContentNoLocationDto(
         long eventId,
-        EventScheduleDaySearchDto searchDto) {
+        List<Shift> shifts,
+        LocalDate date) {
 
         // get activities without location
         var activitiesWithoutLocation = activityDao.findAllWithoutLocationByEventId(eventId).stream()
@@ -210,24 +204,9 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             .map(ActivityMapper::toActivityDto)
             .toList();
 
-        // get shifts without location
-        var shiftsWithoutLocation = shiftDao.searchShiftsInEvent(eventId,
-                currentActor.get().requireUserId(),
-                searchDto).stream()
-            .filter(shift -> shift.getEffectiveLocation() == null)
-            .filter(securityHelper::isUserInPlan)
-            .toList();
-
-        var filteredShiftsWithoutLocation = getShiftsBasedOnViewModes(eventId,
-            currentActor.get().requireUserId(),
-            searchDto,
-            shiftsWithoutLocation);
-
-        var shiftColumns = calculateShiftColumns(filteredShiftsWithoutLocation);
-
         return ScheduleContentNoLocationDto.builder()
             .activities(activitiesWithoutLocation)
-            .shiftColumns(shiftColumns)
+            .shiftColumns(toShiftColumns(shifts, date))
             .build();
     }
 
@@ -268,10 +247,27 @@ public class EventScheduleServiceImpl implements EventScheduleService {
         return filteredShiftsWithoutViewMode;
     }
 
-    private List<ShiftColumnDto> calculateShiftColumns(List<Shift> sortedShifts) {
+    private List<ShiftColumnDto> toShiftColumns(List<Shift> shifts, LocalDate date) {
+        var placements = calculateShiftPlacements(shifts).stream();
+        if (date != null) {
+            var start = date.atStartOfDay(ZoneOffset.UTC).toInstant();
+            var end = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+            placements = placements.filter(placement -> placement.shift().getStartTime().isBefore(end)
+                && placement.shift().getEndTime().isAfter(start));
+        }
+        return placements.map(placement -> ShiftColumnDto.builder()
+            .columnIndex(placement.columnIndex())
+            .shiftDto(shiftMapper.assemble(placement.shift()))
+            .build()).toList();
+    }
+
+    private List<ShiftPlacement> calculateShiftPlacements(List<Shift> shifts) {
+        var sortedShifts = shifts.stream().sorted(Comparator.comparing(Shift::getStartTime)
+            .thenComparing(Shift::getEndTime)
+            .thenComparingLong(Shift::getId)).toList();
         // end time per column
         var columnEndTimes = new ArrayList<Instant>();
-        var result = new ArrayList<ShiftColumnDto>(sortedShifts.size());
+        var result = new ArrayList<ShiftPlacement>(sortedShifts.size());
         for (var shift : sortedShifts) {
             int columnIndex = findFirstFreeColumnIndex(columnEndTimes, shift.getStartTime());
             if (columnIndex == -1) {
@@ -280,10 +276,7 @@ public class EventScheduleServiceImpl implements EventScheduleService {
             } else {
                 columnEndTimes.set(columnIndex, shift.getEndTime());
             }
-            result.add(ShiftColumnDto.builder()
-                .columnIndex(columnIndex)
-                .shiftDto(shiftMapper.assemble(shift))
-                .build());
+            result.add(new ShiftPlacement(shift, columnIndex));
         }
         return result;
     }

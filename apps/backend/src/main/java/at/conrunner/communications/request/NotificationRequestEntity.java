@@ -6,11 +6,14 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "communications_request")
+@Table(name = "communications_request", uniqueConstraints = @UniqueConstraint(
+    name = "uq_communications_request_trigger_recipient_type",
+    columnNames = {"trigger_id", "recipient_id", "notification_type"}))
 class NotificationRequestEntity {
     enum Status { PENDING, PROCESSING, COMPLETED, FAILED }
 

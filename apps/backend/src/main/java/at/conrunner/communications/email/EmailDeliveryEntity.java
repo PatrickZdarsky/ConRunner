@@ -5,7 +5,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "communications_email_delivery")
+@Table(name = "communications_email_delivery", uniqueConstraints = @UniqueConstraint(
+    name = "uq_communications_email_delivery_request", columnNames = "request_id"))
 class EmailDeliveryEntity {
     enum Status { PENDING, PROCESSING, SENT, FAILED, CANCELED }
     @Id UUID id;

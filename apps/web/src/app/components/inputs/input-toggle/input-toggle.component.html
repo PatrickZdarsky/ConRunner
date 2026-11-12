@@ -1,7 +1,8 @@
 @if (!disguise){
   <div class="relative cursor-pointer" [ngClass]="{
   'pointer-events-none opacity-60' : disabled
-}" (click)="input.click(); (ngControl?.touched ?? true) ? 0 : onTouched?.()" (keydown)="input.click()" tabindex="0">
+}" (click)="input.click(); (ngControl?.touched ?? true) ? 0 : onTouched?.()"
+     (keydown.enter)="input.click()" (keydown.space)="$event.preventDefault(); input.click()" tabindex="0">
 
     <input #input type="checkbox" tabindex="-1" class="w-0 h-0 opacity-0 absolute" [name]="name" [id]="name"
            [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0" (blur)="onTouched ? onTouched() : 0">

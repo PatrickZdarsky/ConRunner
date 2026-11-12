@@ -95,7 +95,8 @@
               tabindex="0"
               #flow
               class="venue-flow"
-              (keydown)="flow.click()"
+              (keydown.enter)="flow.click()"
+              (keydown.space)="$event.preventDefault(); flow.click()"
               (click)="config.emptySpaceClickCallback(getDateOfClickY(flow, $event, config), venue.location)"
               style="grid-row: 2/2; grid-column: venue-{{venue.location.id}}-start / venue-{{venue.location.id}}-end"
             ></div>
@@ -118,7 +119,8 @@
               tabindex="0"
               #flow
               class="venue-flow"
-              (keydown)="flow.click()"
+              (keydown.enter)="flow.click()"
+              (keydown.space)="$event.preventDefault(); flow.click()"
               (click)="config.emptySpaceClickCallback(getDateOfClickY(flow, $event, config), undefined)"
               style="grid-row: 2/2; grid-column: venue-none-start / venue-none-end"
             ></div>

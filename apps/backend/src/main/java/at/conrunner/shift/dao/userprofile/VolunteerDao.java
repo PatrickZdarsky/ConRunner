@@ -40,4 +40,6 @@ public interface VolunteerDao extends BasicDao<Volunteer, UUID> {
     Optional<Volunteer> findByCalendarShareId(String calendarShareId);
 
     boolean existsByCalendarShareId(String calendarShareId);
+
+    boolean existsById(UUID uuid);
 }

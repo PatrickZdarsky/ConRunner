@@ -21,7 +21,7 @@
 
 @else {
   <div class="w-full flex flex-row items-center cursor-pointer --hover:scale-95 --active:scale-[98%] transition-all
-   border-ctr rounded-[1rem]" (click)="clicked($event)" tabindex="0" (keydown)="button.click()" [ngClass]="{
+   border-ctr rounded-[1rem]" (click)="clicked($event)" [ngClass]="{
       'pointer-events-none opacity-60' : lock,
 
       'border-framing-default_danger bg-gradient_item_danger hover:border-framing-highlight_danger' : action === 'danger',
@@ -45,7 +45,7 @@
       <fa-icon class="animate-spin" [icon]="lockIcon" />
     }
 
-    <input class="grow cursor-pointer" #button (click)="clicked($event)" [ngClass]="{
+    <input class="grow cursor-pointer" (click)="clicked($event)" [ngClass]="{
     'w-0' : content.length === 0
   }"
            [type]="type" [name]="name" tabindex="0" [value]="content">
