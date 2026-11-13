@@ -3,7 +3,7 @@ package at.conrunner.schedule.session;
 import java.time.Instant;
 import java.util.UUID;
 
-import at.conrunner.schedule.error.EventCatalogValidationException;
+import at.conrunner.platform.exception.ValidationException;
 
 /** Validated session data accepted by the session service. */
 public record SessionData(String name, String description, Instant startTime, Instant endTime, UUID locationId) {
@@ -11,14 +11,14 @@ public record SessionData(String name, String description, Instant startTime, In
         name = required(name, "Session name");
         description = optional(description);
         if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
-            throw new EventCatalogValidationException("Session end time must be after start time");
+            throw new ValidationException("Session end time must be after start time");
         }
     }
 
     private static String required(String value, String label) {
         String normalized = optional(value);
         if (normalized == null) {
-            throw new EventCatalogValidationException(label + " is required");
+            throw new ValidationException(label + " is required");
         }
         return normalized;
     }

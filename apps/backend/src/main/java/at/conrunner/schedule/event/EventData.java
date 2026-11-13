@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import at.conrunner.schedule.error.EventCatalogValidationException;
+import at.conrunner.platform.exception.ValidationException;
 
 /** Validated event data accepted by the event-catalogue service. */
 public record EventData(
@@ -22,7 +22,7 @@ public record EventData(
         shortDescription = optional(shortDescription);
         longDescription = optional(longDescription);
         if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
-            throw new EventCatalogValidationException("Event end time must be after start time");
+            throw new ValidationException("Event end time must be after start time");
         }
         rewardPointsRedeemUrl = optionalAbsoluteUrl(rewardPointsRedeemUrl, "Reward points redeem URL");
         links = uniqueLinks(links);
@@ -31,7 +31,7 @@ public record EventData(
     static String required(String value, String label) {
         String normalized = optional(value);
         if (normalized == null) {
-            throw new EventCatalogValidationException(label + " is required");
+            throw new ValidationException(label + " is required");
         }
         return normalized;
     }
@@ -55,7 +55,7 @@ public record EventData(
                 throw new IllegalArgumentException();
             }
         } catch (IllegalArgumentException _) {
-            throw new EventCatalogValidationException(label + " must be a valid absolute URL");
+            throw new ValidationException(label + " must be a valid absolute URL");
         }
         return normalized;
     }
@@ -65,7 +65,7 @@ public record EventData(
             return List.of();
         }
         if (links.stream().anyMatch(java.util.Objects::isNull)) {
-            throw new EventCatalogValidationException("Event links cannot contain null entries");
+            throw new ValidationException("Event links cannot contain null entries");
         }
         return List.copyOf(new LinkedHashSet<>(links));
     }

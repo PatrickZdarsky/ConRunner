@@ -2,7 +2,7 @@ package at.conrunner.schedule.api;
 
 import java.util.UUID;
 
-import at.conrunner.schedule.error.EventCatalogNotFoundException;
+import at.conrunner.platform.exception.NotFoundException;
 import at.conrunner.schedule.event.EventRepository;
 import at.conrunner.schedule.location.LocationRepository;
 import at.conrunner.schedule.session.SessionRepository;
@@ -22,30 +22,30 @@ class EventCatalogQueryService implements EventCatalogQuery {
     @Override
     public CatalogEvent requireEvent(UUID eventId) {
         if (eventId == null) {
-            throw new EventCatalogNotFoundException("Event not found");
+            throw new NotFoundException("Event not found");
         }
         return eventRepository.findById(eventId)
             .map(event -> new CatalogEvent(event.getId(), event.getStartTime(), event.getEndTime()))
-            .orElseThrow(() -> new EventCatalogNotFoundException("Event not found: " + eventId));
+            .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
     }
 
     @Override
     public CatalogLocation requireLocation(UUID locationId) {
         if (locationId == null) {
-            throw new EventCatalogNotFoundException("Location not found");
+            throw new NotFoundException("Location not found");
         }
         return locationRepository.findById(locationId)
             .map(location -> new CatalogLocation(location.getId(), location.getEventId()))
-            .orElseThrow(() -> new EventCatalogNotFoundException("Location not found: " + locationId));
+            .orElseThrow(() -> new NotFoundException("Location not found: " + locationId));
     }
 
     @Override
     public CatalogSession requireSession(UUID sessionId) {
         if (sessionId == null) {
-            throw new EventCatalogNotFoundException("Session not found");
+            throw new NotFoundException("Session not found");
         }
         return sessionRepository.findById(sessionId)
             .map(session -> new CatalogSession(session.getId(), session.getEventId(), session.getLocationId()))
-            .orElseThrow(() -> new EventCatalogNotFoundException("Session not found: " + sessionId));
+            .orElseThrow(() -> new NotFoundException("Session not found: " + sessionId));
     }
 }

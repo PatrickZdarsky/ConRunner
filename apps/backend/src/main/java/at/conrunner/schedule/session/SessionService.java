@@ -1,14 +1,14 @@
 package at.conrunner.schedule.session;
 
 import java.util.List;
+import at.conrunner.platform.exception.ConflictException;
+import at.conrunner.platform.exception.NotFoundException;
+import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.schedule.audit.CatalogAudit;
 import java.util.UUID;
 
 import at.conrunner.schedule.event.CatalogEventEntity;
 import at.conrunner.schedule.event.EventRepository;
-import at.conrunner.schedule.error.EventCatalogConflictException;
-import at.conrunner.schedule.error.EventCatalogNotFoundException;
-import at.conrunner.schedule.error.EventCatalogValidationException;
 import at.conrunner.schedule.location.LocationEntity;
 import at.conrunner.schedule.location.LocationRepository;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class SessionService {
     public SessionDetails create(UUID eventId, SessionData data) {
         CatalogEventEntity event = getEvent(eventId);
         if (data == null) {
-            throw new EventCatalogValidationException("Session data is required");
+            throw new ValidationException("Session data is required");
         }
         validateEventAndLocation(event, data);
         assertNameAvailable(eventId, data.name(), null);
@@ -51,10 +51,10 @@ public class SessionService {
     public SessionDetails update(UUID sessionId, SessionData data) {
         SessionEntity session = getEntity(sessionId);
         if (session.isReadOnly()) {
-            throw new EventCatalogConflictException("Cannot modify a read-only imported session");
+            throw new ConflictException("Cannot modify a read-only imported session");
         }
         if (data == null) {
-            throw new EventCatalogValidationException("Session data is required");
+            throw new ValidationException("Session data is required");
         }
         validateEventAndLocation(getEvent(session.getEventId()), data);
         assertNameAvailable(session.getEventId(), data.name(), session);
@@ -78,7 +78,7 @@ public class SessionService {
     public void delete(UUID sessionId) {
         SessionEntity session = getEntity(sessionId);
         if (session.isReadOnly()) {
-            throw new EventCatalogConflictException("Cannot modify a read-only imported session");
+            throw new ConflictException("Cannot modify a read-only imported session");
         }
         audit.record("session", "deleted", session.getId(), snapshot(session), null);
         sessionRepository.delete(session);
@@ -95,35 +95,35 @@ public class SessionService {
 
     private CatalogEventEntity getEvent(UUID eventId) {
         if (eventId == null) {
-            throw new EventCatalogValidationException("Event ID is required");
+            throw new ValidationException("Event ID is required");
         }
         return eventRepository.findById(eventId)
-            .orElseThrow(() -> new EventCatalogNotFoundException("Event not found: " + eventId));
+            .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
     }
 
     private void requireEvent(UUID eventId) {
         if (eventId == null || !eventRepository.existsById(eventId)) {
-            throw new EventCatalogNotFoundException("Event not found: " + eventId);
+            throw new NotFoundException("Event not found: " + eventId);
         }
     }
 
     private SessionEntity getEntity(UUID sessionId) {
         if (sessionId == null) {
-            throw new EventCatalogValidationException("Session ID is required");
+            throw new ValidationException("Session ID is required");
         }
         return sessionRepository.findById(sessionId)
-            .orElseThrow(() -> new EventCatalogNotFoundException("Session not found: " + sessionId));
+            .orElseThrow(() -> new NotFoundException("Session not found: " + sessionId));
     }
 
     private void validateEventAndLocation(CatalogEventEntity event, SessionData data) {
         if (data.startTime().isBefore(event.getStartTime()) || data.endTime().isAfter(event.getEndTime())) {
-            throw new EventCatalogValidationException("Session time range must be within event time range");
+            throw new ValidationException("Session time range must be within event time range");
         }
         if (data.locationId() != null) {
             LocationEntity location = locationRepository.findById(data.locationId())
-                .orElseThrow(() -> new EventCatalogNotFoundException("Location not found: " + data.locationId()));
+                .orElseThrow(() -> new NotFoundException("Location not found: " + data.locationId()));
             if (!event.getId().equals(location.getEventId())) {
-                throw new EventCatalogValidationException("Session location must belong to the same event");
+                throw new ValidationException("Session location must belong to the same event");
             }
         }
     }
@@ -133,7 +133,7 @@ public class SessionService {
             return;
         }
         if (sessionRepository.existsByEventIdAndNameIgnoreCase(eventId, name)) {
-            throw new EventCatalogConflictException("Session name must be unique within an event");
+            throw new ConflictException("Session name must be unique within an event");
         }
     }
 

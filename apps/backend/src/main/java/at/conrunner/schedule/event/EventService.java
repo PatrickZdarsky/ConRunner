@@ -5,10 +5,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import at.conrunner.platform.exception.ConflictException;
+import at.conrunner.platform.exception.NotFoundException;
+import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.schedule.audit.CatalogAudit;
-import at.conrunner.schedule.error.EventCatalogConflictException;
-import at.conrunner.schedule.error.EventCatalogNotFoundException;
-import at.conrunner.schedule.error.EventCatalogValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +28,10 @@ public class EventService {
     @Transactional
     public EventDetails create(EventData data) {
         if (data == null) {
-            throw new EventCatalogValidationException("Event data is required");
+            throw new ValidationException("Event data is required");
         }
         if (eventRepository.existsByNameIgnoreCase(data.name())) {
-            throw new EventCatalogConflictException("An event with this name already exists");
+            throw new ConflictException("An event with this name already exists");
         }
 
         CatalogEventEntity event = new CatalogEventEntity();
@@ -45,13 +45,13 @@ public class EventService {
     public EventDetails update(UUID eventId, EventData data) {
         CatalogEventEntity event = getEntity(eventId);
         if (data == null) {
-            throw new EventCatalogValidationException("Event data is required");
+            throw new ValidationException("Event data is required");
         }
         if (!event.getName().equalsIgnoreCase(data.name()) && eventRepository.existsByNameIgnoreCase(data.name())) {
-            throw new EventCatalogConflictException("An event with this name already exists");
+            throw new ConflictException("An event with this name already exists");
         }
         if (event.getArchivedAt() != null && data.endTime().isAfter(clock.instant())) {
-            throw new EventCatalogConflictException("Unarchive the event before moving its end into the future");
+            throw new ConflictException("Unarchive the event before moving its end into the future");
         }
         var before = snapshot(event);
         apply(event, data);
@@ -80,7 +80,7 @@ public class EventService {
 
     public List<EventDetails> findOpen(Instant now) {
         if (now == null) {
-            throw new EventCatalogValidationException("Open-event time is required");
+            throw new ValidationException("Open-event time is required");
         }
         return eventRepository.findAllByArchivedAtIsNullAndEndTimeGreaterThanEqualOrderByStartTimeAsc(now).stream()
             .map(EventService::toDetails)
@@ -93,7 +93,7 @@ public class EventService {
         if (event.getArchivedAt() == null) {
             Instant now = clock.instant();
             if (event.getEndTime().isAfter(now)) {
-                throw new EventCatalogConflictException("Only events that have ended can be archived");
+                throw new ConflictException("Only events that have ended can be archived");
             }
             var before = snapshot(event);
             event.setArchivedAt(now);
@@ -122,10 +122,10 @@ public class EventService {
 
     private CatalogEventEntity getEntity(UUID eventId) {
         if (eventId == null) {
-            throw new EventCatalogValidationException("Event ID is required");
+            throw new ValidationException("Event ID is required");
         }
         return eventRepository.findById(eventId)
-            .orElseThrow(() -> new EventCatalogNotFoundException("Event not found: " + eventId));
+            .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
     }
 
     private static CatalogAudit.Snapshot snapshot(CatalogEventEntity e) {

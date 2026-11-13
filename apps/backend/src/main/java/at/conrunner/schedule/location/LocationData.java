@@ -2,7 +2,7 @@ package at.conrunner.schedule.location;
 
 import java.net.URI;
 
-import at.conrunner.schedule.error.EventCatalogValidationException;
+import at.conrunner.platform.exception.ValidationException;
 
 /** Validated location data accepted by the location service. */
 public record LocationData(String name, String description, String url) {
@@ -15,7 +15,7 @@ public record LocationData(String name, String description, String url) {
     private static String required(String value, String label) {
         String normalized = optional(value);
         if (normalized == null) {
-            throw new EventCatalogValidationException(label + " is required");
+            throw new ValidationException(label + " is required");
         }
         return normalized;
     }
@@ -39,7 +39,7 @@ public record LocationData(String name, String description, String url) {
                 throw new IllegalArgumentException();
             }
         } catch (IllegalArgumentException _) {
-            throw new EventCatalogValidationException("Location URL must be a valid absolute URL");
+            throw new ValidationException("Location URL must be a valid absolute URL");
         }
         return normalized;
     }

@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import at.conrunner.platform.exception.ConflictException;
+import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.schedule.audit.CatalogAudit;
-import at.conrunner.schedule.error.EventCatalogConflictException;
-import at.conrunner.schedule.error.EventCatalogValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -70,7 +70,7 @@ class EventServiceTest {
 
     @Test
     void create_rejectsAnInvalidTimeRangeBeforeTouchingPersistence() {
-        EventCatalogValidationException exception = assertThrows(EventCatalogValidationException.class,
+        ValidationException exception = assertThrows(ValidationException.class,
             () -> new EventData("ShiftControl Fest", "Short description", "Long description", END, START,
                 "https://shiftcontrol.at/rewards", List.of()));
 
@@ -79,18 +79,18 @@ class EventServiceTest {
 
     @Test
     void create_rejectsAnInvalidRewardRedemptionUrlBeforeTouchingPersistence() {
-        assertThrows(EventCatalogValidationException.class, () -> new EventData(
+        assertThrows(ValidationException.class, () -> new EventData(
             "ShiftControl Fest", "Short description", "Long description", START, END, "not a URL", List.of()));
     }
 
     @Test
     void eventLink_requiresAnAbsoluteUrl() {
-        assertThrows(EventCatalogValidationException.class, () -> new EventLink(EventLinkType.WEBSITE, "not a URL"));
+        assertThrows(ValidationException.class, () -> new EventLink(EventLinkType.WEBSITE, "not a URL"));
     }
 
     @Test
     void create_rejectsMissingEventData() {
-        assertThrows(EventCatalogValidationException.class, () -> eventService.create(null));
+        assertThrows(ValidationException.class, () -> eventService.create(null));
     }
 
     @Test
@@ -98,7 +98,7 @@ class EventServiceTest {
         EventData data = data("ShiftControl Fest", START, END, List.of());
         when(eventRepository.existsByNameIgnoreCase(data.name())).thenReturn(true);
 
-        assertThrows(EventCatalogConflictException.class, () -> eventService.create(data));
+        assertThrows(ConflictException.class, () -> eventService.create(data));
     }
 
     @Test
@@ -116,7 +116,7 @@ class EventServiceTest {
         when(eventRepository.existsByNameIgnoreCase(other.getName())).thenReturn(true);
         EventData duplicate = data("Another Event", START, END, List.of());
 
-        assertThrows(EventCatalogConflictException.class, () -> eventService.update(eventId, duplicate));
+        assertThrows(ConflictException.class, () -> eventService.update(eventId, duplicate));
     }
 
     @Test
@@ -137,7 +137,7 @@ class EventServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
         when(clock.instant()).thenReturn(START, END);
 
-        assertThrows(EventCatalogConflictException.class, () -> eventService.archive(eventId));
+        assertThrows(ConflictException.class, () -> eventService.archive(eventId));
         assertNull(event.getArchivedAt());
         assertEquals(END, eventService.archive(eventId).archivedAt());
         assertEquals(END, eventService.archive(eventId).archivedAt());

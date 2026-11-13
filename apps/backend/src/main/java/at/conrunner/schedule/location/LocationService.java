@@ -1,13 +1,13 @@
 package at.conrunner.schedule.location;
 
 import java.util.List;
+import at.conrunner.platform.exception.ConflictException;
+import at.conrunner.platform.exception.NotFoundException;
+import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.schedule.audit.CatalogAudit;
 import java.util.UUID;
 
 import at.conrunner.schedule.event.EventRepository;
-import at.conrunner.schedule.error.EventCatalogConflictException;
-import at.conrunner.schedule.error.EventCatalogNotFoundException;
-import at.conrunner.schedule.error.EventCatalogValidationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ public class LocationService {
     public LocationDetails create(UUID eventId, LocationData data) {
         requireEvent(eventId);
         if (data == null) {
-            throw new EventCatalogValidationException("Location data is required");
+            throw new ValidationException("Location data is required");
         }
         assertNameAvailable(eventId, data.name(), null);
 
@@ -46,7 +46,7 @@ public class LocationService {
         LocationEntity location = getEntity(locationId);
         assertMutable(location);
         if (data == null) {
-            throw new EventCatalogValidationException("Location data is required");
+            throw new ValidationException("Location data is required");
         }
         assertNameAvailable(location.getEventId(), data.name(), location);
         var before = snapshot(location);
@@ -75,16 +75,16 @@ public class LocationService {
 
     private void requireEvent(UUID eventId) {
         if (eventId == null || !eventRepository.existsById(eventId)) {
-            throw new EventCatalogNotFoundException("Event not found: " + eventId);
+            throw new NotFoundException("Event not found: " + eventId);
         }
     }
 
     private LocationEntity getEntity(UUID locationId) {
         if (locationId == null) {
-            throw new EventCatalogValidationException("Location ID is required");
+            throw new ValidationException("Location ID is required");
         }
         return locationRepository.findById(locationId)
-            .orElseThrow(() -> new EventCatalogNotFoundException("Location not found: " + locationId));
+            .orElseThrow(() -> new NotFoundException("Location not found: " + locationId));
     }
 
     private void assertNameAvailable(UUID eventId, String name, LocationEntity currentLocation) {
@@ -92,7 +92,7 @@ public class LocationService {
             return;
         }
         if (locationRepository.existsByEventIdAndNameIgnoreCase(eventId, name)) {
-            throw new EventCatalogConflictException("Location name must be unique within an event");
+            throw new ConflictException("Location name must be unique within an event");
         }
     }
 
@@ -108,7 +108,7 @@ public class LocationService {
 
     private static void assertMutable(LocationEntity location) {
         if (location.isReadOnly()) {
-            throw new EventCatalogConflictException("Cannot modify a read-only imported location");
+            throw new ConflictException("Cannot modify a read-only imported location");
         }
     }
 

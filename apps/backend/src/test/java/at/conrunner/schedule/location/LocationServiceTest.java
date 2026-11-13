@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.UUID;
 
+import at.conrunner.platform.exception.ConflictException;
 import at.conrunner.schedule.audit.CatalogAudit;
 import at.conrunner.schedule.event.EventRepository;
-import at.conrunner.schedule.error.EventCatalogConflictException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -62,7 +62,7 @@ class LocationServiceTest {
         when(eventRepository.existsById(eventId)).thenReturn(true);
         when(locationRepository.existsByEventIdAndNameIgnoreCase(eventId, "main hall")).thenReturn(true);
 
-        assertThrows(EventCatalogConflictException.class,
+        assertThrows(ConflictException.class,
             () -> locationService.create(eventId, new LocationData("main hall", null, null)));
     }
 
@@ -76,9 +76,9 @@ class LocationServiceTest {
         importedLocation.setReadOnly(true);
         when(locationRepository.findById(locationId)).thenReturn(Optional.of(importedLocation));
 
-        assertThrows(EventCatalogConflictException.class,
+        assertThrows(ConflictException.class,
             () -> locationService.update(locationId, new LocationData("Updated", null, null)));
-        assertThrows(EventCatalogConflictException.class, () -> locationService.delete(locationId));
+        assertThrows(ConflictException.class, () -> locationService.delete(locationId));
     }
 
     @Test

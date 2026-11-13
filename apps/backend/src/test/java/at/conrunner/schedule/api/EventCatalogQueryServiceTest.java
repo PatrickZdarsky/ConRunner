@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import at.conrunner.schedule.error.EventCatalogNotFoundException;
+import at.conrunner.platform.exception.NotFoundException;
 import at.conrunner.schedule.event.CatalogEventEntity;
 import at.conrunner.schedule.event.EventRepository;
 import at.conrunner.schedule.location.LocationEntity;
@@ -63,8 +63,8 @@ class EventCatalogQueryServiceTest {
 
     @Test
     void rejectsMissingCatalogueReferences() {
-        assertThrows(EventCatalogNotFoundException.class, () -> query.requireEvent(null));
-        assertThrows(EventCatalogNotFoundException.class, () -> query.requireLocation(UUID.randomUUID()));
-        assertThrows(EventCatalogNotFoundException.class, () -> query.requireSession(UUID.randomUUID()));
+        assertThrows(NotFoundException.class, () -> query.requireEvent(null));
+        assertThrows(NotFoundException.class, () -> query.requireLocation(UUID.randomUUID()));
+        assertThrows(NotFoundException.class, () -> query.requireSession(UUID.randomUUID()));
     }
 }

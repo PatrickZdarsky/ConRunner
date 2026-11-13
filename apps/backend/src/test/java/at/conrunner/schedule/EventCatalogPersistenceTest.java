@@ -8,12 +8,12 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 
+import at.conrunner.platform.exception.ConflictException;
 import at.conrunner.schedule.audit.CatalogAudit;
 import at.conrunner.TestcontainersConfiguration;
 import at.conrunner.schedule.event.EventData;
 import at.conrunner.schedule.event.EventDetails;
 import at.conrunner.schedule.event.EventService;
-import at.conrunner.schedule.error.EventCatalogConflictException;
 import at.conrunner.schedule.location.LocationData;
 import at.conrunner.schedule.location.LocationDetails;
 import at.conrunner.schedule.location.LocationService;
@@ -83,7 +83,7 @@ class EventCatalogPersistenceTest {
         locationService.create(first.id(), new LocationData("Main Hall", null, null));
         locationService.create(second.id(), new LocationData("Main Hall", null, null));
 
-        assertThrows(EventCatalogConflictException.class,
+        assertThrows(ConflictException.class,
             () -> locationService.create(first.id(), new LocationData("main hall", null, null)));
     }
 

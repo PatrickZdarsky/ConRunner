@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import at.conrunner.platform.exception.ConflictException;
+import at.conrunner.platform.exception.ValidationException;
 import at.conrunner.schedule.audit.CatalogAudit;
 import at.conrunner.schedule.event.CatalogEventEntity;
 import at.conrunner.schedule.event.EventRepository;
-import at.conrunner.schedule.error.EventCatalogConflictException;
-import at.conrunner.schedule.error.EventCatalogValidationException;
 import at.conrunner.schedule.location.LocationEntity;
 import at.conrunner.schedule.location.LocationRepository;
 import org.junit.jupiter.api.Test;
@@ -75,7 +75,7 @@ class SessionServiceTest {
         SessionData data = new SessionData("Opening ceremony", null, EVENT_START.minusSeconds(1),
             EVENT_START.plusSeconds(3600), null);
 
-        assertThrows(EventCatalogValidationException.class, () -> sessionService.create(eventId, data));
+        assertThrows(ValidationException.class, () -> sessionService.create(eventId, data));
     }
 
     @Test
@@ -88,7 +88,7 @@ class SessionServiceTest {
         SessionData data = new SessionData("Opening ceremony", null, EVENT_START.plusSeconds(1),
             EVENT_START.plusSeconds(3600), locationId);
 
-        assertThrows(EventCatalogValidationException.class, () -> sessionService.create(eventId, data));
+        assertThrows(ValidationException.class, () -> sessionService.create(eventId, data));
     }
 
     @Test
@@ -115,7 +115,7 @@ class SessionServiceTest {
         SessionData data = new SessionData("opening ceremony", null, EVENT_START.plusSeconds(1),
             EVENT_START.plusSeconds(3600), null);
 
-        assertThrows(EventCatalogConflictException.class, () -> sessionService.create(eventId, data));
+        assertThrows(ConflictException.class, () -> sessionService.create(eventId, data));
     }
 
     @Test
@@ -136,7 +136,7 @@ class SessionServiceTest {
 
     @Test
     void suggestion_rejectsANegativeTolerance() {
-        assertThrows(EventCatalogValidationException.class,
+        assertThrows(ValidationException.class,
             () -> new SessionSuggestion(null, EVENT_START, EVENT_START.plusSeconds(1), -1));
     }
 
