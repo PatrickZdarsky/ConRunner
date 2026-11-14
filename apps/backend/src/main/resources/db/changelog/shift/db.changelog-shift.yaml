@@ -766,3 +766,17 @@ databaseChangeLog:
                   type: VARCHAR(64)
                   constraints:
                     unique: true
+  - include:
+      file: db/changelog/shift/custom-field-values.yaml
+  - changeSet:
+      id: shift-custom-field-owner-constraints
+      author: conrunner
+      validCheckSum: "9:38e99f9f15c503b64a483c98cd65371b"
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: shift_field_value
+            baseColumnNames: owner_id
+            constraintName: fk_shift_field_value_owner
+            referencedTableName: shift_shift
+            referencedColumnNames: id
+            onDelete: CASCADE

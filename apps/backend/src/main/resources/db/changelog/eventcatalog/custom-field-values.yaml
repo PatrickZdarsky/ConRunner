@@ -1,0 +1,129 @@
+databaseChangeLog:
+  - changeSet:
+      id: eventcatalog-custom-field-values
+      author: conrunner
+      validCheckSum: "9:1f1c429b43c8e9b4ca1420846f604825"
+      changes:
+        - createTable:
+            tableName: schedule_event_field_value
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: owner_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: definition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: schedule_event_field_value
+            baseColumnNames: definition_id
+            constraintName: schedule_event_field_value_definition_id_fkey
+            referencedTableName: platform_custom_field_definition
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: schedule_event_field_value
+            columnNames: owner_id, definition_id
+            constraintName: schedule_event_field_value_owner_id_definition_id_key
+        - sql:
+            sql: >-
+              ALTER TABLE schedule_event_field_value ADD CHECK (value <> 'null'::jsonb)
+        - createIndex:
+            tableName: schedule_event_field_value
+            indexName: ix_schedule_event_field_value_definition
+            columns:
+              - column: {name: definition_id}
+        - createTable:
+            tableName: schedule_session_field_value
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: owner_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: definition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: schedule_session_field_value
+            baseColumnNames: definition_id
+            constraintName: schedule_session_field_value_definition_id_fkey
+            referencedTableName: platform_custom_field_definition
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: schedule_session_field_value
+            columnNames: owner_id, definition_id
+            constraintName: schedule_session_field_value_owner_id_definition_id_key
+        - sql:
+            sql: >-
+              ALTER TABLE schedule_session_field_value ADD CHECK (value <> 'null'::jsonb)
+        - createIndex:
+            tableName: schedule_session_field_value
+            indexName: ix_schedule_session_field_value_definition
+            columns:
+              - column: {name: definition_id}
+        - createTable:
+            tableName: schedule_location_field_value
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: owner_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: definition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: schedule_location_field_value
+            baseColumnNames: definition_id
+            constraintName: schedule_location_field_value_definition_id_fkey
+            referencedTableName: platform_custom_field_definition
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: schedule_location_field_value
+            columnNames: owner_id, definition_id
+            constraintName: schedule_location_field_value_owner_id_definition_id_key
+        - sql:
+            sql: >-
+              ALTER TABLE schedule_location_field_value ADD CHECK (value <> 'null'::jsonb)
+        - createIndex:
+            tableName: schedule_location_field_value
+            indexName: ix_schedule_location_field_value_definition
+            columns:
+              - column: {name: definition_id}

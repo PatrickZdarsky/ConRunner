@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: shift-custom-field-values
+      author: conrunner
+      validCheckSum: "9:3bf5bf7093e8258251cd59e616a0eef2"
+      changes:
+        - createTable:
+            tableName: shift_field_value
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: owner_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: definition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: JSONB
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: shift_field_value
+            baseColumnNames: definition_id
+            constraintName: shift_field_value_definition_id_fkey
+            referencedTableName: platform_custom_field_definition
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            tableName: shift_field_value
+            columnNames: owner_id, definition_id
+            constraintName: shift_field_value_owner_id_definition_id_key
+        - sql:
+            sql: >-
+              ALTER TABLE shift_field_value ADD CHECK (value <> 'null'::jsonb)
+        - createIndex:
+            tableName: shift_field_value
+            indexName: ix_shift_field_value_definition
+            columns:
+              - column: {name: definition_id}

@@ -15,3 +15,5 @@ databaseChangeLog:
             indexName: ix_platform_websocket_ticket_expiry
             columns:
               - column: {name: expires_at}
+  - include:
+      file: db/changelog/platform/custom-fields.yaml

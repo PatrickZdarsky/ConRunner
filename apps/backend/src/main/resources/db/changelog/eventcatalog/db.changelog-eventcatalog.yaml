@@ -228,3 +228,38 @@ databaseChangeLog:
         - sql:
             sql: CREATE INDEX idx_eventcatalog_active_start ON eventcatalog_event (start_time) WHERE archived_at IS NULL
             splitStatements: false
+  - include:
+      file: db/changelog/eventcatalog/custom-field-values.yaml
+  - changeSet:
+      id: eventcatalog-custom-field-owner-constraints
+      author: conrunner
+      validCheckSum: "9:0da26cba37a503109cf47629fbd2106f"
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: schedule_event_field_value
+            baseColumnNames: owner_id
+            constraintName: fk_schedule_event_field_value_owner
+            referencedTableName: eventcatalog_event
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: schedule_session_field_value
+            baseColumnNames: owner_id
+            constraintName: fk_schedule_session_field_value_owner
+            referencedTableName: eventcatalog_session
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: schedule_location_field_value
+            baseColumnNames: owner_id
+            constraintName: fk_schedule_location_field_value_owner
+            referencedTableName: eventcatalog_location
+            referencedColumnNames: id
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: platform_custom_field_definition
+            baseColumnNames: event_scope_id
+            constraintName: fk_custom_field_event_scope
+            referencedTableName: eventcatalog_event
+            referencedColumnNames: id
+            onDelete: CASCADE

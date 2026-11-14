@@ -1,0 +1,146 @@
+databaseChangeLog:
+  - changeSet:
+      id: platform-002-custom-fields
+      author: conrunner
+      validCheckSum: "9:fb3bb09d3b4e1d95db3c20b808a92a8a"
+      changes:
+        - createTable:
+            tableName: platform_custom_field_definition
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: field_key
+                  type: VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: label
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_type
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value_type
+                  type: VARCHAR(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: multiple
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: required
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_scope_id
+                  type: UUID
+              - column:
+                  name: built_in
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: configuration
+                  type: JSONB
+                  defaultValue: "{}"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - sql:
+            sql: >-
+              ALTER TABLE platform_custom_field_definition
+              ADD CHECK (field_key ~ '^[a-z][a-z0-9_]{0,63}$'),
+              ADD CHECK (entity_type IN ('EVENT','SESSION','LOCATION','SHIFT')),
+              ADD CHECK (value_type IN ('TEXT','URL','NUMBER','DATE','DATETIME','USER','LINK')),
+              ADD CHECK (jsonb_typeof(configuration) = 'object')
+        - sql:
+            sql: >-
+              CREATE UNIQUE INDEX ux_custom_field_global_key
+              ON platform_custom_field_definition(entity_type, field_key) WHERE event_scope_id IS NULL
+        - sql:
+            sql: >-
+              CREATE UNIQUE INDEX ux_custom_field_event_key
+              ON platform_custom_field_definition(event_scope_id, entity_type, field_key) WHERE event_scope_id IS NOT NULL
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000001"}
+              - column: {name: field_key, value: description}
+              - column: {name: label, value: Description}
+              - column: {name: entity_type, value: EVENT}
+              - column: {name: value_type, value: TEXT}
+              - column: {name: multiple, valueBoolean: false}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000002"}
+              - column: {name: field_key, value: social_links}
+              - column: {name: label, value: Social links}
+              - column: {name: entity_type, value: EVENT}
+              - column: {name: value_type, value: LINK}
+              - column: {name: multiple, valueBoolean: true}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000003"}
+              - column: {name: field_key, value: description}
+              - column: {name: label, value: Description}
+              - column: {name: entity_type, value: SESSION}
+              - column: {name: value_type, value: TEXT}
+              - column: {name: multiple, valueBoolean: false}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000004"}
+              - column: {name: field_key, value: abstract}
+              - column: {name: label, value: Abstract}
+              - column: {name: entity_type, value: SESSION}
+              - column: {name: value_type, value: TEXT}
+              - column: {name: multiple, valueBoolean: false}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000005"}
+              - column: {name: field_key, value: description}
+              - column: {name: label, value: Description}
+              - column: {name: entity_type, value: LOCATION}
+              - column: {name: value_type, value: TEXT}
+              - column: {name: multiple, valueBoolean: false}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
+        - insert:
+            tableName: platform_custom_field_definition
+            columns:
+              - column: {name: id, value: "00000000-0000-4000-8000-000000000006"}
+              - column: {name: field_key, value: description}
+              - column: {name: label, value: Description}
+              - column: {name: entity_type, value: SHIFT}
+              - column: {name: value_type, value: TEXT}
+              - column: {name: multiple, valueBoolean: false}
+              - column: {name: required, valueBoolean: false}
+              - column: {name: built_in, valueBoolean: true}
