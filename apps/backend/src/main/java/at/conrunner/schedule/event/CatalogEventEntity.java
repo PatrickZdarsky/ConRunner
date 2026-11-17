@@ -8,6 +8,8 @@ import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,6 +50,17 @@ public class CatalogEventEntity {
 
     @Column(name = "reward_points_redeem_url", length = 2048)
     private String rewardPointsRedeemUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source_mode", nullable = false, length = 16)
+    private ScheduleSourceMode sourceMode = ScheduleSourceMode.MANAGED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operation_state", nullable = false, length = 24)
+    private ScheduleOperationState operationState = ScheduleOperationState.PLANNING;
+
+    @Column(nullable = false, length = 64)
+    private String timezone = "UTC";
 
     @Version
     @Column(nullable = false)

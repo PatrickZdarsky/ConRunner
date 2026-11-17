@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,6 +15,13 @@ import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
+import at.conrunner.schedule.ScheduleRecordOrigin;
 
 @Getter
 @Setter
@@ -44,6 +53,22 @@ public class SessionEntity {
 
     @Column(name = "read_only", nullable = false)
     private boolean readOnly;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private ScheduleRecordOrigin origin = ScheduleRecordOrigin.LOCAL;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "effective_status", nullable = false, length = 16)
+    private SessionStatus effectiveStatus = SessionStatus.SCHEDULED;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "effective_content", nullable = false, columnDefinition = "jsonb")
+    private JsonNode effectiveContent = JsonNodeFactory.instance.objectNode();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "source_removal_snapshot", columnDefinition = "jsonb")
+    private JsonNode sourceRemovalSnapshot;
 
     @Version
     @Column(nullable = false)

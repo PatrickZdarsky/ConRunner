@@ -1,0 +1,20 @@
+package at.conrunner.schedule.change;
+
+public enum ChangeOperation {
+    DELAY,
+    RESCHEDULE,
+    DURATION_CHANGE,
+    ROOM_CHANGE,
+    CANCELLATION,
+    RESTORE_SESSION,
+    CONTENT_CORRECTION,
+    NEW_SESSION,
+    CLEAR_OVERRIDE,
+    FOLLOW_SOURCE,
+    CREATE,
+    UPDATE,
+    DELETE,
+    REORDER_LOCATIONS,
+    CONSOLIDATE,
+    STATE_CHANGE
+}

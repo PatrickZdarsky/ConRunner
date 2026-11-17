@@ -263,3 +263,9 @@ databaseChangeLog:
             referencedTableName: eventcatalog_event
             referencedColumnNames: id
             onDelete: CASCADE
+  - changeSet:
+      id: eventcatalog-managed-schedule-storage
+      author: conrunner
+      changes:
+        - sqlFile:
+            path: db/changelog/eventcatalog/managed-schedule.sql

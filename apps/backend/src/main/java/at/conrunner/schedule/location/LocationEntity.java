@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +14,8 @@ import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import at.conrunner.schedule.ScheduleRecordOrigin;
 
 @Getter
 @Setter
@@ -37,6 +41,16 @@ public class LocationEntity {
 
     @Column(name = "read_only", nullable = false)
     private boolean readOnly;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private ScheduleRecordOrigin origin = ScheduleRecordOrigin.LOCAL;
+
+    @Column(nullable = false)
+    private boolean retired;
+
+    @Column(name = "sort_position", nullable = false)
+    private int sortPosition;
 
     @Version
     @Column(nullable = false)

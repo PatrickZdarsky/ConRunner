@@ -62,7 +62,7 @@ Keep endpoints thin: authenticate, authorize, validate request shape, call an ap
 | `eventcatalog.session.EffectiveSessionResolver` | Pure function combining baseline, active overrides, local additions, and source-removal preservation. Shared by preview, commit, import, and rebuild checks. |
 | `eventcatalog.session.ScheduleValidator` | Hard errors, room overlap warnings, event-bound warnings, content field validation, and same-event reference checks. |
 | `eventcatalog.location.ScheduleLocationService` | Create local rooms, retire rooms, update locally owned details, and persist shared ordering. Imported metadata remains source-owned. |
-| `eventcatalog.content.ContentFieldRegistry` | Built-in field definitions, stable keys, types, limits, and public visibility. Foundation for later configurable fields. |
+| `platform.customfields` | Shared field definitions, types, configuration, validation, and domain-owned current-value storage. Schedule commands coordinate writes with change entries. |
 | `eventcatalog.change.ChangeBatchService` | Create, edit, list, and discard shared drafts with optimistic concurrency and contributor history. |
 | `eventcatalog.change.BatchReviewService` | Calculate a preview from draft entries and current schedule data, returning before/after values, warnings, batch version, and latest committed batch sequence. |
 | `eventcatalog.change.ScheduleCommitService` | Validate review and permissions; atomically apply the draft, update projections, append journal/feed records, and mark it committed. |
@@ -187,7 +187,8 @@ erDiagram
     EVENT ||--|| SCHEDULE_SIGNALS : invalidates
     EVENT ||--o{ LOCATION : owns
     EVENT ||--o{ SESSION_OCCURRENCE : owns
-    EVENT ||--o{ CONTENT_FIELD_DEFINITION : defines
+    CUSTOM_FIELD_DEFINITION ||--o{ SESSION_FIELD_VALUE : defines
+    SESSION_OCCURRENCE ||--o{ SESSION_FIELD_VALUE : owns
     EVENT ||--o{ CHANGE_BATCH : owns
     SESSION_OCCURRENCE ||--|| SESSION_BASELINE : has
     LOCATION o|--o{ SESSION_BASELINE : baseline_room
@@ -219,8 +220,13 @@ erDiagram
         instant effective_start
         instant effective_end
         uuid effective_location_id FK
-        jsonb effective_content
         bigint version
+    }
+    SESSION_FIELD_VALUE {
+        uuid id PK
+        uuid owner_id FK
+        uuid definition_id FK
+        jsonb value
     }
     SESSION_BASELINE {
         uuid occurrence_id PK
@@ -265,12 +271,22 @@ erDiagram
 | --- | --- |
 | `Event` | Owns event metadata and schedule settings directly. `sourceMode = MANAGED / SYNCED`; `operationState = PLANNING / AWAITING_IMPORT / LIVE`. IANA timezone and JPA optimistic-lock version. The latest committed batch sequence supplies the schedule revision. Only Managed uses Planning; Synced starts Awaiting import and enters Live after its first successful import. |
 | `ScheduleSignals` | One row per event holding collaboration/sync invalidation counters. Separate from the event row so draft saves and run-status updates do not contend with schedule serialization in the wrong lock order. |
-| `SessionOccurrence` | Stable UUID; event; `origin = LOCAL / IMPORTED`; effective time pair, room, status, content, version, and optional source-removal preservation snapshot. This row is the materialized read model and identity anchor. |
+| `SessionOccurrence` | Stable UUID; event; `origin = LOCAL / IMPORTED`; effective time pair, room, status, version, and optional source-removal preservation snapshot. This row is the materialized read model and identity anchor. |
 | `SessionBaseline` | One baseline per occurrence, including local additions. Contains source/planning values, current source presence/status, and baseline revision. Local additions are identified by origin plus their creation journal entry rather than a fake Pretalx record. |
-| `Location` | Stable UUID, event, origin, name/description/URL, retired flag, shared sort position, version. Sync never changes the local sort position. Retired locations remain resolvable by history and existing occurrences. |
-| `ContentFieldDefinition` | Event and stable key; value type, label, visibility, validation bounds, built-in flag, schema version. Seed title, description, abstract. Phase 1 supports built-in definitions only; values use JSONB maps in baseline/effective snapshots. |
+| `Location` | Stable UUID, event, origin, name/URL, retired flag, shared sort position, version. Sync never changes the local sort position. Retired locations remain resolvable by history and existing occurrences. |
+| `CustomFieldDefinition` | Platform-owned definitions with stable IDs/keys, types, multiplicity, validation configuration, built-in flag, and optional event scope. Current values live in the owning domain’s field-value tables. |
 
-Keep timing, status, and location relational and typed. Use JSONB for extensible content values and immutable history payloads, not for the entire relational model. Title is a required string field; description and abstract are optional long text fields, without the current 1,024-character storage ceiling. Set explicit request/value size limits rather than accepting unbounded content. Any indexed/searchable effective title column must be derived in the same transaction as the content map, never independently edited.
+Keep timing, status, location, and the existing name/title relational. Descriptions, abstracts, social links, and other custom content use the platform custom-field definitions and domain-owned value tables. Session reads obtain current custom content from `schedule_session_field_value`. The diagram shows that table as `SESSION_FIELD_VALUE`; events, locations, and shifts use their corresponding value tables.
+
+### Custom content and history
+
+Custom-field values are the authoritative current content. The target model removes separate writable description fields and `SessionEntity.effectiveContent` once callers are connected to the custom-field API. Those legacy mappings currently still exist in the implementation and need that integration step.
+
+The owning domain manages value history. Schedule edits record the definition ID, action, and full JSON value in `CHANGE_ENTRY.payload`. Draft validation and preview calculate changes without writing current field values. Commit validates again and applies the entries and custom-field writes in the same transaction. Initial values and later Planning edits must also enter the domain history to support reconstruction.
+
+`SessionBaselineEntity.content` retains baseline custom-field values keyed by stable definition identity. Source snapshots retain imported versions. Current-value tables store the result of applying committed overrides to that baseline. `SET` replaces a value, `UNSET` deliberately makes an optional value absent, and `CLEAR_OVERRIDE` follows the latest baseline. Platform `remove` applies an absent result, while the domain entry preserves which action caused it. History references must retain interpretable definitions across label changes or future schema migrations.
+
+Definition administration is a platform responsibility and should use the existing audit infrastructure. Draft/commit history and source precedence remain domain responsibilities. Events and locations will need baseline support if their custom fields receive source overrides.
 
 Override resolution order is baseline → active field overrides → source-removal preservation. When a complete source snapshot cancels/removes an occurrence with active local overrides, capture its pre-import effective state in the preservation snapshot, retain its effective state, and record a warning. Subsequent local commands update that preserved state through the same resolver. Keep new source values underneath it. If the source restores the occurrence, remove preservation and resolve normally with the remaining local overrides. Provide an explicit reviewed “follow source” command to clear preservation; clearing one unrelated field override must not silently cancel the session. Journal both automatic restoration and explicit release.
 
@@ -280,10 +296,10 @@ A preservation snapshot is necessary: keeping only a room override would otherwi
 
 | Entity | Important fields and rules |
 | --- | --- |
-| `ChangeBatch` | Shared container from preparation onward, with state (`DRAFT / COMMITTED / DISCARDED`), creator, last editor, version, timestamps, and reason. Commit assigns its event-local sequence and commit actor/time. Origin (`MANUAL / PLANNING / SYNC / CONSOLIDATION / STATE_CHANGE`), actor snapshot, timestamp, reason, idempotency key/request hash, optional sync run, and an `affects_effective_schedule` flag for feed filtering. |
+| `ChangeBatch` | Shared container with state (`DRAFT / COMMITTED / DISCARDED`), creator, last editor, version, timestamps, origin, and idempotency key. Commit assigns its event-local sequence and commit actor/time. Reasons belong to individual change entries. |
 | `ChangeEntry` | Stable UUID, `state` (`DRAFT / COMMITTED / DISCARDED`), explicit `operation_type`, deterministic entry order, event and target, one typed `payload`, reason, required batch link from creation, and schema version. A reserved UUID can identify a proposed new occurrence until its real foreign key can be set at commit. |
 
-The journal records baseline-only edits, override removal, transitions, and consolidation as well as attendee-visible changes. The **committed effective change feed** filters batches to those that actually changed effective schedule values. A sync with baseline-only changes is explained in its sync audit and source snapshot; it does not need an empty journal batch. A repeat import with no changes creates no change batch.
+The journal records baseline-only edits, override removal, transitions, and consolidation as well as attendee-visible changes. The committed change feed returns committed batches in sequence order, including consolidation and state transitions. A sync with baseline-only changes is explained in its sync audit and source snapshot; it does not need an empty journal batch. A repeat import with no changes creates no change batch.
 
 Corrections append new entries. No user-facing API edits committed entries or terminal sync audit records. Rebuilding current state should be possible from journal entries plus accepted source snapshots and their recorded application order; ordinary reads use the projection. Full accepted source snapshots retain release comparisons without depending on the provider's continued availability.
 
@@ -356,7 +372,7 @@ Store credentials separately from audit/config snapshots using a write-only secr
 - Every child carries event identity where useful for filtering. Use composite foreign keys or equivalent database constraints to prevent cross-event room/occurrence/draft references; application checks alone are not enough.
 - Enforce positive durations, valid mode/state combinations, one baseline per occurrence, and at most one active connection per event.
 - Remove event-wide session-name uniqueness. Names are labels and repeated activities are valid.
-- At most one `DRAFT` batch per event, enforced by a partial unique index. Unique `(event_id, sequence)` for committed batches; unique `(event_id, idempotency_key)` for commit commands with a stored request hash; at most one committed batch per sync run.
+- At most one `DRAFT` batch per event, enforced by a partial unique index. Unique `(event_id, sequence)` for committed batches; unique `(event_id, idempotency_key)` for commit commands for commit retries; at most one committed batch per sync run.
 - Every entry belongs to one same-event batch throughout its lifecycle. A draft batch contains draft or discarded entries. A committed batch contains committed or previously discarded entries, and a discarded batch contains only discarded entries. Enforce these transitions atomically through the command service and database constraint triggers. Each entry has a unique position within its batch. Sequence and commit metadata are set only on committed batches.
 - Unique source observation per `(snapshot_id, source_record_key)` within its kind. Never make submission ID unique across occurrences. Enforce one-to-one occurrence assignment within an accepted snapshot.
 - Index effective occurrences by `(event_id, effective_start, id)` and `(event_id, effective_location_id, effective_start)`; batches by event/state; batch feed by event/sequence; committed entries by event/occurrence and batch/order, draft entries by batch/order; runs by event/provider/start/id/status; audit details by run and local occurrence.
@@ -403,13 +419,13 @@ sequenceDiagram
 
 Apply ordered entries in `DRAFT` state to a working copy during review and return the resolved results keyed by entry ID. Read entries, schedule values, and revisions from one consistent database snapshot. Commit locks the event and batch, validates the expected revisions, and recalculates the result before applying it. Keep resolution deterministic for those inputs. A preview request creates no database record and does not advance collaboration revision. When saving a draft, “delay by 10 minutes” is converted to absolute resulting start/end times against the expected schedule and batch revisions. The preview and commit apply that same payload. A new occurrence and changes to it can live in one draft using its reserved UUID. All hard validation and acknowledged warnings are rechecked at commit.
 
-Check an idempotency-key replay before rejecting an already committed draft: the same request returns its original batch; reusing the key with a different payload returns a conflict. A stale review cannot be made valid merely by acknowledging warnings. Reject empty drafts and drafts with no state changes. A new override can change which value future syncs use even when its current effective value stays the same. Commit that change to the journal without advancing the effective feed.
+Check an idempotency-key replay before rejecting an already committed draft: the same request returns its original batch; reusing the key with a different payload returns a conflict. A stale review cannot be made valid merely by acknowledging warnings. Reject empty drafts and drafts with no state changes. A new override can change which value future syncs use even when its current effective value stays the same. Commit that change to the journal and include its batch in the committed feed.
 
 ### Returning to Planning
 
 A managed event's transition preview shows effective values becoming the baseline. Require all open drafts to be committed or discarded first. Under the event lock, recheck the preview revision, copy effective data into baselines, reset override resolution and clear preservation, retain local additions and cancellation state, and append a consolidation batch with per-occurrence reset entries containing the resulting baseline. Change the operation state to Planning in the same transaction.
 
-Occurrence IDs and effective values remain unchanged. Assign the consolidation batch its next sequence and mark it as not affecting the effective schedule. The next transition to Live protects the consolidated baseline; historical overrides are never replayed.
+Occurrence IDs and effective values remain unchanged. Assign the consolidation batch its next sequence and include it in the committed feed. The next transition to Live protects the consolidated baseline; historical overrides are never replayed.
 
 ## Sync execution
 
@@ -477,7 +493,7 @@ Use `/api/v1/events/{eventId}/schedule` as the new base path. Names are proposed
 | `PUT /drafts/{id}/items`, `POST /drafts/{id}/discard` | Version-checked editing of draft entries and shared discard. The path calls them items for the client. |
 | `GET /drafts/{id}/preview` | Calculate before/after values and warnings, returning batch version and latest committed batch sequence. |
 | `POST /drafts/{id}/commit` | Expected batch version and latest committed batch sequence, acknowledged warning codes, and idempotency key; returns batch ID. |
-| `GET /changes?after={cursor}`, `GET /batches/{id}` | Durable committed effective feed and batch detail. Batches are not split across feed pages. |
+| `GET /changes?after={cursor}`, `GET /batches/{id}` | Durable committed batch feed and batch detail. Batches are not split across feed pages. |
 | `GET /source`, `PUT /source` | Sanitized source configuration read and version-checked update; credentials write-only. |
 | `POST /source/pause`, `POST /source/resume` | Explicit audited actions. |
 | `POST /sync-runs` | Request a manual run; return `202` with run ID. Idempotency key prevents repeated requests from enqueueing duplicates. |
@@ -486,7 +502,7 @@ Use `/api/v1/events/{eventId}/schedule` as the new base path. Names are proposed
 
 Use `409 Conflict` for stale revisions, already-terminal drafts, conflicting idempotency keys, and invalid transitions; validation responses identify hard errors or reviewable warning codes. Never accept actor IDs supplied by the caller as the audit actor.
 
-The feed cursor represents event-local journal order, with a high-water mark captured consistently. Filtering out non-effective batches may leave gaps; the response supplies the next scan cursor and high-water mark. Requests must not skip a late commit with an earlier sequence. Clients deduplicate by batch/change UUID and resume after reconnect. If retention later removes cursor history, respond explicitly that a full snapshot refresh is required.
+The feed cursor represents event-local journal order, with a high-water mark captured consistently. The response supplies the next batch cursor and high-water mark. Requests must not skip a late commit with an earlier sequence. Clients deduplicate by batch/change UUID and resume after reconnect. If retention later removes cursor history, respond explicitly that a full snapshot refresh is required.
 
 Staff APIs expose operational detail only to authorized staff. A separate allowlisted effective DTO supports website/app consumers and excludes draft data, reasons/private notes, credentials, audit internals, and non-public content fields. Anonymous publication is not enabled implicitly; add an explicit event publication/access policy before exposing a public route. Signage room-list endpoints and SSE remain future features.
 
@@ -526,7 +542,7 @@ Use the main Liquibase changelog on a clean PostgreSQL instance in CI. The curre
 | Identity | Republish with changed slot IDs, repeated submissions, changed rooms/times, reordered input, missing identifiers, ties, and insertions/removals; assert mapping uniqueness and documented fallback. |
 | Audit/recovery | Run/error records survive rollback; applied mutations always have audit; crash before/after apply yields correct recovery; old fenced worker cannot commit; secrets never enter API/audit/log fixtures. |
 | Multi-instance behavior | Concurrent manual/scheduled attempts apply once; pause/reconfiguration fences in-flight work; signals reach a second instance; access revocation prevents private reads/signals. |
-| Feed | Concurrent writers preserve cursor order; paging across non-effective gaps works; public projections omit private fields; full snapshot and reported revision are consistent. |
+| Feed | Concurrent writers preserve cursor order; paging includes consolidation and state-transition batches; public projections omit private fields; full snapshot and reported revision are consistent. |
 | Lifecycle/staffing | Consolidation preserves UUIDs, cancellation state and journal; later Live transition does not repeat delays; linked shifts read the new effective room without changing assignments. |
 | Schema/API | PostgreSQL Testcontainers migrations and constraint tests, endpoint authorization tests, module boundary checks, generated-client build, and regression tests for current catalog/staffing adapters. |
 
