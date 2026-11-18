@@ -19,28 +19,22 @@ The source mode belongs to each event, not to the whole installation. Two events
 | **Managed** (the notes' “Primary”) | ConRunner is the source of truth. Staff create and maintain sessions and locations here. |
 | **Synced** | Pretalx supplies the source schedule. ConRunner imports changes, but never writes local changes back to Pretalx. Other providers can come later. |
 
-Separately, use **Planning** and **Live operations** instead of “unlocked” and “locked.” Live operations means that the baseline is protected from ordinary local edits, not that nothing can change.
+Use **Planning** and **Live operations** for the event's operating state. Live operations freezes the Session Baseline and gives staff a recorded workflow for changing the effective schedule.
 
 | State | Editing behavior |
 | --- | --- |
 | Managed + Planning | Add, edit, and delete sessions and locations directly. |
-| Managed + Live operations | Preserve the baseline; make operational changes through recorded, committed updates. |
-| Synced + awaiting first import | Show that no successful import exists yet. A failed import must not look like a ready schedule. |
-| Synced + Live operations | Enter this state automatically after the first successful import. Imported data is locally read-only; operational changes remain possible. |
+| Synced + awaiting first import | Show that no successful import exists yet. Live activation requires a successful import. |
+| Synced + Planning | The first successful import makes the schedule ready. Pretalx imports can update the baseline. Imported sessions and room details are read-only in ConRunner. |
+| Managed or Synced + Live operations | Freeze the baseline and make operational changes through recorded, committed updates. Sync is disabled for Synced events. |
 
-For a managed event, entering Live operations is an explicit action, typically when the program has been printed or otherwise finalized. Show what that action means before applying it.
-
-A managed event can return from Live operations to Planning. Consolidate the committed operational changes into the editable baseline: the current effective times, rooms, content, additions, and cancellation state become the new plan. Do not apply the old overrides a second time. Keep occurrence identities, previous baselines, and the complete audit trail.
-
-The UI must explain this consolidation and show a summary before the user confirms it. Record the transition itself. Entering Live operations again protects the newly consolidated baseline. Uncommitted drafts are not included; **proposed default:** require them to be committed or discarded before this transition so they cannot silently become stale.
-
-Switching between Managed and Synced is a separate migration question, not part of returning to Planning.
+An authorized operator explicitly activates Live operations, typically when the program has been printed or finalized. Before confirmation, show which schedule will become the baseline, explain that activation disables sync for Synced events, and state that Live operations is a one-way transition for this release. Audit the activation and the automatic sync shutdown. Source-mode migration between Managed and Synced is outside the initial scope.
 
 ## Keep the original plan and the current reality
 
 We need to distinguish three things:
 
-- **Baseline:** the managed schedule when Live operations began, or the latest successfully imported source schedule.
+- **Baseline:** the current managed plan or latest successfully imported source schedule during Planning. Activation freezes that version for Live operations.
 - **Operational changes:** committed local changes made by staff.
 - **Effective schedule:** the result attendees and staff should currently follow, combining the baseline with those changes.
 
@@ -69,10 +63,10 @@ A session can have any number of changes. If it is delayed twice and then moved,
 **Proposed defaults:**
 
 - “Delay by 10 minutes” starts from the current effective time. If a 14:00 session is delayed by 10 minutes and then by another 5, it now starts at 14:15. The preview shows both the additional delay and total difference from the baseline.
-- Committed time changes store the intended resulting times, so a later source update cannot accidentally apply the same delay again.
+- Committed time changes store the intended resulting times, so replaying the history yields the recorded result.
 - Fix a mistaken committed change with a new correction or reversal entry. Do not silently rewrite or delete the old history. Restoring a cancelled session follows the same rule.
 - Changing one session does not automatically move every later session in that room. Any future “shift the rest of the day” feature needs an explicit preview of all affected occurrences.
-- Title and description overrides are allowed, including on imported sessions. Use a modular field-level correction mechanism so additional content fields can use the same preview, commit, audit, and source-override behavior.
+- Title and description overrides are allowed, including on imported sessions. Use a modular field-level correction mechanism so additional content fields can use the same preview, commit, audit, and baseline restoration behavior.
 
 ### Content fields should be extensible
 
@@ -92,7 +86,7 @@ The first live change automatically creates a shared draft batch together with i
 
 Each committed wave has a common, stable batch ID linking all its individual changes, including changes across multiple occurrences. Preserve that grouping in history and the committed change feed. The whole reviewed batch should succeed together or remain unapplied. Discarding a draft has no effect on the live schedule. Retrying a commit after a connection problem must not duplicate changes or notifications.
 
-If another operator or a sync changes the relevant data while a draft is open, require a refreshed review before committing. Do not silently apply an outdated preview.
+If another operator changes the relevant data while a draft is open, require a refreshed review before committing. Do not silently apply an outdated preview.
 
 Reject invalid data such as an end time before the start time or a location belonging to another event. Warn about room overlaps or sessions outside the event's dates, but allow an authorized operator to proceed with a warning where real-world circumstances require it.
 
@@ -118,11 +112,11 @@ Location order must be configurable even for imported rooms. Store a shared orde
 
 ConRunner acts as the schedule backend for its consumers. Website and app requests read locally stored schedule data instead of causing a Pretalx request each time. If Pretalx is unavailable, the last successfully imported schedule remains usable, including local operational changes.
 
-Each synced event has its own source configuration. Sync is an ongoing process, with scheduled runs, a manual “sync now” action, and pause/resume controls. Staff can see whether it is running or paused, the last successful sync, the imported release/version when available, and errors or matching warnings. The refresh interval is still to be decided.
+Each synced event has its own source configuration. Before Live activation, sync is an ongoing process, with scheduled runs, a manual “sync now” action, and pause/resume controls. Staff can see whether it is running or paused, the last successful sync, the imported release/version when available, and errors or matching warnings. The refresh interval is still to be decided.
 
 **Pause behavior:** pausing stops scheduled runs; an explicit manual run remains available without resuming the schedule. Pausing does not remove imported data or stop local operational changes.
 
-Sync continues during Live operations, both on schedule and when triggered manually. Local operational overrides take priority over incoming source values. Live operations protects local decisions and records changes; it does not freeze the external schedule. Pause/resume is controlled per event.
+Live activation disables all sync for the event, including scheduled runs, manual runs, and retries. Resume is unavailable in Live. The last successfully applied import becomes the frozen baseline. A queued or in-flight import can only change the baseline if it finishes applying before activation takes effect. Keep the source configuration and import history available to authorized staff, and show that sync was disabled by Live activation.
 
 Import a complete, validated snapshot before making it visible. A failed or partial fetch must not leave half the event updated or be interpreted as mass cancellation. Repeating the same import must not create duplicates or spurious change notifications.
 
@@ -134,28 +128,21 @@ In [Pretalx issue #2256](https://github.com/pretalx/pretalx/issues/2256), closed
 - Match repeated occurrences independently. Matching only by submission/talk ID is insufficient when the same activity runs several times.
 - Do not rely solely on time or room for matching, since those are precisely the fields that can change.
 - Use deterministic best-effort matching for the first version, combining available source identifiers with occurrence details and previous mappings. Do not require an operator resolution queue before imports can proceed.
-- Record uncertain matches and the matching basis for diagnosis. Best effort cannot guarantee identity continuity in every ambiguous case. **Proposed fallback:** when no credible match exists, retain the old record/history and create a new identity rather than transferring local changes arbitrarily. Prevent multiple imported occurrences from mapping to the same local occurrence. A dedicated reconciliation workflow can come later.
+- Record uncertain matches and the matching basis for diagnosis. Best effort cannot guarantee identity continuity in every ambiguous case. **Proposed fallback:** when no credible match exists, retain the old record/history and create a new identity instead of guessing which occurrence should keep the existing references. Prevent multiple imported occurrences from mapping to the same local occurrence. A dedicated reconciliation workflow can come later.
 - Verify the integration against representative source responses, including republishing, repeated occurrences, removals, and API version differences. The exact matching strategy depends on what the supported source API reliably provides.
 
-### What happens when source updates meet local changes
+### How source updates change the schedule before Live
 
-The following policy applies to source updates, including during Live operations:
-
-- Import source changes into the baseline while preserving committed local overrides for the fields they affect.
-- Source changes to fields without a local override flow through to the effective schedule.
-- If Pretalx changes an overridden field, retain the local result automatically and record the source difference. This applies to content fields as well as time and room. Staff can clear an override to follow the source again through a recorded change, but a mandatory conflict-resolution step is not required.
-- Treat start/end times as a coherent pair so merging changes cannot produce an invalid duration.
-- When the source removes or cancels an occurrence with local changes, preserve its last usable effective state and show a prominent warning in the sync summary. Do not block the entire sync on operator resolution. The warning must make clear that the local schedule may now differ from the source.
-- For an unmodified occurrence removed from a complete source schedule, mark it withdrawn/cancelled and retain its identity and history. Do not hard-delete it.
-- Show a sync summary covering additions, updates, withdrawals, and best-effort matching or source-disagreement warnings. Imported changes must be traceable as source changes rather than attributed to an operator's manual edit.
-- If an import affects an open draft, mark its review as stale and notify collaborators through the live update mechanism. Require a refreshed preview before committing.
-- Each import that changes the effective schedule creates a committed batch attributed to the source provider, linked to its sync run. Baseline-only updates remain auditable without producing misleading effective-schedule changes.
+- Apply source changes to the imported baseline and effective schedule together. Treat start and end times as a coherent pair.
+- Mark an imported occurrence removed from a complete source schedule as withdrawn or cancelled and retain its identity and history.
+- Show a sync summary covering additions, updates, withdrawals, and best-effort matching warnings. Attribute imported changes to the source provider.
+- Each import that changes the effective schedule creates a committed batch linked to its sync run. Baseline-only updates remain auditable without producing effective-schedule changes.
 
 The notes also mention fields that may only appear updated after publishing a new source schedule. The UI should identify which source release it imported; it must not suggest that unpublished Pretalx edits are already visible. **Proposed default:** import the published schedule. Confirm the endpoint and release semantics during integration work.
 
 ### A proper audit log for every sync provider
 
-Sync auditing is part of the first backend version, with a common model for Pretalx and future providers. It must answer: what ran, why, who initiated it, what source data it used, what changed, what stayed locally overridden, and what went wrong. Ordinary application logs alone are not sufficient.
+Sync auditing is part of the first backend version, with a common model for Pretalx and future providers. It must answer: what ran, why, who initiated it, what source data it used, what changed, and what went wrong. Ordinary application logs alone are not sufficient.
 
 Persist a record for every sync run, including successful runs with no changes and failed attempts. Each record contains:
 
@@ -166,7 +153,7 @@ Persist a record for every sync run, including successful runs with no changes a
 - Sanitized error details and the stage that failed, such as fetch, validation, matching, or applying changes. Show whether anything was applied; failed atomic imports must explicitly show that the existing schedule was retained.
 - Links to the resulting committed batch and individual changes when the effective schedule changed. A no-change run still has an audit record but does not create an empty change batch.
 
-For each changed record, retain the local identity, relevant source identifiers, before/after baseline values, before/after effective values, and the decision taken. Record preserved local overrides, source removals, uncertain occurrence matches and their matching basis, and fallback identity creation. This must make it possible to explain a session's history across source releases without relying on the current source response still being available.
+For each changed record, retain the local identity, relevant source identifiers, before/after baseline values, before/after effective values, and the decision taken. Record source removals, uncertain occurrence matches and their matching basis, and fallback identity creation. This must make it possible to explain a session's history across source releases without relying on the current source response still being available.
 
 Audit pause/resume, source configuration changes, and manual sync requests as well, including who performed them and when. Never store credentials, authorization headers, or secrets in audit details. Access to sync history is event-scoped and restricted to authorized staff; it is not part of the public schedule API.
 
@@ -207,13 +194,13 @@ Drafts never generate attendee notifications. A committed batch should provide a
 
 The committed change feed is required in the first backend version. Persist it with stable change IDs, the common batch ID, affected occurrence IDs, actor/source, commit time, and before/after values. Consumers must be able to resume from a cursor or revision and recognize retries. Draft collaboration events are separate from this feed. Actual attendee delivery, subscriptions, and team-specific routing are follow-up work. Source updates that change the effective schedule should use the same change mechanism; a sync that changes nothing effective should not notify people as though the program moved.
 
-Shift planning depends on the schedule: preserve links from shifts to their session occurrences across imports, operational changes, and consolidation back to Planning. Down the line, volunteers assigned to related shifts should receive notifications when a session is delayed, moved, cancelled, or otherwise changed in a relevant way. The committed feed must carry enough occurrence identity and change detail to support that lookup. Automatically moving volunteer shifts or assignments is outside this scope and needs a separate decision.
+Shift planning depends on the schedule: preserve links from shifts to their session occurrences across imports, Live activation, and operational changes. Down the line, volunteers assigned to related shifts should receive notifications when a session is delayed, moved, cancelled, or otherwise changed in a relevant way. The committed feed must carry enough occurrence identity and change detail to support that lookup. Automatically moving volunteer shifts or assignments is outside this scope and needs a separate decision.
 
 ## Delivery order
 
 The [phase 1 backend architecture](schedulecontrol-phase1-architecture.md) expands this scope into entities, services, transaction flows, APIs, and implementation slices.
 
-1. **Backend first:** event modes and state transitions, baseline/history and consolidation, extensible content corrections, persisted collaborative drafts, atomic commits and batch IDs, effective schedule queries, shared room ordering, continuous/manual/pausable Pretalx sync including Live operations, provider-independent sync auditing, best-effort identity matching, staffing references, and the durable committed change feed. Provide backend events for live UI updates and document the APIs.
+1. **Backend first:** event modes and one-way Live activation, baseline/history, extensible content corrections, persisted collaborative drafts, atomic commits and batch IDs, effective schedule queries, shared room ordering, scheduled/manual/pausable Pretalx sync before Live operations, provider-independent sync auditing, best-effort identity matching, staffing references, and the durable committed change feed. Provide backend events for live UI updates and document the APIs.
 2. **UI pass next:** review the calendar and Activity modal against those capabilities. Add draft collaboration, preview/commit, mode-transition explanations, sync controls/status and audit history, readable content, and shared room ordering. Decide on tabs and other layout details here.
 3. **Future features:** track the list below separately from the initial backend and UI work.
 
@@ -232,28 +219,25 @@ The [phase 1 backend architecture](schedulecontrol-phase1-architecture.md) expan
 
 - A managed event edits its program freely, enters Live operations, then records two delays on one session. Both entries remain visible, while the public schedule shows the final effective time.
 - An operator drafts a room move and cancellation, reviews both, then discards them. Nothing changes for attendees and no notification is generated.
-- An imported session moves to a newly added local room. A later applied Pretalx release changes its description, which has no local override. The description updates, the local room move remains, and the occurrence keeps its identity.
-- Pretalx republishes three occurrences of the same activity with different timeslot IDs. Existing favorites and local changes still refer to the correct individual occurrences, using best-effort matching without requiring an operator resolution queue. Uncertain matches are recorded, and unmatchable occurrences use the documented fallback.
-- A source outage leaves the last good schedule available. Staff can still record operational changes, and a later successful sync preserves them.
+- Pretalx republishes an imported session with a new description before Live activation. After activation, an operator moves that session to a newly added local room. The imported description and original room remain in the baseline, and the occurrence keeps its identity.
+- Pretalx republishes three occurrences of the same activity with different timeslot IDs. Existing favorites and staffing links still refer to the correct individual occurrences, using best-effort matching without requiring an operator resolution queue. Uncertain matches are recorded, and unmatchable occurrences use the documented fallback.
+- A source outage leaves the last successfully imported schedule available. Staff can activate Live with that schedule and record operational changes.
 - A saved draft survives a refresh and is visible to another authorized operator. Their edits update the shared draft without changing the public schedule.
 - A committed wave changes three sessions. Its individual changes share one batch ID in history and the change feed.
-- A managed event returns to Planning. Its effective values become the new baseline, its audit history remains available, and re-entering Live operations does not reapply old delays.
-- A description override survives an applied source update; clearing that override explicitly restores the latest imported description.
-- Pausing sync stops scheduled imports while keeping the existing schedule and manual sync available without resuming scheduled runs.
+- An event in Live stays in Live. The Planning transition is unavailable and staff use recorded updates to correct the effective schedule.
+- After Live activation, clearing a description override restores the description from the frozen baseline.
+- Before Live, pausing sync stops scheduled imports while keeping the existing schedule and manual sync available without resuming scheduled runs.
 - Two operators edit the same session. The second commit requires a new review if the first commit made its preview stale.
-- A live sync changes an unmodified session and preserves a local room override on another. Its audit record explains both outcomes and links to the batch containing the effective changes.
+- A sync fetch is in flight when a Synced event enters Live. The run is recorded without applying its snapshot. A later Pretalx release, a manual sync request, and a resume request leave the frozen baseline as it was at activation.
 - A failed import and a successful no-change import each appear in sync history. Neither creates a schedule-change batch, and a later retry is linked without duplicating changes.
 - A mistaken cancellation is reversed with another recorded action, restoring the occurrence without losing the cancellation history.
 
 ## Decisions still worth checking
 
-The source modes and state names, returning managed events to Planning, shared room ordering, collaborative persisted drafts, content overrides, continued live sync with local override precedence, pause/manual-run behavior, provider-independent sync auditing, and deferred notification delivery are agreed. The remaining choices are narrower:
-
 - What scheduled sync interval is appropriate?
 - What retention/archive policy should apply to sync audit history?
 - What source evidence is sufficient for best-effort occurrence matching, and is creating a new identity the right fallback when no credible match exists?
 - Should description and abstract be built-in custom fields immediately, and what minimal field schema is needed for the backend foundation?
-- Is requiring shared drafts to be committed or discarded before returning to Planning the right transition behavior?
 - Do we need source-mode migration between Managed and Synced soon, or can it remain outside the initial scope?
 
 The Activity modal layout, including whether to use tabs, is deliberately left for the UI pass.

@@ -35,6 +35,7 @@ startup, local service details, and how to reload the Keycloak realm.
 | Task | Command | Run from |
 | --- | --- | --- |
 | Run backend tests | `./mvnw test` | Repository root, with Docker available for Testcontainers |
+| Build the backend and run integration tests | `./mvnw verify` | Repository root, with Docker available for Testcontainers |
 | Generate the Angular API client | `./dev client` | Repository root |
 | Build the web app | `npm run build` | `apps/web`, after generating the client |
 | Lint the web app | `npm run lint` | `apps/web` |
@@ -44,6 +45,12 @@ startup, local service details, and how to reload the Keycloak realm.
 Rerun `./dev client` when backend HTTP endpoints or DTOs change. It runs the backend against a
 temporary PostgreSQL container, writes the OpenAPI description to `apps/backend/target/openapi.json`,
 and regenerates the Git-ignored TypeScript client at `apps/web/src/api-client`.
+
+GitHub Actions runs the backend build, Angular build, lint and unit tests, and Playwright tests on pull
+requests and pushes to `master`. The workflow uploads the runnable JAR and Angular build, along with
+backend test reports and diagnostics for failed Playwright runs. Dependabot opens weekly update pull
+requests for Maven, both npm projects, GitHub Actions, and Docker images once its configuration is on
+the default branch.
 
 ## Repository guide
 

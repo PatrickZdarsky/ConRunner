@@ -11,13 +11,13 @@ These modes are always per-event.
 ## Primary
 In the primary event mode (idk the name is odd I wanna express that we are the source of truth), the schedule control has full control over the schedule. This includes the ability to add, edit, and delete sessions and locations.
 
-Here we can toggle the schedule to the "locked" mode (pls come up with a better name).
+An operator can activate Live operations to freeze the schedule baseline. Returning to Planning is outside the current scope.
 
 
 
 ### Synced
 In the synced event mode, the schedule control is synced with Pretalx (or another source). Changes made in Pretalx are reflected in the schedule control, not the other way around.
-The synced schedule automatically locked as soon as it is synced.
+After the first successful import, an operator can activate Live operations. Activation disables sync and freezes the latest successfully imported schedule as the baseline. See the [current lifecycle requirements](schedulecontrol-requirements.md#two-separate-settings-where-the-schedule-comes-from-and-how-we-edit-it).
 
 ## Locked
 Locked means the primary data is locked and cannot be edited. This mode is used for during the event when the schedule has already been printed for conbooks etc. So any changes are basically delays or changed rooms because something happened.
