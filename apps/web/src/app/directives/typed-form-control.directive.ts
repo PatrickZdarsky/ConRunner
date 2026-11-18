@@ -1,5 +1,4 @@
 /* eslint-disable @angular-eslint/directive-selector */
-/* eslint-disable @angular-eslint/no-input-rename */
 import { Directive, Input } from "@angular/core";
 import { AbstractControl } from "@angular/forms";
 import {TypedControlValueAccessor} from "../util/typedControlValueAccessor";

@@ -54,9 +54,9 @@
       @for (day of createDateGrid(position); track day.date) {
         <div (click)="pickDate(day.date); optionsFlyout.close()" role="gridcell"
              (keyup)="pickDate(day.date); optionsFlyout.close()" tabindex="0"
-             class="grid place-items-center cursor-pointer hover:text-signature-300 w-full p-[4px] rounded-[4px] hover:bg-signature-400 hover:bg-opacity-40 transition-colors"
+             class="grid place-items-center cursor-pointer hover:text-signature-300 w-full p-[4px] rounded-[4px] hover:bg-signature-400/40 transition-colors"
              [ngClass]="{
-                'light:text-text-light_primary text-text-primary bg-signature-400 bg-opacity-40' : isChosen(day.date),
+                'light:text-text-light_primary text-text-primary bg-signature-400/40' : isChosen(day.date),
                 'light:text-text-light-secondary text-text-secondary' : !isChosen(day.date)
               }"
         >

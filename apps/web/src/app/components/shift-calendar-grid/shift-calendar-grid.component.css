@@ -1,3 +1,5 @@
+@reference "../../../styles.css";
+
 
 .date {
   @apply sticky left-0 top-0 h-full border-r-2 border-framing-card bg-background-card z-50 font-semibold border-b-2 pb-xs flex flex-row gap-sm items-center justify-center;
@@ -20,10 +22,10 @@
 }
 
 .hour-marker {
-  @apply border-b-framing-default border-opacity-70 border-b-ctr absolute w-full z-0;
+  @apply border-b-framing-default/70 border-b-ctr absolute w-full z-0;
 
   &.new-day {
-    @apply border-b-framing-card border-opacity-100 border-b-2;
+    @apply border-b-framing-card border-b-2;
   }
 }
 
@@ -31,7 +33,7 @@
   @apply border-framing-default_success from-transparent to-background-card_success  absolute w-full z-0 grid place-content-center;
 
   &.start-marker {
-    @apply border-b-ctr bg-gradient-to-b;
+    @apply border-b-ctr bg-linear-to-b;
   }
 
   &.end-marker {
@@ -43,7 +45,7 @@
   @apply sticky top-0 z-40 flex flex-row gap-sm items-center justify-center font-semibold border-b-2 border-framing-card pb-xs;
 
   span {
-    @apply whitespace-nowrap overflow-hidden overflow-ellipsis;
+    @apply whitespace-nowrap overflow-hidden text-ellipsis;
   }
 }
 
@@ -60,8 +62,8 @@
 }
 
 .item-secondary {
-  @apply absolute w-full grid justify-start font-semibold border-ctr border-framing-card bg-background-item bg-opacity-30 rounded-lg;
-  @apply font-semibold text-sm text-opacity-50 text-center z-10 pointer-events-none;
+  @apply absolute w-full grid justify-start font-semibold border-ctr border-framing-card bg-background-item/30 rounded-lg;
+  @apply font-semibold text-sm text-center z-10 pointer-events-none;
   container-type: size;
 
   span {
@@ -74,14 +76,14 @@
   }
 
   .label {
-    @apply overflow-hidden overflow-ellipsis;
+    @apply overflow-hidden text-ellipsis;
   }
 }
 
 .item-primary {
   @apply absolute w-full grid place-content-center font-semibold border-ctr border-framing-item bg-background-item rounded-lg;
   @apply hover:border-framing-highlight cursor-pointer transition-colors;
-  @apply font-semibold text-sm text-opacity-40 text-center z-20;
+  @apply font-semibold text-sm text-center z-20;
   container-type: size;
 
   &.signed-up {
@@ -93,7 +95,7 @@
   }
 
   .label {
-    @apply overflow-hidden overflow-ellipsis;
+    @apply overflow-hidden text-ellipsis;
   }
 
   > .tag, > .time {

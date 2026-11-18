@@ -21,7 +21,7 @@ export class FlyoutTriggerDirective<TTemplate> implements OnDestroy {
   private overlayRef?: OverlayRef;
   private dropdownClosingActionsSub = Subscription.EMPTY;
 
-  @HostListener("click", ["$event.target"])
+  @HostListener("click")
   toggleDropdown(): void {
     if (this.isDropdownOpen) {
       this.destroyDropdown();

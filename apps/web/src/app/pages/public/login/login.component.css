@@ -1,3 +1,5 @@
+@reference "../../../../styles.css";
+
 @keyframes pulseSize {
   0% {
     transform: scale(1);

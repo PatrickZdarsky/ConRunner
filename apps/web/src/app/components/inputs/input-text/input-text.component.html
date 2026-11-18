@@ -3,7 +3,7 @@
   'pointer-events-none opacity-60' : disabled
 }">
     @if(type === "area") {
-      <textarea tabindex="0" class="w-full h-full resize-none active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight" [name]="name" [id]="name"
+      <textarea tabindex="0" class="w-full h-full resize-none active:outline-hidden p-xs transition-colors border-framing-item bg-background-item focus:outline-hidden focus:border-framing-highlight" [name]="name" [id]="name"
                 [placeholder]="placeholder" [ngClass]="{
       'focus:border-signature-300' : valid || disabled,
       'focus:border-framing-level_2_danger' : !valid && !disabled,
@@ -12,7 +12,7 @@
     }" rows="4" [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0"
                 (blur)="onTouched ? onTouched() : 0"></textarea>
     } @else {
-      <input tabindex="0" class="w-full active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight" [name]="name" [id]="name"
+      <input tabindex="0" class="w-full active:outline-hidden p-xs transition-colors border-framing-item bg-background-item focus:outline-hidden focus:border-framing-highlight" [name]="name" [id]="name"
              [placeholder]="placeholder" [ngClass]="{
       'focus:border-signature-300' : valid || disabled,
       'focus:border-framing-level_2_danger' : !valid && !disabled,

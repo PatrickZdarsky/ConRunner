@@ -19,7 +19,7 @@ import {Title} from "@angular/platform-browser";
   ],
   standalone: true,
   templateUrl: "./page.component.html",
-  styleUrl: "./page.component.scss"
+  styleUrl: "./page.component.css"
 })
 export class PageComponent implements OnInit {
 

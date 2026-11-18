@@ -5,7 +5,7 @@ import {TypedControlValueAccessor} from "../../../util/typedControlValueAccessor
 @Component({
   selector: "xsb-input-slider",
   templateUrl: "./input-slider.component.html",
-  styleUrls: ["./input-slider.component.scss"],
+  styleUrls: ["./input-slider.component.css"],
   standalone: true,
   imports: [
     FormsModule

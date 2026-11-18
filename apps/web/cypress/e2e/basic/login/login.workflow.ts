@@ -25,7 +25,7 @@ export class LoginWorkflow extends BaseWorkflow {
         cy.get(LOGIN_SELECTORS.IDP.usernameInput).clear();
         cy.get(LOGIN_SELECTORS.IDP.usernameInput).type(u);
         cy.get(LOGIN_SELECTORS.IDP.passwordInput).clear();
-        cy.get(LOGIN_SELECTORS.IDP.passwordInput).type(p);
+        cy.get(LOGIN_SELECTORS.IDP.passwordInput).type(p, {log: false});
         cy.get(LOGIN_SELECTORS.IDP.loginButton).click();
       },
     );

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VolunteerPersistenceTest {
     @Test
     void uuidIdRoundTripsThroughNativeUuidColumn() throws Exception {
-        try (var db = new PostgreSQLContainer("postgres:16-alpine")) {
+        try (var db = new PostgreSQLContainer("postgres:18.7-alpine")) {
             db.start();
             try (var conn = DriverManager.getConnection(db.getJdbcUrl(), db.getUsername(), db.getPassword()); var statement = conn.createStatement()) {
                 statement.execute("create table volunteer (id uuid primary key, calendar_share_id varchar(64))");

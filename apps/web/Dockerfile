@@ -1,8 +1,8 @@
 # =========================================
 # Stage 1: Build the Angular Application
 # =========================================
-ARG NODE_VERSION=24.7.0-alpine
-ARG NGINX_VERSION=alpine3.22
+ARG NODE_VERSION=24.22.3-alpine
+ARG NGINX_VERSION=1.31.8-alpine3.24
 
 # Use a lightweight Node.js image for building (customizable via ARG)
 FROM node:${NODE_VERSION} AS builder
@@ -27,7 +27,7 @@ RUN npm run build
 # Stage 2: Prepare Nginx to Serve Static Files
 # =========================================
 
-FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runner
+FROM nginx/nginx-unprivileged:${NGINX_VERSION} AS runner
 
 USER root
 

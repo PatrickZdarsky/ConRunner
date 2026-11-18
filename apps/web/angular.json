@@ -33,7 +33,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/ui.scss"
+              "src/ui.css"
             ],
             "scripts": []
           },
@@ -82,6 +82,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "builderMode": "application",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
@@ -95,7 +96,7 @@
               }
             ],
             "styles": [
-              "src/ui.scss",
+              "src/ui.css",
               "src/styles.css"
             ],
             "scripts": []

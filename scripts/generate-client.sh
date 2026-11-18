@@ -16,7 +16,7 @@ if [[ ! -x "$web/node_modules/.bin/openapi-generator-cli" ]]; then
   echo 'Installing frontend dependencies...'
   (cd "$web" && CYPRESS_INSTALL_BINARY=0 npm ci --no-audit --no-fund)
 fi
-container=$(docker run -d --rm -e POSTGRES_DB=shiftcontrol -e POSTGRES_USER=shiftcontrol -e POSTGRES_PASSWORD=shiftcontrol -p 127.0.0.1::5432 -v "$root/ops/compose/postgres/01-clob.sql:/docker-entrypoint-initdb.d/01-clob.sql:ro" postgres:16-alpine)
+container=$(docker run -d --rm -e POSTGRES_DB=shiftcontrol -e POSTGRES_USER=shiftcontrol -e POSTGRES_PASSWORD=shiftcontrol -p 127.0.0.1::5432 -v "$root/ops/compose/postgres/01-clob.sql:/docker-entrypoint-initdb.d/01-clob.sql:ro" postgres:18.7-alpine)
 for _ in {1..60}; do
   if docker exec "$container" pg_isready -U shiftcontrol -d shiftcontrol >/dev/null 2>&1; then break; fi
   sleep 1
@@ -56,7 +56,7 @@ spec['servers'] = [{'url': '/'}]
 with open(sys.argv[1], 'w') as f: json.dump(spec, f, sort_keys=True, separators=(',', ':'))
 PY
 echo 'Generating Angular API client...'
-(cd "$web" && ./node_modules/.bin/openapi-generator-cli generate -i "$tmp/openapi.json" -g typescript-angular -o "$tmp/api-client" --additional-properties=fileNaming=kebab-case,withInterfaces=true,ngVersion=19.2.0 --generate-alias-as-model --type-mappings set=Array)
+(cd "$web" && ./node_modules/.bin/openapi-generator-cli generate -i "$tmp/openapi.json" -g typescript-angular -o "$tmp/api-client" --additional-properties=fileNaming=kebab-case,withInterfaces=true,ngVersion=21.2.0 --generate-alias-as-model --type-mappings set=Array)
 mkdir -p "$root/apps/backend/target"
 cp "$tmp/openapi.json" "$root/apps/backend/target/openapi.json"
 rm -rf "$web/src/api-client"

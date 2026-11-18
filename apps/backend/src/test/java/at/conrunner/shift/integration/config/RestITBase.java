@@ -107,7 +107,7 @@ public abstract class RestITBase {
     @DynamicPropertySource
     static void dbProps(DynamicPropertyRegistry r) {
         // Always use a dedicated database: cleanup truncates every table between tests.
-        postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+        postgres = new PostgreSQLContainer<>("postgres:18.7-alpine")
             .withDatabaseName("test")
             .withUsername("test")
             .withPassword("test");

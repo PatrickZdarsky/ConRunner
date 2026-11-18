@@ -1,3 +1,5 @@
+@reference "../../../styles.css";
+
 .toast-info {
   @apply border-framing-item_hint bg-background-item_hint cursor-pointer;
 

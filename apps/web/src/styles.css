@@ -1,6 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@config "../tailwind.theme.cjs";
+@source "./app";
+@source "./index.html";
+
+/* Keep the Tailwind 3 defaults used by existing templates. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  ::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 body {
   font-family: 'Source Sans 3' , sans-serif;
@@ -11,15 +32,15 @@ h1 {
   font-family: 'Bricolage Grotesque', sans-serif;
 }
 
+.signature-gradient,
 .signature-gradient-font {
-  @apply signature-gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.signature-gradient {
   background: white;
   background: linear-gradient(124deg, #c7cbfd 0%, #aea6f3 70%, #c7cbfd 100%);
+}
+
+.signature-gradient-font {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 :root {

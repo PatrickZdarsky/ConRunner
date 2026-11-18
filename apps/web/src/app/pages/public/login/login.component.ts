@@ -13,7 +13,7 @@ import {filter, take} from "rxjs";
   ],
   standalone: true,
   templateUrl: "./login.component.html",
-  styleUrl: "./login.component.scss"
+  styleUrl: "./login.component.css"
 })
 export class LoginComponent {
   public readonly form;

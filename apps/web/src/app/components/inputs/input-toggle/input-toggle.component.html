@@ -8,7 +8,7 @@
            [(ngModel)]="value" (ngModelChange)="onChange ? onChange($event) : 0" (blur)="onTouched ? onTouched() : 0">
 
     <!-- toggle icon container -->
-    <div class="h-6 w-11 border-ctr aspect-square active:outline-none p-xxs flex items-center border-framing-item hover:border-framing-highlight transition-colors" [ngClass]="{
+    <div class="h-6 w-11 border-ctr aspect-square active:outline-hidden p-xxs flex items-center border-framing-item hover:border-framing-highlight transition-colors" [ngClass]="{
           'focus:border-framing-highlight' : valid || disabled,
           'focus:border-framing-default_danger' : !valid && !disabled,
           'rounded-lg text-sm' : size === 'minimal',

@@ -86,7 +86,7 @@ export interface calendarNavigation {
   ],
   standalone: true,
   templateUrl: "./shift-calendar-grid.component.html",
-  styleUrl: "./shift-calendar-grid.component.scss"
+  styleUrl: "./shift-calendar-grid.component.css"
 })
 export class ShiftCalendarGridComponent {
 

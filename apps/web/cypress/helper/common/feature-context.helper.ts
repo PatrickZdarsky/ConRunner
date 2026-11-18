@@ -1,51 +1,35 @@
-
-const CONTEXT_KEY = 'featureContext';
-
-type FeatureContextMap = Record<string, Record<string, string>>;
+const contextBySpec = new Map<string, Map<string, string>>();
 
 /** Stores a key-value pair for the current spec */
 export function setFeatureContextValue(key: string, value: string): void {
-  const spec: string = Cypress.spec.name;
-  const raw: unknown = Cypress.env(CONTEXT_KEY);
-  const all: FeatureContextMap = typeof raw === 'object' && raw !== null ? (raw as FeatureContextMap) : {};
-  if (!all[spec]) {
-    all[spec] = {};
-  }
-  all[spec][key] = value ?? '';
-  Cypress.env(CONTEXT_KEY, all);
-  Cypress.log({ name: 'FeatureContext.setValue', message: key + ' = ' + all[spec][key] });
+  const spec = Cypress.spec.name;
+  const context = contextBySpec.get(spec) ?? new Map<string, string>();
+  context.set(key, value ?? '');
+  contextBySpec.set(spec, context);
+  Cypress.log({ name: 'FeatureContext.setValue', message: key + ' = ' + context.get(key) });
 }
 
 /** Gets a stored value for the current spec */
 export function getFeatureContextValue(key: string): string {
-  const spec: string = Cypress.spec.name;
-  const raw: unknown = Cypress.env(CONTEXT_KEY);
-  const all: FeatureContextMap = typeof raw === 'object' && raw !== null ? (raw as FeatureContextMap) : {};
-  const value: string = all[spec]?.[key] ?? '';
+  const value = contextBySpec.get(Cypress.spec.name)?.get(key) ?? '';
   Cypress.log({ name: 'FeatureContext.getValue', message: key + ' = ' + value });
   return value;
 }
 
 /** Clears only the context of the current spec */
 export function clearFeatureContextForSpec(): void {
-  const spec: string = Cypress.spec.name;
-  const raw: unknown = Cypress.env(CONTEXT_KEY);
-  const all: FeatureContextMap = typeof raw === 'object' && raw !== null ? (raw as FeatureContextMap) : {};
-  if (all[spec]) {
-    delete all[spec];
-    Cypress.env(CONTEXT_KEY, all);
-    Cypress.log({ name: 'FeatureContext.clear', message: spec + 'cleared' });
+  const spec = Cypress.spec.name;
+  if (contextBySpec.delete(spec)) {
+    Cypress.log({ name: 'FeatureContext.clear', message: spec + ' cleared' });
   }
 }
 
 /** Logs all stored values for the current spec */
 export function logAllFeatureContextValues(): void {
-  const spec: string = Cypress.spec.name;
+  const spec = Cypress.spec.name;
   cy.then(() => {
-    const raw: unknown = Cypress.env(CONTEXT_KEY);
-    const all: FeatureContextMap = typeof raw === 'object' && raw !== null ? (raw as FeatureContextMap) : {};
-    const entries: [string, string][] = Object.entries(all[spec] ?? {});
-    const formatted: string = entries.map(([k, v]) => k + ' = ' + v).join(', ');
+    const entries = Array.from(contextBySpec.get(spec) ?? []);
+    const formatted = entries.map(([key, value]) => key + ' = ' + value).join(', ');
     cy.log('FeatureContext for ' + spec + ': {' + formatted + '}');
   });
 }

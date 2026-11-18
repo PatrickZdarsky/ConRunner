@@ -2,7 +2,7 @@
   <div class="w-full relative flex gap-sm items-center" [ngClass]="{
   'pointer-events-none opacity-60' : disabled
 }">
-    <input tabindex="0" class="w-[6ex] active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight"
+    <input tabindex="0" class="w-[6ex] active:outline-hidden p-xs transition-colors border-framing-item bg-background-item focus:outline-hidden focus:border-framing-highlight"
            [name]="name"
            [id]="name"
            [placeholder]="placeholder" [ngClass]="{
@@ -19,7 +19,7 @@
 
     <b>:</b>
 
-    <input tabindex="0" class="w-[6ex] active:outline-none p-xs transition-colors border-framing-item bg-background-item focus:outline-none focus:border-framing-highlight"
+    <input tabindex="0" class="w-[6ex] active:outline-hidden p-xs transition-colors border-framing-item bg-background-item focus:outline-hidden focus:border-framing-highlight"
            [name]="name"
            [id]="name"
            [placeholder]="placeholder" [ngClass]="{

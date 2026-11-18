@@ -1,3 +1,5 @@
+@reference "../../../../styles.css";
+
 .unavailability-remove {
   @apply cursor-pointer transition-opacity opacity-50;
 

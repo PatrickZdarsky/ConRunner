@@ -39,7 +39,7 @@ import {InputButtonComponent} from "../../../components/inputs/input-button/inpu
   ],
   standalone: true,
   templateUrl: "./event.component.html",
-  styleUrl: "./event.component.scss"
+  styleUrl: "./event.component.css"
 })
 export class EventComponent {
 

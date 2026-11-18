@@ -2,9 +2,6 @@
 
 module.exports = {
   darkMode: 'selector',
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
   theme: {
     extend: {
       borderWidth: {

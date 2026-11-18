@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Build and run backend tests
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+      - name: Upload backend test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-test-reports
+          path: |
+            apps/backend/target/surefire-reports/
+            apps/backend/target/failsafe-reports/
+      - name: Upload executable JAR
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: backend-jar
+          path: apps/backend/target/backend-*.jar
+          if-no-files-found: error
+
+  web:
+    name: Web and end-to-end
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            apps/web/package-lock.json
+            e2e/package-lock.json
+      - name: Install Angular dependencies
+        working-directory: apps/web
+        env:
+          CYPRESS_INSTALL_BINARY: '0'
+        run: npm ci --no-audit --no-fund
+      - name: Generate Angular API client
+        run: ./dev client
+      - name: Lint Angular
+        working-directory: apps/web
+        run: npm run lint
+      - name: Build Angular
+        working-directory: apps/web
+        run: npm run build
+      - name: Run Angular unit tests
+        working-directory: apps/web
+        run: npm run test-headless
+      - name: Upload Angular build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: web-build
+          path: apps/web/dist/shift-control/
+          if-no-files-found: error
+      - name: Install Playwright and Chromium
+        working-directory: e2e
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Run end-to-end tests
+        timeout-minutes: 8
+        run: |
+          ./dev up > "$RUNNER_TEMP/conrunner-dev.log" 2>&1 &
+          stack_pid=$!
+          cleanup() {
+            if [[ $? != 0 ]]; then
+              docker compose -f ops/compose/compose.yaml logs --no-color > "$RUNNER_TEMP/conrunner-compose.log" 2>&1 || true
+            fi
+            kill "$stack_pid" 2>/dev/null || true
+            wait "$stack_pid" 2>/dev/null || true
+            ./dev down
+          }
+          trap cleanup EXIT
+
+          for attempt in {1..120}; do
+            if curl -fsS --max-time 3 http://localhost:4200/ >/dev/null 2>&1 &&
+               curl -fsS --max-time 3 http://localhost:8081/v3/api-docs >/dev/null 2>&1 &&
+               curl -fsS --max-time 3 http://localhost:8180/realms/shiftcontrol/.well-known/openid-configuration >/dev/null 2>&1; then
+              # Provision the shared dev account before the browsers make concurrent authenticated requests.
+              token=$(curl -fsS --max-time 15 http://localhost:8180/realms/shiftcontrol/protocol/openid-connect/token \
+                --data 'grant_type=password&client_id=shiftcontrol-local&username=dev&password=dev' |
+                python3 -c 'import json, sys; print(json.load(sys.stdin)["access_token"])')
+              curl -fsS --max-time 15 -H "Authorization: Bearer $token" http://localhost:8081/api/v1/events >/dev/null
+              npm --prefix e2e test
+              exit
+            fi
+            if ! kill -0 "$stack_pid" 2>/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+
+          echo 'The ConRunner stack did not become ready.'
+          tail -100 "$RUNNER_TEMP/conrunner-dev.log"
+          exit 1
+      - name: Upload end-to-end diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-diagnostics
+          path: |
+            e2e/test-results/
+            ${{ runner.temp }}/conrunner-dev.log
+            ${{ runner.temp }}/conrunner-compose.log
+          if-no-files-found: ignore

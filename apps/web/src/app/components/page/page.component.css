@@ -1,3 +1,5 @@
+@reference "../../../styles.css";
+
 .page {
 
   width: 100vw;
@@ -84,14 +86,14 @@
         padding: .4rem .6rem;
         @apply border-ctr border-framing-item transition-colors text-[1.05rem];
         font-weight: 600;
-        //box-shadow: 0px 0px 10px 7px rgb(18, 20, 30);
+        /*box-shadow: 0px 0px 10px 7px rgb(18, 20, 30); */
         cursor: pointer;
         max-width: 20ex;
 
         &:hover {
           @apply bg-background-item border-framing-highlight;
-          //background: rgba(55, 63, 101, 20%);
-          //transform: scale(0.97);
+          /*background: rgba(55, 63, 101, 20%); */
+          /*transform: scale(0.97); */
           transition: 0.1s;
         }
 

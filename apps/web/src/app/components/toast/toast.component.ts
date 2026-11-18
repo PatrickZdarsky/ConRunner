@@ -13,29 +13,22 @@ import {NotificationService} from "../../services/notification/notification.serv
     NgClass
   ],
   templateUrl: "./toast.component.html",
-  styleUrl: "./toast.component.scss"
+  styleUrl: "./toast.component.css"
 })
-export class ToastComponent extends Toast {
+export class ToastComponent extends Toast<{ notification?: boolean; url?: string }> {
 
   protected readonly icons = icons;
 
   private readonly _router = inject(Router);
   private readonly _notificationService = inject(NotificationService);
 
-  public get type(){
-    if(this.options.payload !== undefined && this.options.payload.notification === true) {
-      return "notification";
-    } else {
-      return "feedback";
-    }
+  public get type() {
+    return this.options().payload?.notification === true ? "notification" : "feedback";
   }
 
   public get url(): string | undefined {
-    if(this.options.payload !== undefined && typeof this.options.payload.url === "string") {
-      return this.options.payload.url;
-    } else {
-      return undefined;
-    }
+    const url = this.options().payload?.url;
+    return typeof url === "string" ? url : undefined;
   }
 
   close(){

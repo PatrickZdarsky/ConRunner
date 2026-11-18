@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18.7-alpine
     environment:
       POSTGRES_DB: shiftcontrol
       POSTGRES_USER: shiftcontrol
@@ -8,7 +8,7 @@ services:
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-18-data:/var/lib/postgresql
       - ./postgres/01-clob.sql:/docker-entrypoint-initdb.d/01-clob.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shiftcontrol -d shiftcontrol"]
@@ -17,7 +17,7 @@ services:
       retries: 12
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4
+    image: quay.io/keycloak/keycloak:26.8.2
     command: ["start-dev", "--import-realm"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
@@ -29,4 +29,4 @@ services:
       - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
 
 volumes:
-  postgres-data:
+  postgres-18-data:

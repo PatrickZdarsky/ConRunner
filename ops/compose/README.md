@@ -23,9 +23,15 @@ Wait for Keycloak's realm import to finish before signing in.
 | Keycloak application client | `shiftcontrol-local` in the `shiftcontrol` realm | Application login `dev` / `dev` |
 
 The local Spring profile applies the audit Liquibase changelog and uses Hibernate to update the
-rest of the development schema. PostgreSQL data persists in the `postgres-data` volume. See the
+rest of the development schema. See the
 [database migration guide](../../apps/backend/src/main/resources/db/changelog/README.md) for the
 master changelog.
+
+PostgreSQL 18 starts with a fresh `postgres-18-data` volume and preserves the old PostgreSQL 16
+volume. To carry over existing data, start the PostgreSQL 16 service with the previous Compose
+configuration and export the database using `pg_dump -Fc`. Stop PostgreSQL 16, start PostgreSQL 18,
+and restore the dump using `pg_restore --clean --if-exists --exit-on-error` before starting the
+backend.
 
 ## Call the local API
 

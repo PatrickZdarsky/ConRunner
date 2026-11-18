@@ -1,10 +1,12 @@
+@reference "../../../../styles.css";
+
 
 input[type=range] {
-  @apply w-full bg-background-item appearance-none rounded-xl outline-none;
+  @apply w-full bg-background-item appearance-none rounded-xl outline-hidden;
 }
 
 input[type=range]:focus {
-  @apply outline-none;
+  @apply outline-hidden;
 }
 
 input[type=range]::-webkit-slider-runnable-track {

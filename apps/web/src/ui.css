@@ -1,5 +1,7 @@
+@reference "./styles.css";
+
 .card {
-  @apply bg-background-card border-framing-card border-ctr transition-colors px-8 py-6 bg-opacity-60;
+  @apply bg-background-card/60 border-framing-card border-ctr transition-colors px-8 py-6;
   border-radius: 1.5rem;
 
   &.ghost {
@@ -39,7 +41,7 @@
       @apply border-framing-item_hint bg-gradient_item_hint bg-transparent;
 
       &:hover {
-        @apply border-framing-highlight_hint bg-opacity-80;
+        @apply border-framing-highlight_hint bg-transparent;
       }
     }
 
@@ -106,7 +108,7 @@ small {
 }
 
 .cdk-overlay-wrapper:has(+.cdk-overlay-backdrop.shiftcontrol-dialog) {
-  @apply p-sm desktop:p-0
+  @apply p-sm desktop:p-0;
 }
 
 .cdk-overlay-backdrop.shiftcontrol-dialog {
@@ -114,7 +116,7 @@ small {
 }
 
 .cdk-overlay-pane.shiftcontrol-dialog {
-  @apply desktop:min-w-[500px] max-w-[calc(100vw-(2*theme(spacing.lg)))] max-h-[calc(100vh-(2*theme(spacing.lg)))];
+  @apply desktop:min-w-[500px] max-w-[calc(100vw-(2*--theme(--spacing-lg)))] max-h-[calc(100vh-(2*--theme(--spacing-lg)))];
 }
 
 .noise:before {

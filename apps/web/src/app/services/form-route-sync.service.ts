@@ -3,7 +3,7 @@ import {AbstractControl} from "@angular/forms";
 import {BehaviorSubject, filter, Observable, Subscription, take, withLatestFrom} from "rxjs";
 import {Router} from "@angular/router";
 
-interface formSyncConfig<> {
+interface FormSyncConfig {
   subscriptions: Subscription[];
 }
 
@@ -12,7 +12,7 @@ interface formSyncConfig<> {
 })
 export class FormRouteSyncService {
 
-  private _forms = new Map<string, formSyncConfig>();
+  private _forms = new Map<string, FormSyncConfig>();
   private _router = inject(Router);
 
   constructor() { }
