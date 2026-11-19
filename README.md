@@ -11,6 +11,13 @@ development.
 
 ## Local development
 
+ConRunner is currently developed without data migration support for older versions. Breaking
+changes to the schema, stored data, APIs, and configuration can and will happen during this phase;
+upgrading an existing development installation is not guaranteed to work or preserve its data.
+Recreate development databases and test data when needed. Schema changes may update existing
+Liquibase change sets directly instead of adding upgrade migrations. See the
+[database development policy](apps/backend/src/main/resources/db/changelog/README.md).
+
 Install JDK 25, Node.js and npm (CI uses Node.js 24), Python 3, curl, and Docker with the Compose plugin.
 The development scripts use Bash and `setsid`. From the repository root, run:
 

@@ -6,6 +6,7 @@ import java.util.UUID;
 import at.conrunner.TestcontainersConfiguration;
 import at.conrunner.schedule.event.CatalogEventEntity;
 import at.conrunner.schedule.event.EventRepository;
+import at.conrunner.schedule.session.BaselinePresence;
 import at.conrunner.schedule.session.SessionBaselineEntity;
 import at.conrunner.schedule.session.SessionBaselineRepository;
 import at.conrunner.schedule.session.SessionEntity;
@@ -89,7 +90,16 @@ class ManagedSchedulePersistenceTest {
                 assertThat(change.getReason()).isEqualTo("Clarify the session description");
             });
         assertThat(baselines.findById(occurrenceId))
-            .hasValueSatisfying(saved -> assertThat(saved.getContent()).isEqualTo(baseline.getContent()));
+            .hasValueSatisfying(saved -> {
+                assertThat(saved.getContent()).isEqualTo(baseline.getContent());
+                assertThat(saved.getPresence()).isEqualTo(BaselinePresence.PRESENT);
+                saved.setPresence(BaselinePresence.REMOVED);
+            });
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(baselines.findById(occurrenceId))
+            .hasValueSatisfying(saved -> assertThat(saved.getPresence()).isEqualTo(BaselinePresence.REMOVED));
     }
 
     @Test

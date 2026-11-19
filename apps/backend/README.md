@@ -5,6 +5,11 @@ share the deployment and database and own their own persistence and workflows.
 
 ## Run and test
 
+During the current development phase, data migration from older versions is unsupported. Schema
+and stored-data changes can and will break existing databases; recreate development databases and
+test data when needed. Existing Liquibase change sets may be edited directly. See the
+[database development policy](src/main/resources/db/changelog/README.md).
+
 Use JDK 25 and the Maven wrapper at the repository root. The [local infrastructure guide](../../ops/compose/README.md)
 shows how to start PostgreSQL and Keycloak and run the backend with the `local` profile. The local
 API exposes [Swagger UI](http://localhost:8081/swagger-ui.html) and

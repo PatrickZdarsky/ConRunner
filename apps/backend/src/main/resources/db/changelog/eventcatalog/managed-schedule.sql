@@ -32,7 +32,7 @@ CREATE TABLE schedule_signals (
 CREATE TABLE schedule_session_baseline (
     occurrence_id UUID PRIMARY KEY,
     event_id UUID NOT NULL,
-    status VARCHAR(16) NOT NULL CHECK (status IN ('SCHEDULED', 'CANCELLED', 'WITHDRAWN')),
+    presence VARCHAR(16) NOT NULL CHECK (presence IN ('PRESENT', 'REMOVED')),
     start_time TIMESTAMP WITH TIME ZONE NOT NULL,
     end_time TIMESTAMP WITH TIME ZONE NOT NULL CHECK (end_time > start_time),
     location_id UUID,

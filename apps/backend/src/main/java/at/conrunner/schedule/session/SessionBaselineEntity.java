@@ -35,7 +35,7 @@ public class SessionBaselineEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private SessionStatus status = SessionStatus.SCHEDULED;
+    private BaselinePresence presence = BaselinePresence.PRESENT;
 
     @Column(name = "start_time", nullable = false)
     private Instant startTime;
